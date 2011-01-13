@@ -24,7 +24,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -98,7 +98,7 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -208,7 +208,23 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\FileInput.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileOutput.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MT.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Option.cpp"
 				>
 			</File>
 			<File
@@ -239,6 +255,22 @@
 			>
 			<File
 				RelativePath=".\AES.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FileInput.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FileOutput.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MT.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Option.h"
 				>
 			</File>
 			<File

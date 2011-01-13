@@ -26,7 +26,7 @@ AES::AES()
 //	●返値
 //			無し
 //==============================================================
-AES::AES(char cNk,const unsigned char Key[])
+AES::AES(char cNk,unsigned char Key[])
 {
 	KeyExpansion(cNk, Key);
 }
@@ -93,7 +93,7 @@ __m128i	AES::mul(__m128i data, unsigned char n)
 //	●返値
 //			無し
 //==============================================================
-void	AES::KeyExpansion(char cNk, const unsigned char *key)
+void	AES::KeyExpansion(char cNk, unsigned char *key)
 {
 	//The round constant word array.
 	static	const	unsigned	int	Rcon[10]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36};
@@ -103,7 +103,7 @@ void	AES::KeyExpansion(char cNk, const unsigned char *key)
 				int	iRm;
 				int	temp;
 
-	Nk	= cNk & 0xFE;
+	Nk	= cNk;
 	Nr	= Nk + 6;
 
 	//高速メモリコピー
@@ -309,15 +309,7 @@ void	AES::Cipher_One(void *ind, void *outd)
 {
 //	_mm_storeu_si128((__m128i*)outd, Cipher(_mm_loadu_si128((__m128i*)ind)));
 
-	__asm{
-		mov		esi,  ind
-		movdqu	xmm0, [esi]
-	}
-	AES_SSE_Cipher(Nr,w);
-	__asm{
-		mov		esi,  outd
-		movdqu	[esi], xmm0
-	}
+	_mm_store_si128((__m128i*)outd, AES_SSE_Cipher(Nr,w, _mm_load_si128((__m128i*)ind)));
 }
 //==============================================================
 //			fips-197	5.1		Cipher
@@ -337,7 +329,7 @@ __m128i	AES::Cipher(__m128i data)
 
 	//◆Round (1) ～ (Nr-1)
 	do{
-		data = AddRoundKey(MixColumns(ShiftRows(data)),i);
+		data = AddRoundKey(MixColumns(ShiftRows((data))),i);
 		i++;
 	} while(i < Nr);
 
@@ -436,6 +428,11 @@ __m128i	AES::MixColumns(__m128i data)
 	__m128i		a1 = SubBytes(data);				//	= mul(data, 1);
 	__m128i		a2 = a1;							//	= mul(data, 1);
 	__m128i		a3 = SubBytes3(data);
+
+//	__m128i		a0 = mul(data, 2);
+//	__m128i		a1 = data;							//	= mul(data, 1);
+//	__m128i		a2 = a1;							//	= mul(data, 1);
+//	__m128i		a3 = mul(data, 3);
 																		//	もしSSE命令にrorがあったら
 																		//	こういうこと（32bit右回転）
 	a1	= _mm_or_si128(_mm_srli_epi32(a1,24),_mm_slli_epi32(a1, 8));	//	prord	a1, 24
@@ -469,15 +466,9 @@ __m128i	AES::AddRoundKey(__m128i data, int i)
 void	AES::InvCipher_One(void *ind, void *outd)
 {
 //	_mm_storeu_si128((__m128i*)outd, InvCipher(_mm_loadu_si128((__m128i*)ind)));
-	__asm{
-		mov		esi,  ind
-		movdqu	xmm0, [esi]
-	}
-	AES_SSE_InvCipher(Nr,w);
-	__asm{
-		mov		esi,  outd
-		movdqu	[esi], xmm0
-	}
+
+	_mm_storeu_si128((__m128i*)outd, AES_SSE_InvCipher(Nr,w,_mm_loadu_si128((__m128i*)ind)));
+
 }
 //==============================================================
 //			fips-197	5.3		InvCipher
@@ -580,4 +571,50 @@ __m128i	AES::InvMixColumns(__m128i data)
 __m128i	AES::InvAddRoundKey(__m128i data, int i)
 {
 	return(_mm_xor_si128(data, _mm_load_si128((__m128i*)&w[i*4])));
+}
+//==============================================================
+//			fips-197	
+//--------------------------------------------------------------
+//	●引数
+//			__m128i data	初期値
+//	●返値
+//			無し
+//==============================================================
+void	AES::SetIV(__m128i data)
+{
+	IV = data;
+}
+//==============================================================
+//			fips-197	
+//--------------------------------------------------------------
+//	●引数
+//			void *data		平文
+//	●返値
+//			無し
+//==============================================================
+void	AES::CBC_Cipher(void *data)
+{
+	__m128i	temp = _mm_load_si128((__m128i*)data);
+
+	temp = AES_SSE_Cipher(Nr,w, _mm_xor_si128(temp, IV));
+	_mm_store_si128((__m128i*)data, temp);
+	IV = temp;
+
+}
+//==============================================================
+//			fips-197	
+//--------------------------------------------------------------
+//	●引数
+//			void *data		暗号文
+//	●返値
+//			無し
+//==============================================================
+void	AES::CBC_InvCipher(void *data)
+{
+	__m128i	temp	= _mm_load_si128((__m128i*)data);
+	__m128i	out		= _mm_xor_si128(AES_SSE_InvCipher(Nr,w,temp), IV);
+
+	IV	= _mm_load_si128((__m128i*)data);
+
+	_mm_store_si128((__m128i*)data, out);
 }

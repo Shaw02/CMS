@@ -53,13 +53,13 @@
 @SubWord3@4		proto	near	syscall		;(__fastcall)
 @InvSubWord@4		proto	near	syscall		;(__fastcall)
 
-@AES_SSE_Cipher@8	proto	near	syscall		;5.1	Cipher	(__fastcall)
+@AES_SSE_Cipher@24	proto	near	syscall		;5.1	Cipher	(__fastcall)
 ;AES_SSE_SubBytes	proto	near	stdcall		;5.1.1	SubBytes
 ;AES_SSE_ShiftRows	proto	near	stdcall		;5.1.2	ShiftRows
 ;AES_SSE_MixColumns	proto	near	stdcall		;5.1.3	MixColumns
 ;AES_SSE_AddRoundKey	proto	near	stdcall		;5.1.4	AddRoundKey
 
-@AES_SSE_InvCipher@8	proto	near	syscall		;5.2	InvCipher	(__fastcall)
+@AES_SSE_InvCipher@24	proto	near	syscall		;5.2	InvCipher	(__fastcall)
 ;AES_SSE_InvShiftRows	proto	near	stdcall		;5.2.1	InvShiftRows
 ;AES_SSE_InvSubBytes	proto	near	stdcall		;5.2.2	InvSubBytes
 ;AES_SSE_InvMixColumns	proto	near	stdcall		;5.2.3	InvMixColumns
@@ -376,15 +376,15 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 ;	fips-197	5.1	Cipher				|
 ;---------------------------------------------------------------|
 ;	Åúà¯êî							|
-;		xmm0		Plain Text			|
 ;		ecx	Nr	Round				|
 ;		edx	ptrKS	Pointer of Key stream		|
+;		xmm0		Plain Text			|
 ;	Åúï‘íl							|
 ;		xmm0		Cipher Text			|
 ;===============================================================|
 .code
 	align(16)
-@AES_SSE_Cipher@8	proc	SYSCALL	uses	ebx edi esi
+@AES_SSE_Cipher@24	proc	SYSCALL	uses	ebx edi esi
 	push	ebp
 	movzx	edi, cl
 	mov	ebp, esp
@@ -394,11 +394,17 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	shl	edi, 4		;esi = Last Round's counter
 	sub	esp, ebx	;esp = __m128i temp
 
+	movdqa	xmm4, XMMWORD PTR [AES_SSE_Mask0]
+	movdqa	xmm5, XMMWORD PTR [AES_SSE_Mask1]
+	movdqa	xmm6, XMMWORD PTR [AES_SSE_Mask2]
+	movdqa	xmm7, XMMWORD PTR [AES_SSE_Mask3]
+
 	;=======================
 	;ÅüRound (0)
 	;---------------
 	;AddRoundKey()
 	movdqa	xmm2, XMMWORD PTR [esi]
+
 
 	;=======================
 	;ÅüRound (1) Å` (Nr-1)
@@ -410,11 +416,11 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	;	invoke	AES_SSE_ShiftRows	;[0] 0,1,2,3
 		pshufd	xmm1, xmm0, 00111001b	;[1] 1,2,3,0
 		pshufd	xmm2, xmm0, 01001110b	;[2] 2,3,0,1
-		pand	xmm1, XMMWORD PTR [AES_SSE_Mask1]
-		pand	xmm2, XMMWORD PTR [AES_SSE_Mask2]
+		pand	xmm1, xmm5
+		pand	xmm2, xmm6
 		pshufd	xmm3, xmm0, 10010011b	;[3] 3,0,1,2
-		pand	xmm0, XMMWORD PTR [AES_SSE_Mask0]
-		pand	xmm3, XMMWORD PTR [AES_SSE_Mask3]
+		pand	xmm0, xmm4
+		pand	xmm3, xmm7
 		por	xmm1, xmm2
 		por	xmm0, xmm3
 		por	xmm0, xmm1
@@ -422,65 +428,63 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 ;		invoke	AES_SSE_MixColumns	;(+ SubBytesÇìØéûÇ…ÅB)
 		movdqa	XMMWORD PTR [esp], xmm0
 		mov	ecx, DWORD PTR [esp]
-		invoke	@SubWord2@4
+		invoke	@SubWord3@4
 		mov	ecx, DWORD PTR [esp + 4]
 		mov	DWORD PTR [esp], eax
-		invoke	@SubWord2@4
+		invoke	@SubWord3@4
 		mov	ecx, DWORD PTR [esp + 8]
 		mov	DWORD PTR [esp + 4], eax
-		invoke	@SubWord2@4
+		invoke	@SubWord3@4
 		mov	ecx, DWORD PTR [esp + 12]
 		mov	DWORD PTR [esp + 8], eax
-		invoke	@SubWord2@4
+		invoke	@SubWord3@4
 		mov	DWORD PTR [esp + 12], eax
 		movdqa	xmm1, XMMWORD PTR [esp]
 
 		movdqa	XMMWORD PTR [esp], xmm0
+		movdqa	xmm2, xmm1
 		mov	ecx, DWORD PTR [esp]
-		invoke	@SubWord3@4
+		invoke	@SubWord@4
+		psrld	xmm1, 8
+		pslld	xmm2, 24
 		mov	ecx, DWORD PTR [esp + 4]
 		mov	DWORD PTR [esp], eax
-		invoke	@SubWord3@4
+		invoke	@SubWord@4
+		por	xmm1, xmm2		;xmm1 = [3]
 		mov	ecx, DWORD PTR [esp + 8]
 		mov	DWORD PTR [esp + 4], eax
-		invoke	@SubWord3@4
+		invoke	@SubWord@4
 		mov	ecx, DWORD PTR [esp + 12]
 		mov	DWORD PTR [esp + 8], eax
-		invoke	@SubWord3@4
+		invoke	@SubWord@4
 		mov	DWORD PTR [esp + 12], eax
 		movdqa	xmm2, XMMWORD PTR [esp]
 
 		movdqa	XMMWORD PTR [esp], xmm0
+		movdqa	xmm3, xmm2
+		movdqa	xmm0, xmm2
 		mov	ecx, DWORD PTR [esp]
-		invoke	@SubWord@4
+		invoke	@SubWord2@4
+		pslld	xmm3, 16
+		psrld	xmm2, 16
 		mov	ecx, DWORD PTR [esp + 4]
 		mov	DWORD PTR [esp], eax
-		invoke	@SubWord@4
+		invoke	@SubWord2@4
+		por	xmm2, xmm3		;xmm2 = [2]
 		mov	ecx, DWORD PTR [esp + 8]
 		mov	DWORD PTR [esp + 4], eax
-		invoke	@SubWord@4
+		invoke	@SubWord2@4
+		movdqa	xmm3, xmm0
 		mov	ecx, DWORD PTR [esp + 12]
 		mov	DWORD PTR [esp + 8], eax
-		invoke	@SubWord@4
-		mov	DWORD PTR [esp + 12], eax
-		movdqa	xmm0, XMMWORD PTR [esp]
-
-		movdqa	xmm3, xmm2
-		movdqa	xmm5, xmm0
-		psrld	xmm2, 8
-		movdqa	xmm6, xmm0
-		pslld	xmm3, 24
-		movdqa	xmm7, xmm0
-		pslld	xmm5, 16
-		por	xmm2, xmm3
-		psrld	xmm6, 16
-		pxor	xmm1, xmm2	;xmm1 = [0] ^ [1]
+		invoke	@SubWord2@4
 		psrld	xmm0, 24
-		por	xmm5, xmm6	;xmm5 = [2]
-		pslld	xmm7, 8
-		pxor	xmm1, xmm5	;xmm1 = [0] ^ [1] ^ [2]
+		pslld	xmm3, 8
+		mov	DWORD PTR [esp + 12], eax
+		pxor	xmm1, xmm2		;xmm1 = [2] ^ [3]
+		por	xmm0, xmm3		;xmm0 = [1]
 		movdqa	xmm2, XMMWORD PTR [esi + ebx]
-		por	xmm0, xmm7	;xmm0 = [3]
+		pxor	xmm0, XMMWORD PTR [esp]	;xmm1 = [0] ^ [1]
 		add	ebx, 16
 		pxor	xmm0, xmm1
 
@@ -509,11 +513,11 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 ;	invoke	AES_SSE_ShiftRows	;[0] 0,1,2,3
 	pshufd	xmm1, xmm0, 00111001b	;[1] 1,2,3,0
 	pshufd	xmm2, xmm0, 01001110b	;[2] 2,3,0,1
-	pand	xmm1, XMMWORD PTR [AES_SSE_Mask1]
-	pand	xmm2, XMMWORD PTR [AES_SSE_Mask2]
+	pand	xmm1, xmm5
+	pand	xmm2, xmm6
 	pshufd	xmm3, xmm0, 10010011b	;[3] 3,0,1,2
-	pand	xmm0, XMMWORD PTR [AES_SSE_Mask0]
-	pand	xmm3, XMMWORD PTR [AES_SSE_Mask3]
+	pand	xmm0, xmm4
+	pand	xmm3, xmm7
 	por	xmm1, xmm2
 	por	xmm0, xmm3
 	movdqa	xmm2, XMMWORD PTR [esi + ebx]
@@ -524,20 +528,20 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	pxor	xmm0, xmm2
 	pop	ebp
 	ret
-@AES_SSE_Cipher@8	endp
+@AES_SSE_Cipher@24	endp
 ;===============================================================|
 ;	fips-197	5.2	InvCipher			|
 ;---------------------------------------------------------------|
 ;	Åúà¯êî							|
-;		xmm0		Cipher Text			|
 ;		ecx	Nr	Round				|
 ;		edx	ptrKS	Pointer of Key stream		|
+;		xmm0		Cipher Text			|
 ;	Åúï‘íl							|
 ;		xmm0		Plain Text			|
 ;===============================================================|
 .code
 	align(16)
-@AES_SSE_InvCipher@8	proc	SYSCALL	uses	ebx edi esi
+@AES_SSE_InvCipher@24	proc	SYSCALL	uses	ebx edi esi
 	push	ebp
 	movzx	ebx, cl
 	mov	ebp, esp
@@ -604,10 +608,10 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 		pslld	xmm2, 16
 		psrld	xmm3, 16		;//[2]
 		pslld	xmm0, 24
-		por	xmm2, xmm3
 		psrld	xmm4, 8
-		pxor	xmm1, xmm2
+		por	xmm2, xmm3
 		por	xmm0, xmm4		;//[3]
+		pxor	xmm1, xmm2
 		pxor	xmm0, xmm1
 
 	;	invoke	AES_SSE_InvShiftRows	;[0] 0,1,2,3
@@ -649,6 +653,6 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	pxor	xmm0, xmm2
 	pop	ebp
 	ret
-@AES_SSE_InvCipher@8	endp
+@AES_SSE_InvCipher@24	endp
 ;****************************************************************
 	end

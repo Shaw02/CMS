@@ -12,6 +12,23 @@
 //	●返値
 //			無し
 //==============================================================
+void	errPrint(const char *strFile, const char *strMSG){
+
+	printf(strFile);
+	printf(strMSG);
+	exit(EXIT_FAILURE);
+}
+
+
+//==============================================================
+//			16進数 数値表示
+//--------------------------------------------------------------
+//	●引数
+//			int		n		表示Byte数
+//			void	*Data	表示する配列[Byte単位]
+//	●返値
+//			無し
+//==============================================================
 void	dataPrint(int n, void *Data){
 
 	unsigned char* cData = (unsigned char*)Data;
@@ -25,6 +42,22 @@ void	dataPrint(int n, void *Data){
 	}
 	printf("\n");
 }
+
+//==============================================================
+//			get process
+//--------------------------------------------------------------
+//	●引数
+//			無し
+//	●返値
+//			無し
+//==============================================================
+__int64	ReadTSC()
+{
+	__asm{
+		cpuid
+		rdtsc
+	}
+}
 //==============================================================
 //			main routine
 //--------------------------------------------------------------
@@ -36,186 +69,174 @@ void	dataPrint(int n, void *Data){
 int __cdecl _tmain(int argc, _TCHAR* argv[])
 {
 
-	//Test1	AES-128
-	static	const	unsigned	char	test1[16]={	0x32,0x43,0xf6,0xa8, 0x88,0x5a,0x30,0x8d,
-													0x31,0x31,0x98,0xa2, 0xe0,0x37,0x07,0x34};
-	static	const	unsigned	char	Key1[16]={	0x2b,0x7e,0x15,0x16, 0x28,0xae,0xd2,0xa6,
-													0xab,0xf7,0x15,0x88, 0x09,0xcf,0x4f,0x3c};
+#define	strAES	0x00534541
 
+	__declspec(align(16))	unsigned	char	text[16];	//処理用
+union {
+	__declspec(align(16))	unsigned	char	c[32];
+	__declspec(align(16))	unsigned	int		i[8];
+} Key;														//暗号鍵
 
-	//Test2	AES-192
-	static	const	unsigned	char	Key2[24]={	0x2b,0x7e,0x15,0x16, 0x28,0xae,0xd2,0xa6,
-													0xab,0xf7,0x15,0x88, 0x09,0xcf,0x4f,0x3c};
+struct Header{
+	unsigned	int		Name;					//ヘッダー
+	unsigned	int		iKeySize;				//暗号鍵のサイズ(128,192,256)
+	unsigned	int		Null;					//
+	unsigned	int		iSize;					//ファイルサイズ
+	union{
+		unsigned	char	c[16];
+		unsigned	int		i[4];
+		__m128i				xmm;
+	} IV;										//CBCモード 初期値
+} __declspec(align(16)) header;					//ヘッダー
 
+union {
+	unsigned	__int64	i64[2];
+	unsigned	long	i[4];
+} randSeed;										//乱数生成用
 
-	//Test3	AES-256	
-	static	const	unsigned	char	Key3[32]={	0x2b,0x7e,0x15,0x16, 0x28,0xae,0xd2,0xa6,
-													0xab,0xf7,0x15,0x88, 0x09,0xcf,0x4f,0x3c};
+union {
+	unsigned	__int64 i64;
+	unsigned	int		i[2];
+} cycles;										//サイクル数カウント用
 
+	unsigned	int		i;						//カウント用
+	unsigned	int		n;						//カウント用
 
-	//Test4
-	static	const	unsigned	char	test4[16]={	0x00,0x11,0x22,0x33, 0x44,0x55,0x66,0x77,
-													0x88,0x99,0xaa,0xbb, 0xcc,0xdd,0xee,0xff};
-	static	const	unsigned	char	Key4[32]={	0x00,0x01,0x02,0x03, 0x04,0x05,0x06,0x07,
-													0x08,0x09,0x0a,0x0b, 0x0c,0x0d,0x0e,0x0f,
-													0x10,0x11,0x12,0x13, 0x14,0x15,0x16,0x17,
-													0x18,0x19,0x1a,0x1b, 0x1c,0x1d,0x1e,0x1f};
+		OPSW*	cOpsw	= new	OPSW(argc, argv);		//オプションスイッチ処理
+		MT*		cMT;									//MT乱数
+static	AES		cAES;									//AES暗号処理
 
-	__declspec(align(16))	unsigned	char	strCipher[16];
+	FileInput*			f_IN	= new FileInput();		//ファイル入力用
+	FileOutput*			f_OUT	= new FileOutput();		//ファイル出力用
+union{
+	FileInput*			i;		//入力
+	FileOutput*			o;		//出力	
+} f_KEY;
 
-	unsigned	__int64 cycles;		//計測用
+	//----------------------------------------------------
+	//処理開始
+	cycles.i64 = ReadTSC();				//計測用 ＆ 乱数の種
+//	header = new Header;
 
+	//----------------------------------------------------
+	//■暗号
+	if(cOpsw->cDecode == 0){
 
+		//------------------
+		//ファイルを開く（ファイル読み込み時間を、乱数生成時間にする）
+		f_IN->fileopen(cOpsw->strBINname.c_str());
+		f_OUT->fileopen(cOpsw->strAESname.c_str());
 
-	//様々な鍵で、暗号のクラスを作る。
-/*
-	AES	cAES1(4,Key1);
-//	AES	cAES2(6,Key2);
-//	AES	cAES3(8,Key3);
-	AES	cAES4(4,Key4);
-	AES	cAES5(6,Key4);
-*/
-	AES	cAES6(8,Key4);
+		//------------------
+		//ヘッダー作成(1)
+		header.Name		= strAES;
+		header.iSize	= f_IN->GetSize();
+		header.iKeySize	= cOpsw->iKey;
 
-/*
-	printf("--- test 1 ---\n");
-	printf("chiper-key	:");
-	dataPrint(16, (char *)Key1);
+		//乱数生成（ファイル読み込みにかかった時間が、乱数の種）
+		randSeed.i64[0] = cycles.i64;
+		randSeed.i64[1] = ReadTSC();
+		cMT	=	new MT(randSeed.i, 4);					//MT乱数処理
 
-	printf("plain-text	:");
-	dataPrint(16, (char *)test1);
-	cAES1.Cipher_One((void *)test1,(void *)strCipher);
+		header.IV.i[0] = cMT->genrand_int32();
+		header.IV.i[1] = cMT->genrand_int32();
+		header.IV.i[2] = cMT->genrand_int32();
+		header.IV.i[3] = cMT->genrand_int32();
 
-	printf("chiper-text	:");
-	dataPrint(16, (char *)strCipher);
-	cAES1.InvCipher_One((void *)strCipher,(void *)strCipher);
+		//------------------
+		//鍵の準備
+		//鍵ファイル有り
+		if(header.iKeySize == 0){
+			f_KEY.i = new FileInput();
+			f_KEY.i->fileopen(cOpsw->strKEYname.c_str());
+			header.iKeySize = f_KEY.i->GetSize()<<3;	//暗号鍵のサイズをヘッダーにセット
+			if((header.iKeySize!=128)&&(header.iKeySize!=192)&&(header.iKeySize!=256)){
+				errPrint(cOpsw->strKEYname.c_str(), ": Not chiper-key file.");
+			}
+			f_KEY.i->read((char *)Key.c, sizeof(Key.c));
+			f_KEY.i->close();
+			delete f_KEY.i;
+		//鍵は自動生成
+		} else {
+			f_KEY.o = new FileOutput();
+			f_KEY.o->fileopen(cOpsw->strKEYname.c_str());
+			i =  header.iKeySize>>5;
+			do{
+				i--;
+				Key.i[i] = cMT->genrand_int32();		//乱数で暗号鍵を生成
+			} while(i>0);
+			f_KEY.o->write((char *)Key.c, header.iKeySize>>3);
+			f_KEY.o->close();
+			delete f_KEY.o;
+		}
 
-	printf("dechiper-text	:");
-	dataPrint(16, (char *)strCipher);
+		delete	cMT;
 
+		//------------------
+		//変換
+		cAES.KeyExpansion(header.iKeySize>>5,Key.c);
+		cAES.SetIV(header.IV.xmm);
+		f_OUT->write((char *)&header, sizeof(Header));
+		i = header.iSize;
+		while(i>0){
+			n = ((i>16)?16:i);
+			f_IN->read((char *)text, 16);
+			cAES.CBC_Cipher(text);
+			f_OUT->write((char *)text, 16);
+			i -= n;
+		}
 
+	//----------------------------------------------------
+	//■復号	
+	} else {
 
+		//------------------
+		//ファイルを開く
+		f_IN->fileopen(cOpsw->strAESname.c_str());
+		f_OUT->fileopen(cOpsw->strBINname.c_str());
 
+		//------------------
+		//ヘッダー読み込み ＆ チェック
+		f_IN->read((char *)&header, sizeof(Header));
+		if(header.Name != strAES){
+			errPrint(cOpsw->strAESname.c_str(), ": Not chiper-text file.");
+		}
 
-	printf("--- test 4 (AEC 128bit) ---\n");
-	printf("chiper-key	:");
-	dataPrint(16, (char *)Key4);
+		//------------------
+		//暗号鍵の準備
+		f_KEY.i = new FileInput();
+		f_KEY.i->fileopen(cOpsw->strKEYname.c_str());
+		if((f_KEY.i->GetSize()) != header.iKeySize>>3){
+			errPrint(cOpsw->strKEYname.c_str(), ": Not chiper-key file.");
+		}
+		f_KEY.i->read((char *)Key.c, header.iKeySize>>3);
+		f_KEY.i->close();
+		delete f_KEY.i;
 
-	printf("plain-text	:");
-	dataPrint(16, (char *)test4);
-	cAES4.Cipher_One((void *)test4,(void *)strCipher);
+		//------------------
+		//変換
+		cAES.KeyExpansion(header.iKeySize>>5,Key.c);
+		cAES.SetIV(header.IV.xmm);
+		i = header.iSize;
+		while(i>0){
+			n = ((i>16)?16:i);
+			f_IN->read((char *)text, 16);
+			cAES.CBC_InvCipher(text);
+			f_OUT->write((char *)text, n);
+			i -= n;
+		}
 
-	printf("chiper-text	:");
-	dataPrint(16, (char *)strCipher);
-	cAES4.InvCipher_One((void *)strCipher,(void *)strCipher);
-
-	printf("dechiper-text	:");
-	dataPrint(16, (char *)strCipher);
-
-
-
-
-
-	printf("--- test 5 (AEC 192bit) ---\n");
-	printf("chiper-key	:");
-	dataPrint(24, (char *)Key4);
-
-	printf("plain-text	:");
-	dataPrint(16, (char *)test4);
-	cAES5.Cipher_One((void *)test4,(void *)strCipher);
-
-	printf("chiper-text	:");
-	dataPrint(16, (char *)strCipher);
-	cAES5.InvCipher_One((void *)strCipher,(void *)strCipher);
-
-	printf("dechiper-text	:");
-	dataPrint(16, (char *)strCipher);
-
-
-*/
-
-
-	printf("--- test 6 (AEC 256bit) ---\n");
-	printf("chiper-key	:");
-	dataPrint(32, (char *)Key4);
-
-	printf("plain-text	:");
-	dataPrint(16, (char *)test4);
-	memcpy(strCipher, test4, 16);
-
-	__asm {
-		cpuid
-		rdtsc
-
-		mov dword ptr cycles[0], eax // (1)
-		mov dword ptr cycles[4], edx
 	}
 
-	int	i=0;
-	do{
-		cAES6.Cipher_One((void *)strCipher,(void *)strCipher);
-		i++;
-	} while(i<500000);	//16*500,000 = 8 [MByte]の暗号化を想定
+	//ファイルを閉じる
+	f_IN->close();
+	f_OUT->close();
 
-	__asm {
-		cpuid
-		rdtsc
+	delete	f_IN;
+	delete	f_OUT;
+	delete	cOpsw;
 
-		sub eax, dword ptr cycles[0]  // (2)
-		sub edx, dword ptr cycles[4]
-
-		mov dword ptr cycles[0], eax // (3)
-		mov dword ptr cycles[4], edx
-	}
-	printf("暗号：クロックサイクル数 : %u [cycles]\n", cycles );
-	//Sbox	Table式	＝	1,876,613,999
-	//mulとSBox合体	＝	1,640,267,499
-	//アセンブリ言語＝	1,297,764,260
-
-	printf("chiper-text	:");
-	dataPrint(16, (char *)strCipher);
-
-	__asm {
-		cpuid
-		rdtsc
-
-		mov dword ptr cycles[0], eax // (1)
-		mov dword ptr cycles[4], edx
-	}
-
-	i=0;
-	do{
-		cAES6.InvCipher_One((void *)strCipher,(void *)strCipher);
-		i++;
-	} while(i<500000);	//16*500,000 = 8 [MByte]の暗号化を想定
-
-	__asm {
-		cpuid
-		rdtsc
-
-		sub eax, dword ptr cycles[0]  // (2)
-		sub edx, dword ptr cycles[4]
-
-		mov dword ptr cycles[0], eax // (3)
-		mov dword ptr cycles[4], edx
-	}
-	printf("復号：クロックサイクル数 : %u [cycles]\n", cycles );
-	//Sbox	Table式	＝	1,876,613,999
-	//mul	Table式	＝	1,640,267,499
-
-	printf("dechiper-text	:");
-	dataPrint(16, (char *)strCipher);
-
-
-
-/*
-	delete	&cAES1;
-//	delete	&cAES2;
-//	delete	&cAES3;
-	delete	&cAES4;
-	delete	&cAES5;
-*/
-	delete	&cAES6;
+	printf("%u:%u サイクル要しました。\n", ReadTSC() - cycles.i64);
 
 	return 0;
 }

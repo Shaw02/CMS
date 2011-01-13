@@ -54,12 +54,12 @@ union _mm_i32
 /****************************************************************/
 //アセンブリ言語で書かれた関数	"AES_sse.asm"
 extern "C"{
-				__m128i	__fastcall	AES_SSE_Cipher(unsigned char cNr,unsigned int *ptrKs);
-				__m128i	__fastcall	AES_SSE_InvCipher(unsigned char cNr,unsigned int *ptrKs);
-	unsigned	int		__fastcall	SubWord(unsigned int data);
-	unsigned	int		__fastcall	SubWord2(unsigned int data);
-	unsigned	int		__fastcall	SubWord3(unsigned int data);
-	unsigned	int		__fastcall	InvSubWord(unsigned int data);
+				__m128i	__fastcall	AES_SSE_Cipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+				__m128i	__fastcall	AES_SSE_InvCipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+//	unsigned	int		__fastcall	SubWord(unsigned int data);
+//	unsigned	int		__fastcall	SubWord2(unsigned int data);
+//	unsigned	int		__fastcall	SubWord3(unsigned int data);
+//	unsigned	int		__fastcall	InvSubWord(unsigned int data);
 }
 
 /****************************************************************/
@@ -74,16 +74,17 @@ __declspec(align(16)) unsigned	int	w[60];	//Key Schedule	(16byte align)
 											//For this standard, Nk = 4, 6, or 8. (Also see Sec. 6.3.)
 	unsigned	char	Nr;					//Number of rounds, which is a function of Nk and Nb (which is fixed).
 											//For this standard, Nr = 10, 12, or 14. (Also see Sec. 6.3.)
+	__m128i				IV;
 
 public:
 	//Function
 	AES();											//
-	AES(char cNk,const unsigned char Key[]);		//鍵スケジュール生成付きでクラス作成
+	AES(char cNk,unsigned char Key[]);				//鍵スケジュール生成付きでクラス作成
 	~AES(void);										//
 
 	__m128i	mul(__m128i data, unsigned char n);					//4,2	Multiplication
 
-	void	KeyExpansion(char cNK, const unsigned char *key);	//5.2	Key Expansion
+	void	KeyExpansion(char cNK, unsigned char *key);			//5.2	Key Expansion
 	unsigned	int		RotWord(unsigned int data);				//
 	unsigned	int		SubWord(unsigned int data);				//
 	unsigned	int		SubWord2(unsigned int data);			//(x 02)
@@ -105,4 +106,9 @@ public:
 	__m128i	InvSubBytes(__m128i data);							//5.3.2	InvSubBytes
 	__m128i	InvMixColumns(__m128i data);						//5.3.3	InvMixColumns
 	__m128i	InvAddRoundKey(__m128i data, int i);				//5.3.4	InvAddRoundKey
+
+	void	SetIV(__m128i data);
+	void	CBC_Cipher(void *data);
+	void	CBC_InvCipher(void *data);
+
 };
