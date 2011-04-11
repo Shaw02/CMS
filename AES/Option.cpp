@@ -15,9 +15,9 @@
 //==============================================================
 OPSW::OPSW(int argc, _TCHAR* argv[]):
 	//初期化設定
-	fHelp(0),		//ヘルプは、デフォルトは表示しない。
-	cDecode(1),		//でバッグ
-	iKey(256)		//鍵は指定
+	fHelp(0),			//ヘルプは、デフォルトは表示しない。
+	cDecipher(1),		//復号モード
+	iMode(42)			//鍵のDefault = 42
 	{
 
 	//----------------------------------
@@ -51,33 +51,58 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 					break;
 				//--------
 				//Decode
+				case 'd' :
 				case 'D' :
-					cDecode = 1;
+					cDecipher = 1;
 					break;
 				//--------
 				//Decode
+				case 'e' :
 				case 'E' :
-					cDecode = 0;
+					cDecipher = 0;
 					break;
 				//--------
 				//鍵の指定
-				case 'K' :
-					iResult=sscanf_s(argv[iCount],"/K%d",&iKey);
+				case 'M' :
+					iResult=sscanf_s(argv[iCount],"/M%d",&iMode);
 					if((iResult==NULL)||(iResult==EOF)){
-						opError("/K");
+						opError("/M");
 						break;
 					};
-					if((iKey!=0)&&(iKey!=128)&&(iKey!=192)&&(iKey!=256)){
-						opError("/K 未対応の鍵長です。");
+				//	if((iKey!=2)&&(iKey!=22)&&(iKey!=42)){
+				//		opError("/M Un-defined mode.");
+				//		break;
+				//	}
+					break;
+				//--------
+				//パスワードの指定
+				case 'w' :
+				case 'W' :
+					//先に、キーワードが書いてあるかチェック。
+					if(argv[iCount][2]==0){
+						opError("/W None pass-word.");
 						break;
-					}
+					};
+					//既に指定されている？
+					if(strKeyWord.empty()){
+						iOptionChk=0;
+						while((cOption=argv[iCount][iOptionChk+2])!=0)
+						{
+							strKeyWord+=cOption;
+							iOptionChk++;
+						};
+					} else {
+						opError("/W Too many pass word.");
+						break;
+					};
 					break;
 				//--------
 				//ファイルの指定
+				case 'f' :
 				case 'F' :
 					//先に、ファイル名が書いてあるかチェック。
 					if(argv[iCount][3]==0){
-						opError("/F ファイル名が書いてありません。");
+						opError("/F None file-name.");
 						break;
 					};
 					switch(argv[iCount][2]){
@@ -95,10 +120,10 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 									iOptionChk++;
 								};
 								if(iFlagFilnameExt==0){
-									strAESname+=".aes";
+									strAESname+=".p7";
 								};
 							} else {
-								opError("/F 暗号文ファイルが2回以上指定されました。");
+								opError("/F Too many cipher-file-name.");
 								break;
 							};
 							break;
@@ -107,7 +132,7 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 						case 'k' :
 							//既に指定されている？
 							if(strKEYname.empty()){
-								iKey = 0;				//鍵が指定された。
+								iMode = -1;				//鍵が指定された。
 								iFlagFilnameExt=0;		//拡張子の有無　Reset
 								iOptionChk=0;
 								while((cOption=argv[iCount][iOptionChk+3])!=0)
@@ -120,7 +145,7 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 									strKEYname+=".key";
 								};
 							} else {
-								opError("/F 暗号鍵ファイルが2回以上指定されました。");
+								opError("/F Too many cipher-key.");
 								break;
 							};
 							break;
@@ -154,7 +179,7 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 					strBINname+=".";
 				};
 			} else {
-				opError("平文ファイルが2回以上指定されました。");
+				opError("Too many plain-file-name.");
 				break;
 			};
 
@@ -177,7 +202,7 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 	//出力ファイルの指定が無かった場合
 	if(strAESname.empty()){
 		strAESname = strBINname;
-		strAESname+=".aes";
+		strAESname+=".p7";
 	};
 
 	//--------------
@@ -225,16 +250,23 @@ void	OPSW::print_help(){
 				"\n"
 				"AES [ /options ] [filename]\n"
 				"\n"
+				"  --- Common option ---\n"
 				"  filename		File name of Plain-Text.\n"
-				"  /Fc[file(.aes)]	File name of Cipher-Text. (Default = [filename].aes)\n"
+				"  /Fc[file(.p7 )]	File name of Cipher-Text. (Default = [filename].p7)\n"
 				"  /Fk[file(.key)]	File name of Cipher-Key. (Default = [filename].key)\n"
-				"  /D			Decode cipher (Default)\n"
-				"  /E			Encode cipher \n"
-				"  /Kn			Auto-make cipher key by rumdom.\n"
-				"			 128 : AES-128\n"
-				"			 192 : AES-192\n"
-				"			 256 : AES-256 (default)\n"
-				"  /H			help"	<<	endl;
+				"  /W[PW]		Cipher-Key is SHA-256 hash of this PW(Pass Word).\n"
+				"  /H			help\n"
+				"\n"
+				"  --- Decipher option ---\n"
+				"  /D			Decipher (Default)\n"
+				"\n"
+				"  --- Encipher option ---\n"
+				"  /E			Encipher\n"
+				"  /M[n]			Block cipher modes of operation.\n"
+				"			   2 : AES-CBC 128-bit\n"
+				"			  22 : AES-CBC 192-bit\n"
+				"			  42 : AES-CBC 256-bit(default)\n" << endl;
+
 
 	exit(EXIT_SUCCESS);
 

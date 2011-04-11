@@ -10,7 +10,7 @@
 //		無し	
 //==============================================================
 MT::MT():
-	mti(N+1)
+	mti(MT_N+1)
 {
 	//Default seed	スタティック領域に置く。（スタックに置くとmov命令を4つ吐く。）
 	static	unsigned	long	init[4]	=	{0x123, 0x234, 0x345, 0x456};
@@ -27,7 +27,7 @@ MT::MT():
 //		無し	
 //==============================================================
 MT::MT(unsigned long init_key[], unsigned int key_length):
-	mti(N+1)
+	mti(MT_N+1)
 {
 	init_by_array(init_key, key_length);
 }
@@ -58,7 +58,7 @@ void MT::init_genrand(unsigned long s)
 		//配列変数への書き込みは、この一回だけに。
 		mt[iMT++] = s;
 
-	} while (iMT < N);
+	} while (iMT < MT_N);
 
 	mti = iMT;
 }
@@ -81,7 +81,7 @@ void MT::init_by_array(unsigned long init_key[], unsigned int key_length)
 	//この辺は、レジスター変数になってくれる。
 	unsigned	int		iMT		= 0;	
 	unsigned	int		iKey	= 0;	
-	unsigned	int		k		= ((N>key_length)? N : key_length);
+	unsigned	int		k		= ((MT_N>key_length)? MT_N : key_length);
 	unsigned	long	r;		//result
 
 	init_genrand(19650218UL);
@@ -101,7 +101,7 @@ void MT::init_by_array(unsigned long init_key[], unsigned int key_length)
 		//配列変数への書き込みは、この一回だけに。
 		mt[iMT++] = r;
 
-		if (iMT>=N){
+		if (iMT>=MT_N){
 			iMT=1;
 //			mt[iMT++] = r;		//変数"r"に入っているので要らない
 		}
@@ -109,7 +109,7 @@ void MT::init_by_array(unsigned long init_key[], unsigned int key_length)
 		if(iKey>=key_length){iKey=0;}
 	};
 
-	k = N-1;
+	k = MT_N-1;
 	while(k--){
 	//	__asm	prefetchnta	mt[iMT+8]
 		_mm_prefetch((const char *)&mt[iMT+4], 0);	//直近の配列を、L1キャッシュにフェッチしておく。
@@ -120,7 +120,7 @@ void MT::init_by_array(unsigned long init_key[], unsigned int key_length)
 		r = ((mt[iMT] ^ ((r ^ (r >> 30)) * (unsigned long)1566083941)) - iMT) & 0xffffffffUL;
 
 		mt[iMT++] = r;		//配列への書き込み。
-        if (iMT>=N){
+        if (iMT>=MT_N){
 			iMT=1;
 //			mt[iMT++] = r;		//変数"r"に入っているので要らない
 		}
@@ -145,9 +145,9 @@ unsigned long MT::genrand_int32(void)
 	unsigned	long	y;
 	unsigned	long	n;
 
-	if(iMT >= N){
+	if(iMT >= MT_N){
 
-		if(iMT >= N+1){		//初期化されていなかったら、初期化する。
+		if(iMT >= MT_N+1){		//初期化されていなかったら、初期化する。
 			init_genrand(5489);
 		}
 
@@ -157,20 +157,20 @@ unsigned long MT::genrand_int32(void)
 			y = (n & UPPER_MASK);
 			n = mt[iMT+1];			//次の値として使う。
 			y |= (n & LOWER_MASK);
-			mt[iMT] = (mt[iMT+M]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
+			mt[iMT] = (mt[iMT+MT_M]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
 			iMT++;
-		} while (iMT < N-M);
+		} while (iMT < MT_N-MT_M);
 
 		do{
 			y = (n & UPPER_MASK);
 			n = mt[iMT+1];			//次の値として使う。
 			y |= (n & LOWER_MASK);
-			mt[iMT] = (mt[iMT+M-N]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
+			mt[iMT] = (mt[iMT+MT_M-MT_N]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
 			iMT++;
-		} while (iMT < N-1);
+		} while (iMT < MT_N-1);
 
 			y = (n & UPPER_MASK) | (mt[0] & LOWER_MASK);
-			mt[N-1] = (mt[M-1]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
+			mt[MT_N-1] = (mt[MT_M-1]) ^ ((y)&1UL ? MATRIX_A : 0) ^ (y >> 1);
 			iMT = 0;
 	}
 

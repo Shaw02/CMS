@@ -5,6 +5,7 @@ class FileInput :
 {
 public:
 		FileInput(void);
+		FileInput(const char*	strFileName);
 		~FileInput(void);
 void	fileopen(const char*	strFileName);
 void	StreamPointerAdd(__int32 iSize);

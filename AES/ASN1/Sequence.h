@@ -1,0 +1,21 @@
+#pragma once
+#include "ASN1.h"
+
+/****************************************************************/
+/*			ÉNÉâÉXíËã`											*/
+/****************************************************************/
+class Sequence :
+	public ASN1
+{
+public:
+//--------------
+//ïœêî
+
+
+//--------------
+//ä÷êî
+						Sequence(const char _strName[]="Sequence");
+						~Sequence(void);
+
+	virtual		void	encodeBER();
+};

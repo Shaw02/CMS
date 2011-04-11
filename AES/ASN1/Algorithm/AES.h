@@ -1,4 +1,5 @@
 #pragma once
+#include "AlgorithmIdentifier.h"
 //======================================================================
 //	fips-197	AES		Encoder / Decorder
 //======================================================================
@@ -45,10 +46,10 @@ union _mm_i32
 /****************************************************************/
 /*			定数定義											*/
 /****************************************************************/
-#define		Nb		4			//Number of columns (32-bit words) comprising the State.
-								//For this standard, Nb = 4. (Also see Sec. 6.3.)
-#define		Nbb		Nb*4		//[Byte]
-
+#define		AES_Nb			4			//Number of columns (32-bit words) comprising the State.
+										//For this standard, Nb = 4. (Also see Sec. 6.3.)
+#define		AES_Nbb			AES_Nb*4	//[Byte]
+#define		AES_BlockSize	AES_Nbb
 /****************************************************************/
 /*			プロトタイプ宣言									*/
 /****************************************************************/
@@ -65,31 +66,47 @@ extern "C"{
 /****************************************************************/
 /*			クラス定義											*/
 /****************************************************************/
-class __declspec(align(16)) AES
+class __declspec(align(16)) AES :
+	public AlgorithmIdentifier
 {
+//Variable
 public:
-	//Variable
-__declspec(align(16)) unsigned	int	w[60];	//Key Schedule	(16byte align)
+	__declspec(align(16)) unsigned	int	w[60];	//Key Schedule	(16byte align)
+
+	__m128i				vector;
+
+	static	unsigned	int		oid[];	//	= (2,16,840,1,101,3,4,1,cMode);
+	OctetString			IV;
+	enum				useMode{ECB, CBC, OFB, CFB, CTR, CTS}	mode;
+
 	unsigned	char	Nk;					//Number of 32-bit words comprising the Cipher Key.
 											//For this standard, Nk = 4, 6, or 8. (Also see Sec. 6.3.)
 	unsigned	char	Nr;					//Number of rounds, which is a function of Nk and Nb (which is fixed).
 											//For this standard, Nr = 10, 12, or 14. (Also see Sec. 6.3.)
-	__m128i				IV;
 
+//Function
 public:
-	//Function
-	AES();											//
-	AES(char cNk,unsigned char Key[]);				//鍵スケジュール生成付きでクラス作成
+	AES(const char _strName[]="AES");											//
 	~AES(void);										//
 
-	__m128i	mul(__m128i data, unsigned char n);					//4,2	Multiplication
+	int		Check_OID(ObjectIdentifier* ptOID);
+	void	Set_AES(int	cMode, __m128i _xmm_IV);
 
-	void	KeyExpansion(char cNK, unsigned char *key);			//5.2	Key Expansion
+	void	Set_Key(void *key){KeyExpansion((unsigned char *)key);};
+	void	Clear_Key();										//鍵Zero化
+	void	init(){SetIV();};									//初期化
+	void	encrypt(void *data);								//暗号
+	void	decrypt(void *data);								//復号
+
+private:
+	void		SetIV();
 	unsigned	int		RotWord(unsigned int data);				//
 	unsigned	int		SubWord(unsigned int data);				//
 	unsigned	int		SubWord2(unsigned int data);			//(x 02)
 	unsigned	int		SubWord3(unsigned int data);			//(x 03)
 	unsigned	int		InvSubWord(unsigned int data);			//
+
+	__m128i	mul(__m128i data, unsigned char n);					//4,2	Multiplication
 
 	void	Cipher_One(void *ind, void *outd);					//
 	__m128i	Cipher(__m128i data);								//5.1	Cipher
@@ -100,6 +117,8 @@ public:
 	__m128i	MixColumns(__m128i data);							//5.1.3	MixColumns
 	__m128i	AddRoundKey(__m128i data, int i);					//5.1.4	AddRoundKey
 
+	void	KeyExpansion(unsigned char *key);					//5.2	Key Expansion
+
 	void	InvCipher_One(void *ind, void *outd);				//
 	__m128i	InvCipher(__m128i data);							//5.3	InvCipher
 	__m128i	InvShiftRows(__m128i data);							//5.3.1	InvShiftRows
@@ -107,8 +126,6 @@ public:
 	__m128i	InvMixColumns(__m128i data);						//5.3.3	InvMixColumns
 	__m128i	InvAddRoundKey(__m128i data, int i);				//5.3.4	InvAddRoundKey
 
-	void	SetIV(__m128i data);
 	void	CBC_Cipher(void *data);
 	void	CBC_InvCipher(void *data);
-
 };

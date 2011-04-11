@@ -14,8 +14,8 @@
 //==============================================================
 void	errPrint(const char *strFile, const char *strMSG){
 
-	printf(strFile);
-	printf(strMSG);
+	cout	<<	strFile	<<	strMSG	<<	endl;
+
 	exit(EXIT_FAILURE);
 }
 
@@ -33,16 +33,36 @@ void	dataPrint(int n, void *Data){
 
 	unsigned char* cData = (unsigned char*)Data;
 	int	i=0;
+
+	cout	<<	setfill('0')	<<	hex;
 	while(i<n){
-		if(((i & 0x0F)==0x00) && (i != 0)){
-			printf("\n		 ");
-		}
-		printf("%02x ",cData[i]);
+		cout	<<	setw(2)	<<	(int)cData[i]	<<	" ";
 		i++;
 	}
-	printf("\n");
+	cout	<<	dec	<<	endl;
 }
+//==============================================================
+//			16進数 数値表示
+//--------------------------------------------------------------
+//	●引数
+//			int		n		表示DWORD数
+//			void	*Data	表示する配列[DWORD単位]
+//	●返値
+//			無し
+//==============================================================
+void	dataPrint32(int n, void *Data){
 
+	unsigned int* cData = (unsigned int*)Data;
+	int	i=0;
+
+	cout	<<	setfill('0')	<<	hex;
+	while(i<n){
+		cout	<<	setw(8)	<<	cData[i]	<<	" ";
+		i++;
+	}
+	cout	<<	dec	<<	endl;
+
+}
 //==============================================================
 //			get process
 //--------------------------------------------------------------
@@ -66,167 +86,269 @@ __int64	ReadTSC()
 //	●返値
 //			無し
 //==============================================================
-int __cdecl _tmain(int argc, _TCHAR* argv[])
+void	encrypt(OPSW* cOpsw)
 {
+	//PKCS#7 の構造定義
+	static	const	unsigned	int		oid_PKCS7_1[]	= {1,2,840,113549,1,7,1};
+	ObjectIdentifier*					_contentType	= new ObjectIdentifier((unsigned int*)oid_PKCS7_1, sizeof(oid_PKCS7_1)/sizeof(unsigned int));
 
-#define	strAES	0x00534541
-
-	__declspec(align(16))	unsigned	char	text[16];	//処理用
-union {
-	__declspec(align(16))	unsigned	char	c[32];
-	__declspec(align(16))	unsigned	int		i[8];
-} Key;														//暗号鍵
-
-struct Header{
-	unsigned	int		Name;					//ヘッダー
-	unsigned	int		iKeySize;				//暗号鍵のサイズ(128,192,256)
-	unsigned	int		Null;					//
-	unsigned	int		iSize;					//ファイルサイズ
-	union{
-		unsigned	char	c[16];
-		unsigned	int		i[4];
-		__m128i				xmm;
-	} IV;										//CBCモード 初期値
-} __declspec(align(16)) header;					//ヘッダー
-
-union {
-	unsigned	__int64	i64[2];
-	unsigned	long	i[4];
-} randSeed;										//乱数生成用
-
-union {
-	unsigned	__int64 i64;
-	unsigned	int		i[2];
-} cycles;										//サイクル数カウント用
+	//変数
+	unsigned	__int64	cycles = ReadTSC();		//プログラム起動時のクロック数
 
 	unsigned	int		i;						//カウント用
-	unsigned	int		n;						//カウント用
+	unsigned	int		ptPadding;
+	unsigned	char	cPadData;
+	unsigned	char	cntPadData;
 
-		OPSW*	cOpsw	= new	OPSW(argc, argv);		//オプションスイッチ処理
-		MT*		cMT;									//MT乱数
-static	AES		cAES;									//AES暗号処理
+				int		cAESmode;				//暗号利用モード
+	__m128i				IV;						//init vector
 
-	FileInput*			f_IN	= new FileInput();		//ファイル入力用
-	FileOutput*			f_OUT	= new FileOutput();		//ファイル出力用
+
+//暗号鍵
+union {
+		unsigned	char	c[32];
+					__m128i	xmm[2];
+} __declspec(align(16)) Key;					//暗号鍵
+
+//乱数の種
+union {
+	unsigned	int		i[4];
+	unsigned	__int64	i64[2];
+} __declspec(align(16)) randSeed;				//乱数の種
+
+//暗号処理用バッファ（パディング用に16Byte余分に。）
+union {
+	unsigned	char	c[	(AES_BlockSize*2)];
+				__m128i	xmm[(AES_BlockSize*2/sizeof(__m128i))];
+} __declspec(align(16)) cBuff;
+
+		SHA256*				cSHA	= new	SHA256();				//SHAハッシュ
+		MT_SHA*				cMT;									//MT乱数
+static	AES					cAES;									//AES暗号処理
+		FileInput*			f_IN	= new FileInput(cOpsw->strBINname.c_str());				//ファイル入力用
+		PKCS7_6_Output*		f_OUT	= new PKCS7_6_Output(cOpsw->strAESname.c_str());		//ファイル出力用
+
 union{
-	FileInput*			i;		//入力
-	FileOutput*			o;		//出力	
+		PKCS8_Input*		i;		//入力
+		PKCS8_Output*		o;		//出力	
 } f_KEY;
 
-	//----------------------------------------------------
-	//処理開始
-	cycles.i64 = ReadTSC();				//計測用 ＆ 乱数の種
-//	header = new Header;
+	cout	<<	"Now enciphering..."	<<	endl;
 
-	//----------------------------------------------------
-	//■暗号
-	if(cOpsw->cDecode == 0){
+	//------------------
+	//乱数から、IV(Init vector)を生成
+	//（ファイル読み込みにかかった時間が、乱数の種）
 
-		//------------------
-		//ファイルを開く（ファイル読み込み時間を、乱数生成時間にする）
-		f_IN->fileopen(cOpsw->strBINname.c_str());
-		f_OUT->fileopen(cOpsw->strAESname.c_str());
+	randSeed.i64[0] = cycles;
+	randSeed.i64[1] = ReadTSC();
+	cMT	=	new MT_SHA((unsigned long *)randSeed.i, sizeof(randSeed)/sizeof(int), cSHA);		//MT乱数処理
 
-		//------------------
-		//ヘッダー作成(1)
-		header.Name		= strAES;
-		header.iSize	= f_IN->GetSize();
-		header.iKeySize	= cOpsw->iKey;
+	//------------------
+	//PKCS#7-6 の構造を作成
+	IV = cMT->get__m128i();		//128bitを、初期ベクトルIVにする
+	cAESmode = cOpsw->iMode;
+//	cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
 
-		//乱数生成（ファイル読み込みにかかった時間が、乱数の種）
-		randSeed.i64[0] = cycles.i64;
-		randSeed.i64[1] = ReadTSC();
-		cMT	=	new MT(randSeed.i, 4);					//MT乱数処理
+	//------------------
+	//鍵の準備
 
-		header.IV.i[0] = cMT->genrand_int32();
-		header.IV.i[1] = cMT->genrand_int32();
-		header.IV.i[2] = cMT->genrand_int32();
-		header.IV.i[3] = cMT->genrand_int32();
-
-		//------------------
-		//鍵の準備
-		//鍵ファイル有り
-		if(header.iKeySize == 0){
-			f_KEY.i = new FileInput();
-			f_KEY.i->fileopen(cOpsw->strKEYname.c_str());
-			header.iKeySize = f_KEY.i->GetSize()<<3;	//暗号鍵のサイズをヘッダーにセット
-			if((header.iKeySize!=128)&&(header.iKeySize!=192)&&(header.iKeySize!=256)){
-				errPrint(cOpsw->strKEYname.c_str(), ": Not chiper-key file.");
-			}
-			f_KEY.i->read((char *)Key.c, sizeof(Key.c));
-			f_KEY.i->close();
-			delete f_KEY.i;
-		//鍵は自動生成
-		} else {
-			f_KEY.o = new FileOutput();
-			f_KEY.o->fileopen(cOpsw->strKEYname.c_str());
-			i =  header.iKeySize>>5;
-			do{
-				i--;
-				Key.i[i] = cMT->genrand_int32();		//乱数で暗号鍵を生成
-			} while(i>0);
-			f_KEY.o->write((char *)Key.c, header.iKeySize>>3);
-			f_KEY.o->close();
-			delete f_KEY.o;
-		}
-
-		delete	cMT;
-
-		//------------------
-		//変換
-		cAES.KeyExpansion(header.iKeySize>>5,Key.c);
-		cAES.SetIV(header.IV.xmm);
-		f_OUT->write((char *)&header, sizeof(Header));
-		i = header.iSize;
-		while(i>0){
-			n = ((i>16)?16:i);
-			f_IN->read((char *)text, 16);
-			cAES.CBC_Cipher(text);
-			f_OUT->write((char *)text, 16);
-			i -= n;
-		}
-
-	//----------------------------------------------------
-	//■復号	
-	} else {
-
-		//------------------
-		//ファイルを開く
-		f_IN->fileopen(cOpsw->strAESname.c_str());
-		f_OUT->fileopen(cOpsw->strBINname.c_str());
-
-		//------------------
-		//ヘッダー読み込み ＆ チェック
-		f_IN->read((char *)&header, sizeof(Header));
-		if(header.Name != strAES){
-			errPrint(cOpsw->strAESname.c_str(), ": Not chiper-text file.");
-		}
-
-		//------------------
-		//暗号鍵の準備
-		f_KEY.i = new FileInput();
-		f_KEY.i->fileopen(cOpsw->strKEYname.c_str());
-		if((f_KEY.i->GetSize()) != header.iKeySize>>3){
-			errPrint(cOpsw->strKEYname.c_str(), ": Not chiper-key file.");
-		}
-		f_KEY.i->read((char *)Key.c, header.iKeySize>>3);
+	//鍵ファイル指定？
+	if(cAESmode == -1){
+		f_KEY.i = new PKCS8_Input(cOpsw->strKEYname.c_str());
+		f_KEY.i->Get_PrivateKeyInfo();
+		cAESmode = cAES.Check_OID(&f_KEY.i->Algorithm);
+		cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定	
+		f_KEY.i->Get_PrivateKey(Key.c, cAES.Nk*4);
 		f_KEY.i->close();
 		delete f_KEY.i;
+	} else {
+		cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
+		//鍵は乱数より自動生成
+		if(cOpsw->strKeyWord.empty()==true){
+			cMT->get256(&Key.c);
+			f_KEY.o = new PKCS8_Output(cOpsw->strKEYname.c_str());
+			f_KEY.o->Set(&cAES, (char *)Key.c, (cAES.Nk*4));
+			f_KEY.o->encodeBER_to_File();
+			f_KEY.o->close();
+			delete f_KEY.o;
+		//キーワードがある場合。
+		} else {
+			//文字列のハッシュ値を、暗号鍵用の配列変数に入れる。
+			cSHA->CalcHash(Key.c, (void *)cOpsw->strKeyWord.c_str(), cOpsw->strKeyWord.length());
+		}
+	}
 
-		//------------------
-		//変換
-		cAES.KeyExpansion(header.iKeySize>>5,Key.c);
-		cAES.SetIV(header.IV.xmm);
-		i = header.iSize;
-		while(i>0){
-			n = ((i>16)?16:i);
-			f_IN->read((char *)text, 16);
-			cAES.CBC_InvCipher(text);
-			f_OUT->write((char *)text, n);
-			i -= n;
+	delete	cMT;				//乱数は、もう使わない。
+
+	//------------------
+	//暗号鍵を設定
+	cAES.Set_Key(Key.c);				//暗号鍵を設定
+	Key.xmm[0] = _mm_setzero_si128();	//セキュリティー対策
+	Key.xmm[1] = _mm_setzero_si128();	//クラスを暗号鍵で初期化したら、暗号鍵を０クリア
+
+	//------------------
+	//PKCS#7-6 の構造をファイル出力
+	i = f_IN->GetSize();		//平文のファイルサイズ
+	f_OUT->Set_EncryptedData(_contentType, &cAES, (i & -16) + 16);
+	f_OUT->write_header();
+
+	//------------------
+	//変換
+	do{
+
+		f_IN->read((char *)cBuff.c, AES_BlockSize);
+
+		if(i > AES_BlockSize){
+			cAES.encrypt(&cBuff.xmm[0]);
+			f_OUT->write((char *)cBuff.c, AES_BlockSize);
+			i -= AES_BlockSize;
+		} else {
+			//Padding処理(PKCS#7)を実施
+			ptPadding	= i;
+			cPadData	= AES_BlockSize - (i & 0x0F);
+			cntPadData	= cPadData;
+			do{
+				cBuff.c[ptPadding] = cPadData;
+				ptPadding++;
+				cntPadData--;
+			} while(cntPadData>0);
+
+			cAES.encrypt(&cBuff.xmm[0]);
+			f_OUT->write((char *)&cBuff.xmm[0], AES_BlockSize);
+			if(i == AES_BlockSize){
+				//Paddingが次のblockにある場合
+				cAES.encrypt(&cBuff.xmm[1]);
+				f_OUT->write((char *)&cBuff.xmm[1], AES_BlockSize);
+			}
+			break;
 		}
 
+	} while(1);
+
+	f_IN->close();
+	f_OUT->close();
+
+	delete	f_IN;
+	delete	f_OUT;
+	delete	cSHA;
+	
+	delete	_contentType;
+}
+//==============================================================
+//			main routine
+//--------------------------------------------------------------
+//	●引数
+//			無し
+//	●返値
+//			無し
+//==============================================================
+void	decrypt(OPSW* cOpsw)
+{
+
+	unsigned	int		i;						//カウント用
+	unsigned	int		ptPadding;
+	unsigned	char	cPadData;
+	unsigned	char	cntPadData;
+
+				int		cAESmode;				//暗号利用モード
+	__m128i				IV;						//init vector
+
+	bool	fStruct;							//ASN.1 構文解析用
+
+//暗号鍵
+union {
+		unsigned	char	c[32];
+					__m128i	xmm[2];
+} __declspec(align(16)) Key;					//暗号鍵
+
+//暗号処理用バッファ（パディング用に16Byte余分に。）
+union {
+	unsigned	char	c[	(AES_BlockSize*2)];
+				__m128i	xmm[(AES_BlockSize*2/sizeof(__m128i))];
+} __declspec(align(16)) cBuff;
+
+		SHA256*	cSHA	= new	SHA256();				//SHAハッシュ
+static	AES		cAES;									//AES暗号処理
+
+	PKCS7_6_Input*		f_IN	= new PKCS7_6_Input(cOpsw->strAESname.c_str());		//ファイル入力用
+	FileOutput*			f_OUT	= new FileOutput(cOpsw->strBINname.c_str());		//ファイル出力用
+
+union{
+	PKCS8_Input*		i;		//入力
+	PKCS8_Output*		o;		//出力	
+} f_KEY;
+
+	cout	<<	"Now deciphering..."	<<	endl;
+
+	//------------------
+	//暗号ファイルのASN.1構造分析
+
+	//暗号化コンテンツのサイズ取得
+	f_IN->Get_EncryptedData();
+
+	//暗号アルゴリズム・パラメータの取得
+	cAESmode = cAES.Check_OID(&f_IN->Algorithm);
+	if(cAESmode == -1){
+		errPrint(cOpsw->strAESname.c_str(),": Unknown encryption algorithm.");
 	}
+	f_IN->StreamPointerMove_AlgorithmPara();
+	if(sizeof(IV) != f_IN->read_TAG_with_Check(BER_Class_General, BER_TAG_OCTET_STRING, &fStruct)){
+		errPrint(cOpsw->strAESname.c_str(),": Initialize Vector(IV) is not found.");
+	};
+	if(fStruct != false){
+		f_IN->error(0);
+	}
+	f_IN->read((char *)&IV, sizeof(IV));
+
+	cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
+
+	//------------------
+	//暗号鍵の準備
+
+	//鍵ファイル
+	if(cOpsw->strKeyWord.empty()==true){
+		f_KEY.i = new PKCS8_Input(cOpsw->strKEYname.c_str());
+		f_KEY.i->Get_PrivateKey_with_check(&cAES, Key.c, cAES.Nk*4);
+		f_KEY.i->close();
+		delete f_KEY.i;
+	//文字列のハッシュ値
+	} else {
+		cSHA->CalcHash(Key.c, (void *)cOpsw->strKeyWord.c_str(), cOpsw->strKeyWord.length());
+	}
+
+
+	//------------------
+	//変換
+	f_IN->StreamPointerMove_EncryptedContent();
+	cAES.Set_Key(Key.c);				//暗号鍵を設定
+	Key.xmm[0] = _mm_setzero_si128();	//セキュリティー対策
+	Key.xmm[1] = _mm_setzero_si128();	//クラスを暗号鍵で初期化したら、暗号鍵を０クリア
+
+	i = f_IN->szEncryptedContent;
+	do {
+		f_IN->read((char *)cBuff.c, AES_BlockSize);
+		cAES.decrypt(&cBuff.xmm[0]);
+		i -= AES_BlockSize;
+		if(i >= AES_BlockSize){
+			f_OUT->write((char *)cBuff.c, AES_BlockSize);
+		} else {
+			//最後のBlockは、Paddingを含む。
+			ptPadding	= AES_BlockSize - 1;
+			cPadData	= cBuff.c[ptPadding];
+			cntPadData	= cPadData;
+			//Paddingのチェック
+			do{
+				if(cBuff.c[ptPadding] != cPadData){
+					errPrint(cOpsw->strAESname.c_str(),": Decryption error. Key may be different.");
+				}
+				ptPadding--;
+				cntPadData--;
+			} while(cntPadData>0);
+			//Paddingデータに基づいてファイル出力
+			f_OUT->write((char *)cBuff.c, AES_BlockSize - cPadData);
+			break;
+		}
+	} while(1);
 
 	//ファイルを閉じる
 	f_IN->close();
@@ -234,11 +356,36 @@ union{
 
 	delete	f_IN;
 	delete	f_OUT;
+	delete	cSHA;
+}
+//==============================================================
+//			main routine
+//--------------------------------------------------------------
+//	●引数
+//			無し
+//	●返値
+//			無し
+//==============================================================
+int __cdecl _tmain(int argc, _TCHAR* argv[])
+{
+
+	unsigned	__int64	cycles = ReadTSC();		//プログラム起動時のクロック数
+
+	OPSW*	cOpsw	= new OPSW(argc, argv);
+
+	//----------------------------------------------------
+	//処理開始
+
+	if(cOpsw->cDecipher == 0){
+		encrypt(cOpsw);		//暗号
+	} else {
+		decrypt(cOpsw);		//復号	
+	}
+
 	delete	cOpsw;
 
-	printf("%u:%u サイクル要しました。\n", ReadTSC() - cycles.i64);
+	cout	<<	"Success.\n"
+				"Process cycles = "	<<	ReadTSC() - cycles	<<	endl;
 
 	return 0;
 }
-
-

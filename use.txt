@@ -8,7 +8,34 @@
 
 
 
-１．暗号
+１．特徴
+━━━━━━━━━━━━
+本ソフトウェアは、単一ファイルに対してＡＥＳ暗号・復号を行う事ができます。
+ＣＵＩ（コマンドライン・ユーザー・インターフェース）アプリケーションであり、
+オプションにより、様々な設定が可能です。
+
+暗号鍵（共通鍵）については、以下の方法で指定する事が可能です。
+・パスワード文字列（SHA-256 ハッシュ値したものが暗号鍵となります）。
+・暗号鍵ファイル（AES暗号用の鍵が格納されたPKCS#8ファイル）。
+・擬似乱数により自動生成（オプションスイッチで暗号鍵長を指定可能です）。
+
+暗号化ファイルは、同じファイルを同じ暗号鍵（パスワード）で暗号化した場合でも、
+毎回異なる結果となるため、解読は困難な強度な暗号化が施されます。
+これは、初期化ベクトル(IV)を、毎回、擬似乱数により変える事で実現しています。
+
+Ｃ言語(vc++)／アセンブリ言語（masm）のソース付です。
+Visual C++.net 2008 Express Editionでビルドしています。
+　＃	尚、本クラスや、ソースコードの流用をする際は、ご一報ください。
+　＃	又、本クラスや、ソースコードの利用により発生したいかなる損害に
+　＃	つきましては法律が許容する最大限において責任を負いませんので、
+　＃	使用者の責任の元、ご利用頂ければ幸いです。
+
+"NIST Special Publication 800-38A"のテストベクターにより、
+AES-CBCモードにおける暗号・復号結果のテストを実施済みです。
+
+
+
+２．暗号
 ━━━━━━━━━━━━
 
 (1) AES-256の暗号鍵を、疑似乱数で自動生成する場合
@@ -17,30 +44,41 @@ AES [filename.ext] /E
 
 とコマンドラインに打ち込む事で、以下、２つのファイルを生成します。
 暗号鍵を自動生成する場合のデフォルトは、AES-256となります。
-　filename.ext.aes	…　暗号文
+　filename.ext.p7	…　暗号文
 　filename.ext.key	…　暗号鍵 (256bit)
 
+復号時においてもファイル名や拡張子はチェックしないので、
+自由に変えてしまって構いません。
+尚、暗号ファイル中にファイル名情報は含まないので、
+その場合は、通信先に、元のファイル名を知らせる必要があります。
+
+また、オプションスイッチ /M[n] により、暗号利用モードを選択できます。
+現在は、以下の３つのみ対応しています。
+	 2　…	AES-CBC 128bit
+	22　…	AES-CBC 192bit
+	42　…	AES-CBC 256bit
 
 
-(2) 暗号鍵を、鍵長を指定して疑似乱数で自動生成する場合
-────────────────────────────
-AES [filename.ext] /E /K[n]
 
-とコマンドラインに打ち込む事で、以下、２つのファイルを生成します。
-自動生成する暗号鍵は、[n]bitとなります。
-nは、128,192,256 以外は指定できません。
-　filename.ext.aes	…　暗号文
-　filename.ext.key	…　暗号鍵 ([n] bit)
-
-
-
-(3) 暗号鍵のファイルを、指定する場合。
+(2) 暗号鍵のファイルを、指定する場合。
 ────────────────────────────
 AES [filename.ext] /E /Fk[key-filename]
 
 とコマンドラインに打ち込む事で、以下のファイルを生成します。
 暗号鍵は、[key-filename]を使用します。
-　filename.ext.aes	…　暗号文
+　filename.ext.p7	…　暗号文
+
+
+
+(3) 暗号鍵を文字列で指定する場合。
+────────────────────────────
+AES [filename.ext] /E /W[strings]
+
+とコマンドラインに打ち込む事で、以下のファイルを生成します。
+暗号鍵は、[strings]をSHA-256ハッシュ値化した数値となります。
+尚、暗号鍵に使用する文字列は、256bit相当の情報量がある方が良いかと思います。
+　filename.ext.p7	…　暗号文
+
 
 
 暗号文のファイルを指定する場合は、オプションスイッチ"/Fc[aes-filename]"を記述して下さい。
@@ -49,63 +87,234 @@ AES [filename.ext] /E /Fk[key-filename]
 
 
 
-２．復号
+３．復号
 ━━━━━━━━━━━━
 
+(1) 暗号鍵のファイルがある場合。
+────────────────────────────
 AES [filename.ext]
 
 とコマンドラインに打ち込む事で、以下２つのファイルを用いて復号します。
-　filename.ext.aes	…　暗号文
+※ファイル名は、復号後のファイル名を入力します。
+　filename.ext.p7	…　暗号文
 　filename.ext.key	…　暗号鍵
 
-暗号鍵のファイルを指定する場合は、オプションスイッチ"/Fk[key-filename]"を記述して下さい。
-暗号文のファイルを指定する場合は、オプションスイッチ"/Fc[aes-filename]"を記述して下さい。
+暗号鍵のファイルを別指定する場合は、オプションスイッチ"/Fk[key-filename]"を記述して下さい。
+暗号文のファイルを別指定する場合は、オプションスイッチ"/Fc[aes-filename]"を記述して下さい。
+
+
+
+(2) 暗号鍵を文字列で指定する場合。
+────────────────────────────
+AES [filename.ext] /W[strings]
+
+とコマンドラインに打ち込む事で、以下のファイルを用いて復号します。
+暗号鍵は、[strings]をSHA-256ハッシュ値化した数値となります。
+　filename.ext.p7	…　暗号文
 
 
 
 
 
-３．技術資料
+４．技術資料
 ━━━━━━━━━━━━
-
-(1) 暗号文ファイル・フォーマット（*.aes）
+(1) 暗号アルゴリズム
 ────────────────────────────
-Address				型		内容
-0x0000-0000 ～ 0x0000-0003	char[4]		文字列 "AES",0
-0x0000-0004 ～ 0x0000-0007	int		暗号鍵のbit数
-0x0000-0008 ～ 0x0000-000B			未使用
-0x0000-000C ～ 0x0000-000F	int		平文のファイルサイズ
-0x0000-0010 ～ 0x0000-001F	char[16]	IV (CBCモードの初期値)
-0x0000-0020 ～			__m128i		暗号文
+	暗号アルゴリズムは、ＡＥＳ暗号（アメリカ合衆国政府の公認暗号）、
+	暗号利用モードは、ＣＢＣ（連鎖モード）で、暗号・復号処理を行います。
 
 
 
-(2) 暗号鍵ファイル・フォーマット（*.key）
+(2) 暗号文ファイル・フォーマット（*.p7）
 ────────────────────────────
-0x0000-0000 ～			char[]		暗号鍵
-
-※ファイルサイズにより、暗号鍵のbit長を識別している。
-
-	16[Byte]　…　AES-128
-	24[Byte]　…　AES-192
-	32[Byte]　…　AES-256
+PKCS#7形式の、暗号化データ(Encrypted-data)タイプです。
+別途、"RFC.5652"を参照願います。
 
 
 
-(3) 暗号シーケンス
+(3) 暗号鍵ファイル・フォーマット（*.key）
 ────────────────────────────
+PKCS#8形式です。
+別途、"RFC.5208"を参照願います。
 
+
+
+(4) 暗号シーケンス
+────────────────────────────
 電源Onからの経過クロック数を取得。（"rdtsc"命令にて）
-平文ファイルを読み込み
+平文ファイルを読み込み。
 電源Onからの経過クロック数を取得。（"rdtsc"命令にて）
 上の経過クロック数を種として、乱数作成。（Mersenne Twister）
 IVを乱数より生成。
 暗号鍵ファイルが指定されなかった場合は、暗号鍵を乱数より生成。
-暗号化実施
+暗号化実施。同時に平文ファイルのSHA-256ハッシュ値計算。
+平文ファイルのSHA-256ハッシュ値計算を暗号。
 
 --- 乱数について ---
 電源On時からの経過クロック数を乱数の種とする事で、自然乱数に近い乱数が
 得られるものと推測する。また、平文ファイルの読み込み後にもクロック数を
 取得する事で、『物理メディアのアクセス時間』といった乱数が得られており、
 より、自然な乱数になっているものと考える。
+更にSHA-256のハッシュ値化する事で、暗号の強度は上がっていると思われる。
+
+
+
+(5) 復号シーケンス
+────────────────────────────
+暗号ファイルを開き、ヘッダーのチェック。
+暗号鍵を取得（パスワード文字列 or 暗号鍵ファイル）。
+暗号ファイルに記録された初期化ベクトルで、暗号関数を初期化。
+復号実施。同時に平文ファイルのSHA-256ハッシュ値を計算。
+平文ファイルのSHA-256ハッシュ値の計算結果を照合。
+
+
+
+
+
+５．改訂履歴
+━━━━━━━━━━━━
+2011. 4.11
+	・暗号文・暗号鍵ファイルを、RFC勧告に従った形式で出力するようにした。
+	　※このため、過去ヴァージョンとの互換性は無くなりました。
+
+
+
+2011. 1.27
+	・各技術の著作権情報をドキュメントに追加。付け忘れていました。
+	・ＭＴのヘッダーファイルにも、ＢＳＤライセンス条文を書いておいた。
+
+
+
+2011. 1.21
+	・スタティック・ライブラリを使用してコンパイルするようにした。
+	・main()関数を書き直して、SHA-256 ハッシュ値を計算しながらでも、
+	　もう少し、暗号・復号が早くなるようにした。
+
+
+
+2011. 1.19
+	・暗号ファイル内に、元ファイルのSHA-256ハッシュを暗号化して格納し、
+	　復号時に元ファイルと同じハッシュ値であるか照合する仕様にした。
+
+
+
+2011. 1.17
+	・乱数生成について、擬似乱数"Mersenne Twister"によって得た値から、
+	　更に"SHA-256"によりハッシュ値化するようにした。
+	　暗号鍵自動生成時の暗号鍵及び、初期ベクトルIVは、この値を使用します。
+	・オプションで、暗号鍵に文字列を指定できるようにした。
+	・平文のSHA-256ハッシュを出力するようにした。
+
+
+
+2011. 1.13
+	・初版。
+	　暗号鍵自動生成の暗号鍵及び、初期ベクトルIVは、
+	　擬似乱数"Mersenne Twister"を使用の為、暗号の強度は若干弱い事が想定される。
+
+
+
+
+
+６．おまけ？
+━━━━━━━━━━━━
+暗号強度は、たぶん、それなりに強い物になっていると思います。
+とりあえずは、以下のような事をしています。
+
+・暗号利用モードは、ＣＢＣモードを仕様し、
+　初期化ベクトル(IV)は、毎回、擬似乱数で生成し更にSHA-256を通した物を使用
+　　→　暗号文が毎回異なるので、解読はしにくいはず。
+
+・本当は、平文のSHA-256 ハッシュ値も保存するべきでは無いのだろうが、
+　正確に復号できたか解らないだろうので、デフォルトは入れる使用にした。
+　復号した後でないと、暗号鍵が合っていたかどうか解らない仕様です。
+　（保存しない事も可能ですが、復号結果は照合できなくなります。）
+　（暗号鍵のハッシュ値は保存していません。）
+
+
+
+元々は、所属楽団ホームページにある、お問い合せフォームや、
+練習見学申し込みの入力フォーム内容に、個人情報が含まれる為、
+それを暗号化しようと思い、暗号の勉強の為に、作ってみたプログラムです。
+
+結局、Perlで書くのが嫌になりＣ言語＋アセンブリ言語で書いたのですが…。
+PerlからＣ言語を呼ぶ方法が良く解らない為、結局使わず、
+独自の暗号化にしてしまいました…。
+サーバーが、Core DuoなんでSSE2命令使えるのに、勿体無い。
+
+結局、暗号化ソフトを作っても、暗号文への攻撃法の知識は
+あまり付かなかったので、暗号文攻撃法の勉強もしてみたいものだ。
+
+
+
+
+
+７．著作権
+━━━━━━━━━━━━
+
+Copyright (c) A.Watanabe (2011), All Rights Reserved
+
+●連絡先
+・E-mail	sha_w@nifty.com
+・URL		http://homepage1.nifty.com/~sha_w/
+・mixi		http://mixi.jp/show_profile.pl?id=16558
+
+
+
+●ＡＥＳ
+────────
+Joan Daemen博士, Vincent Rijmen博士
+
+
+●ＳＨＡ
+────────
+アメリカ国家安全保障局（NSA）
+
+
+●Mersenne Twister
+────────
+Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura, All rights reserved.
+松本眞教授　西村拓士助手
+
+
+   A C-program for MT19937, with initialization improved 2002/1/26.
+   Coded by Takuji Nishimura and Makoto Matsumoto.
+
+   Before using, initialize the state by using init_genrand(seed)  
+   or init_by_array(init_key, key_length).
+
+   Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+   All rights reserved.                          
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+
+     3. The names of its contributors may not be used to endorse or promote 
+        products derived from this software without specific prior written 
+        permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+   Any feedback is very welcome.
+   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+   email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 

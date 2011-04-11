@@ -12,6 +12,18 @@
 FileInput::FileInput(void)
 {
 }
+//==============================================================
+//		デストラクタ
+//--------------------------------------------------------------
+//	●引数
+//				無し
+//	●返値
+//				無し
+//==============================================================
+FileInput::FileInput(const char*	strFileName)
+{
+	fileopen(strFileName);
+}
 
 //==============================================================
 //		デストラクタ
@@ -78,10 +90,11 @@ unsigned	__int16	FileInput::i16Read(){
 unsigned	int	FileInput::GetSize(){
 
 	unsigned	int	iData;
+	unsigned	int	iDataT = tellg();
 
-	seekg(0,ios::end);
+	seekg(0		,ios::end);
 	iData = tellg();
-	seekg(0,ios::beg);
+	seekg(iDataT,ios::beg);
 
 	return(iData);
 };
