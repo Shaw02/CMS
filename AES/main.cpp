@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 
+//暗号処理用バッファ
+#define	AES_Buff_Block	(2048/AES_BlockSize)		//128*16 = 2048
+
 //==============================================================
 //			16進数 数値表示
 //--------------------------------------------------------------
@@ -12,14 +15,11 @@
 //	●返値
 //			無し
 //==============================================================
-void	errPrint(const char *strFile, const char *strMSG){
-
+void	errPrint(const char *strFile, const char *strMSG)
+{
 	cout	<<	strFile	<<	strMSG	<<	endl;
-
 	exit(EXIT_FAILURE);
 }
-
-
 //==============================================================
 //			16進数 数値表示
 //--------------------------------------------------------------
@@ -29,10 +29,10 @@ void	errPrint(const char *strFile, const char *strMSG){
 //	●返値
 //			無し
 //==============================================================
-void	dataPrint(int n, void *Data){
-
-	unsigned char* cData = (unsigned char*)Data;
-	int	i=0;
+void	dataPrint(int n, void *Data)
+{
+	unsigned	char*	cData	= (unsigned char*)Data;
+				int		i		= 0;
 
 	cout	<<	setfill('0')	<<	hex;
 	while(i<n){
@@ -50,10 +50,10 @@ void	dataPrint(int n, void *Data){
 //	●返値
 //			無し
 //==============================================================
-void	dataPrint32(int n, void *Data){
-
-	unsigned int* cData = (unsigned int*)Data;
-	int	i=0;
+void	dataPrint32(int n, void *Data)
+{
+	unsigned	int*	cData	= (unsigned int*)Data;
+				int		i		= 0;
 
 	cout	<<	setfill('0')	<<	hex;
 	while(i<n){
@@ -69,7 +69,7 @@ void	dataPrint32(int n, void *Data){
 //	●引数
 //			無し
 //	●返値
-//			無し
+//			__int64		プロセス時間
 //==============================================================
 __int64	ReadTSC()
 {
@@ -79,10 +79,10 @@ __int64	ReadTSC()
 	}
 }
 //==============================================================
-//			main routine
+//			暗号処理ルーチン
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			OPSW* cOpsw	オプションスイッチ
 //	●返値
 //			無し
 //==============================================================
@@ -95,7 +95,7 @@ void	encrypt(OPSW* cOpsw)
 	//変数
 	unsigned	__int64	cycles = ReadTSC();		//プログラム起動時のクロック数
 
-	unsigned	int		i;						//カウント用
+	unsigned	int		i,n;					//カウント用
 	unsigned	int		ptPadding;
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;
@@ -116,11 +116,10 @@ union {
 	unsigned	__int64	i64[2];
 } __declspec(align(16)) randSeed;				//乱数の種
 
-//暗号処理用バッファ（パディング用に16Byte余分に。）
 union {
-	unsigned	char	c[	(AES_BlockSize*2)];
-				__m128i	xmm[(AES_BlockSize*2/sizeof(__m128i))];
-} __declspec(align(16)) cBuff;
+	unsigned	char	c[	(AES_BlockSize*AES_Buff_Block)];
+				__m128i	xmm[(AES_BlockSize*AES_Buff_Block/sizeof(__m128i))];
+} static __declspec(align(16)) cBuff;
 
 		SHA256*				cSHA	= new	SHA256();				//SHAハッシュ
 		MT_SHA*				cMT;									//MT乱数
@@ -133,27 +132,27 @@ union{
 		PKCS8_Output*		o;		//出力	
 } f_KEY;
 
+	//==========================
+	//処理開始
 	cout	<<	"Now enciphering..."	<<	endl;
 
 	//------------------
-	//乱数から、IV(Init vector)を生成
+	//乱数を初期化
 	//（ファイル読み込みにかかった時間が、乱数の種）
-
 	randSeed.i64[0] = cycles;
 	randSeed.i64[1] = ReadTSC();
-	cMT	=	new MT_SHA((unsigned long *)randSeed.i, sizeof(randSeed)/sizeof(int), cSHA);		//MT乱数処理
+	cMT	= new MT_SHA((unsigned long *)randSeed.i, sizeof(randSeed)/sizeof(int), cSHA);		//MT乱数処理
 
 	//------------------
-	//PKCS#7-6 の構造を作成
-	IV = cMT->get__m128i();		//128bitを、初期ベクトルIVにする
-	cAESmode = cOpsw->iMode;
-//	cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
+	//乱数から、IV(Init vector)を生成
+	IV	= cMT->get__m128i();		//128bitを、初期ベクトルIVにする
 
 	//------------------
 	//鍵の準備
+	cAESmode = cOpsw->iMode;
 
-	//鍵ファイル指定？
 	if(cAESmode == -1){
+		//鍵ファイル指定？
 		f_KEY.i = new PKCS8_Input(cOpsw->strKEYname.c_str());
 		f_KEY.i->Get_PrivateKeyInfo();
 		cAESmode = cAES.Check_OID(&f_KEY.i->Algorithm);
@@ -163,22 +162,24 @@ union{
 		delete f_KEY.i;
 	} else {
 		cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
-		//鍵は乱数より自動生成
 		if(cOpsw->strKeyWord.empty()==true){
+			//鍵は乱数より自動生成
 			cMT->get256(&Key.c);
 			f_KEY.o = new PKCS8_Output(cOpsw->strKEYname.c_str());
 			f_KEY.o->Set(&cAES, (char *)Key.c, (cAES.Nk*4));
 			f_KEY.o->encodeBER_to_File();
 			f_KEY.o->close();
 			delete f_KEY.o;
-		//キーワードがある場合。
 		} else {
+			//キーワードがある場合。
 			//文字列のハッシュ値を、暗号鍵用の配列変数に入れる。
 			cSHA->CalcHash(Key.c, (void *)cOpsw->strKeyWord.c_str(), cOpsw->strKeyWord.length());
 		}
 	}
 
-	delete	cMT;				//乱数は、もう使わない。
+	//乱数は、もう使わない。
+	delete	cMT;
+	delete	cSHA;
 
 	//------------------
 	//暗号鍵を設定
@@ -188,38 +189,57 @@ union{
 
 	//------------------
 	//PKCS#7-6 の構造をファイル出力
-	i = f_IN->GetSize();		//平文のファイルサイズ
+	i = f_IN->GetSize();			//平文のファイルサイズ
 	f_OUT->Set_EncryptedData(_contentType, &cAES, (i & -16) + 16);
 	f_OUT->write_header();
+
+	delete	_contentType;		//ファイルに出力したので、もういらない。
 
 	//------------------
 	//変換
 	do{
+		//高速化の為、ある程度読み込んで、一気に暗号処理をする。
+		f_IN->read((char *)cBuff.c, AES_BlockSize * AES_Buff_Block);
 
-		f_IN->read((char *)cBuff.c, AES_BlockSize);
+		if(i > AES_BlockSize * AES_Buff_Block){
+			n = 0;
+			while(n < AES_Buff_Block){
+				cAES.encrypt(&cBuff.xmm[n]);
+				n++;
+			}
+			f_OUT->write((char *)cBuff.c, AES_BlockSize * AES_Buff_Block);
+			i -= AES_BlockSize * AES_Buff_Block;
 
-		if(i > AES_BlockSize){
-			cAES.encrypt(&cBuff.xmm[0]);
-			f_OUT->write((char *)cBuff.c, AES_BlockSize);
-			i -= AES_BlockSize;
 		} else {
+			n = 0;
+			while(i >= AES_BlockSize){
+				cAES.encrypt(&cBuff.xmm[n]);
+				n++;
+				i -= AES_BlockSize;
+			}
+
 			//Padding処理(PKCS#7)を実施
+			if(n >= AES_Buff_Block){
+				f_OUT->write((char *)cBuff.c, AES_BlockSize * AES_Buff_Block);			
+				n = 0;
+				f_IN->read((char *)cBuff.c, AES_BlockSize * 1);
+			}
+	
 			ptPadding	= i;
-			cPadData	= AES_BlockSize - (i & 0x0F);
+			cPadData	= AES_BlockSize - i;
 			cntPadData	= cPadData;
 			do{
-				cBuff.c[ptPadding] = cPadData;
+				cBuff.c[n * AES_BlockSize + ptPadding] = cPadData;
 				ptPadding++;
 				cntPadData--;
 			} while(cntPadData>0);
-
-			cAES.encrypt(&cBuff.xmm[0]);
-			f_OUT->write((char *)&cBuff.xmm[0], AES_BlockSize);
 			if(i == AES_BlockSize){
-				//Paddingが次のblockにある場合
-				cAES.encrypt(&cBuff.xmm[1]);
-				f_OUT->write((char *)&cBuff.xmm[1], AES_BlockSize);
+				cAES.encrypt(&cBuff.xmm[n]);
+				n++;
 			}
+			cAES.encrypt(&cBuff.xmm[n]);
+			n++;
+			f_OUT->write((char *)&cBuff.xmm[0], n * AES_BlockSize);
 			break;
 		}
 
@@ -230,22 +250,20 @@ union{
 
 	delete	f_IN;
 	delete	f_OUT;
-	delete	cSHA;
 	
-	delete	_contentType;
 }
 //==============================================================
-//			main routine
+//			復号処理ルーチン
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			OPSW* cOpsw	オプションスイッチ
 //	●返値
 //			無し
 //==============================================================
 void	decrypt(OPSW* cOpsw)
 {
 
-	unsigned	int		i;						//カウント用
+	unsigned	int		i,n;					//カウント用
 	unsigned	int		ptPadding;
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;
@@ -253,19 +271,17 @@ void	decrypt(OPSW* cOpsw)
 				int		cAESmode;				//暗号利用モード
 	__m128i				IV;						//init vector
 
-	bool	fStruct;							//ASN.1 構文解析用
-
 //暗号鍵
 union {
 		unsigned	char	c[32];
 					__m128i	xmm[2];
 } __declspec(align(16)) Key;					//暗号鍵
 
-//暗号処理用バッファ（パディング用に16Byte余分に。）
+//暗号処理用バッファ
 union {
-	unsigned	char	c[	(AES_BlockSize*2)];
-				__m128i	xmm[(AES_BlockSize*2/sizeof(__m128i))];
-} __declspec(align(16)) cBuff;
+	unsigned	char	c[	(AES_BlockSize*AES_Buff_Block)];
+				__m128i	xmm[(AES_BlockSize*AES_Buff_Block/sizeof(__m128i))];
+} static __declspec(align(16)) cBuff;
 
 		SHA256*	cSHA	= new	SHA256();				//SHAハッシュ
 static	AES		cAES;									//AES暗号処理
@@ -278,6 +294,8 @@ union{
 	PKCS8_Output*		o;		//出力	
 } f_KEY;
 
+	//==========================
+	//処理開始
 	cout	<<	"Now deciphering..."	<<	endl;
 
 	//------------------
@@ -292,12 +310,9 @@ union{
 		errPrint(cOpsw->strAESname.c_str(),": Unknown encryption algorithm.");
 	}
 	f_IN->StreamPointerMove_AlgorithmPara();
-	if(sizeof(IV) != f_IN->read_TAG_with_Check(BER_Class_General, BER_TAG_OCTET_STRING, &fStruct)){
+	if(sizeof(IV) != f_IN->read_TAG_with_Check(BER_Class_General, false, BER_TAG_OCTET_STRING)){
 		errPrint(cOpsw->strAESname.c_str(),": Initialize Vector(IV) is not found.");
 	};
-	if(fStruct != false){
-		f_IN->error(0);
-	}
 	f_IN->read((char *)&IV, sizeof(IV));
 
 	cAES.Set_AES(cAESmode, IV);			//暗号利用モード, 初期化ベクタIV を、設定
@@ -316,6 +331,8 @@ union{
 		cSHA->CalcHash(Key.c, (void *)cOpsw->strKeyWord.c_str(), cOpsw->strKeyWord.length());
 	}
 
+	//もう使わない。
+	delete	cSHA;
 
 	//------------------
 	//変換
@@ -326,14 +343,28 @@ union{
 
 	i = f_IN->szEncryptedContent;
 	do {
-		f_IN->read((char *)cBuff.c, AES_BlockSize);
-		cAES.decrypt(&cBuff.xmm[0]);
-		i -= AES_BlockSize;
-		if(i >= AES_BlockSize){
-			f_OUT->write((char *)cBuff.c, AES_BlockSize);
+		//高速化の為、ある程度読み込んで、一気に暗号処理をする。
+		f_IN->read((char *)cBuff.c, AES_BlockSize * AES_Buff_Block);
+
+		if(i > AES_BlockSize * AES_Buff_Block){
+			n = 0;
+			while(n < AES_Buff_Block){
+				cAES.decrypt(&cBuff.xmm[n]);
+				n++;
+			}
+			f_OUT->write((char *)cBuff.c, AES_BlockSize * AES_Buff_Block);
+			i -= AES_BlockSize * AES_Buff_Block;
+
 		} else {
+			n = 0;
+			while(i > 0){
+				cAES.decrypt(&cBuff.xmm[n]);
+				n++;
+				i -= AES_BlockSize;
+			}
+
 			//最後のBlockは、Paddingを含む。
-			ptPadding	= AES_BlockSize - 1;
+			ptPadding	= n * AES_BlockSize - 1;
 			cPadData	= cBuff.c[ptPadding];
 			cntPadData	= cPadData;
 			//Paddingのチェック
@@ -345,7 +376,7 @@ union{
 				cntPadData--;
 			} while(cntPadData>0);
 			//Paddingデータに基づいてファイル出力
-			f_OUT->write((char *)cBuff.c, AES_BlockSize - cPadData);
+			f_OUT->write((char *)cBuff.c, n * AES_BlockSize - cPadData);
 			break;
 		}
 	} while(1);
@@ -356,7 +387,6 @@ union{
 
 	delete	f_IN;
 	delete	f_OUT;
-	delete	cSHA;
 }
 //==============================================================
 //			main routine

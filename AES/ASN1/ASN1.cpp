@@ -82,7 +82,7 @@ void	ASN1::error(unsigned int iEer)
 //==============================================================
 void	ASN1::encodeBER_TAG(unsigned char cClass, bool fStruct,unsigned int iTag, unsigned int iSize)
 {
-	unsigned	char	cTag = ((fStruct&0x01)<<5) | (cClass<<6);
+	const	unsigned	char	cTag = ((fStruct&0x01)<<5) | (cClass<<6);
 
 	if(iTag <= 30){
 		strBER.assign(1,cTag | iTag);
@@ -197,7 +197,6 @@ void	ASN1::encodeBER_Constructed(unsigned char cClass, unsigned int iTag)
 		szAddValue += Constructed[i]->Get_ExternalDataSize();	//追加データが有るか？
 		strSEQ.append(Constructed[i]->Get_BERcode(), Constructed[i]->Get_BERsize());
 		i++;
-		//■■■ to do 途中に外部データが来ても大丈夫なような設計へ。 	
 		if(i < Constructed.size()){
 			if(szAddValue != 0){
 				error(1);

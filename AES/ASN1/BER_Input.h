@@ -16,7 +16,7 @@ public:
 unsigned	int		read_uint(int iSize);
 unsigned	int		read_variable(void);
 			void	read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* iTag);
-unsigned	int		read_TAG_with_Check(unsigned char cClass, unsigned int iTag, bool* fStruct);
+unsigned	int		read_TAG_with_Check(unsigned char cClass, bool fStruct, unsigned int iTag);
 
 unsigned	int		read_Integer(Integer* i);
 unsigned	int		read_Object_Identifier(ObjectIdentifier* oid);

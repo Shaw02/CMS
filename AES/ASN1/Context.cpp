@@ -38,7 +38,6 @@ Context::~Context(void)
 void	Context::encodeBER()
 {
 	unsigned	int		i		= 0;
-//	unsigned	int		iSize	= 0;
 	string				strContext;
 
 	//両方のデータがある場合。

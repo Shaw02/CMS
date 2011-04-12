@@ -139,22 +139,23 @@ void	BER_Input::read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* iTa
 //==============================================================
 //		タグ読み込み
 //--------------------------------------------------------------
-//	●引数
+//	●引数		（チェック用）
 //				cClass		クラス
+//				fStruct		構造化フラグ
 //				iTag		タグ
-//				*fStruct	戻り値用のポインタ	構造化フラグ
 //	●返値
 //				サイズ
 //==============================================================
-unsigned	int	BER_Input::read_TAG_with_Check(unsigned char cClass, unsigned int iTag, bool* fStruct)
+unsigned	int	BER_Input::read_TAG_with_Check(unsigned char cClass, bool fStruct, unsigned int iTag)
 {
 	unsigned	int		read_tag;
 	unsigned	char	read_class;
+				bool	read_fStruct;
 	unsigned	int		iSize;
 
-	read_TAG(&read_class, fStruct, &read_tag);
+	read_TAG(&read_class, &read_fStruct, &read_tag);
 
-	if((read_class != cClass)||(read_tag != iTag)){
+	if((read_class != cClass)||(read_tag != iTag)||(fStruct != read_fStruct)){
 		DecodeError(0);
 	}
 
@@ -175,13 +176,8 @@ unsigned	int	BER_Input::read_TAG_with_Check(unsigned char cClass, unsigned int i
 //==============================================================
 unsigned int	BER_Input::read_Integer(Integer* i)
 {
-	int		iSize;
-	bool	fStruct;
+	const	int		iSize	= read_TAG_with_Check(BER_Class_General, false, BER_TAG_INTEGER);
 
-	iSize = read_TAG_with_Check(BER_Class_General, BER_TAG_INTEGER, &fStruct);
-	if(fStruct){
-		DecodeError(0);
-	}
 	i->Set(read_int(iSize));
 
 	return(iSize);
@@ -196,20 +192,12 @@ unsigned int	BER_Input::read_Integer(Integer* i)
 //==============================================================
 unsigned int	BER_Input::read_Object_Identifier(ObjectIdentifier* oid)
 {
-	int		iSize;
-	int		ptPos;
-	int		n;
-	bool	fStruct;
+		const		int		iSize	= read_TAG_with_Check(BER_Class_General, false, BER_TAG_OBJECT_IDENTIFIER);
+		const		int		ptPos	= iSize + tellg();
+		const		int		n		= read_variable();
 	vector<unsigned int>	iData;
 
-	iSize = read_TAG_with_Check(BER_Class_General, BER_TAG_OBJECT_IDENTIFIER, &fStruct);
-	if(fStruct){
-		DecodeError(0);
-	}
-	
 	//OID読み込み
-	ptPos = iSize + tellg();
-	n = read_variable();
 	iData.push_back(n / 40);
 	iData.push_back(n % 40);
 	while(ptPos > tellg()){
@@ -236,9 +224,8 @@ unsigned int	BER_Input::read_Object_Identifier_with_Check(
 					unsigned	int		szData
 				)
 {
-				int	iSize = read_Object_Identifier(oid);
-
-	unsigned	int	i = 0;
+		const	int	iSize	= read_Object_Identifier(oid);
+	unsigned	int	i		= 0;
 
 	if(oid->iValue.size() != szData){
 		DecodeError(0);
@@ -263,13 +250,5 @@ unsigned int	BER_Input::read_Object_Identifier_with_Check(
 //==============================================================
 unsigned int	BER_Input::read_Octet_Strings(void)
 {
-	int		iSize;
-	bool	fStruct;
-
-	iSize = read_TAG_with_Check(BER_Class_General, BER_TAG_OCTET_STRING, &fStruct);
-	if(fStruct){
-		DecodeError(0);
-	}
-
-	return(iSize);
+	return(read_TAG_with_Check(BER_Class_General, false, BER_TAG_OCTET_STRING));
 }

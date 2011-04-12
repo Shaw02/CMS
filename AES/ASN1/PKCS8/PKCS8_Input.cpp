@@ -36,16 +36,11 @@ PKCS8_Input::~PKCS8_Input(void)
 //==============================================================
 void	PKCS8_Input::Get_PrivateKeyInfo()
 {
-			unsigned	int		szAlgorithm;
-			unsigned	int		ptAlgorithm;
-
-						bool	fStruct;
+	unsigned	int		szAlgorithm;
+	unsigned	int		ptAlgorithm;
 
 	//SEQUENCE
-	read_TAG_with_Check(BER_Class_General, BER_TAG_SEQUENCE, &fStruct);
-	if(fStruct != true){
-		DecodeError(0);
-	}
+	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 
  		//version                   Version,
 		read_Integer(&version);
@@ -54,11 +49,8 @@ void	PKCS8_Input::Get_PrivateKeyInfo()
 		}
 
 		//privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
-		szAlgorithm	= read_TAG_with_Check(BER_Class_General, BER_TAG_SEQUENCE, &fStruct);
+		szAlgorithm	= read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 		ptAlgorithm	= tellg();
-		if(fStruct != true){
-			error(0);
-		}
 		read_Object_Identifier(&Algorithm);		//OID‚¾‚¯“Ç‚Þ
 		StreamPointerMove(ptAlgorithm + szAlgorithm);
 

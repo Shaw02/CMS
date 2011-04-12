@@ -35,16 +35,11 @@ PKCS7_6_Input::~PKCS7_6_Input(void)
 //==============================================================
 unsigned	int		PKCS7_6_Input::Get_EncryptedData(void)
 {
-				bool	fStruct;
-
 	//ContentInfo
 	Get_ContentInfo(EncryptedData_type);
 
 		//EnvelopedData
-		read_TAG_with_Check(BER_Class_General, BER_TAG_SEQUENCE, &fStruct);
-		if(fStruct != true){
-			error(0);
-		}
+		read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 
 			//version
 			read_Integer(&encrypted_data.version);
@@ -54,31 +49,22 @@ unsigned	int		PKCS7_6_Input::Get_EncryptedData(void)
 			encrypted_data.Set_Construct(&encrypted_data.version);
 
 			//encryptedContentInfo
-			read_TAG_with_Check(BER_Class_General, BER_TAG_SEQUENCE, &fStruct);
-			if(fStruct != true){
-				error(0);
-			}
+			read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 
 				//contentType 
 				read_Object_Identifier(&contentType);
 				encrypted_data.encryptedContentInfo.Set_Construct(&contentType);
 
 				//EncryptionAlgorithm
-				szAlgorithm	= read_TAG_with_Check(BER_Class_General, BER_TAG_SEQUENCE, &fStruct);
+				szAlgorithm	= read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 				ptAlgorithm	= tellg();
-				if(fStruct != true){
-					error(0);
-				}
 				read_Object_Identifier(&Algorithm);
 				ptAlgorithmPara	= tellg();
 				StreamPointerMove(ptAlgorithm + szAlgorithm);
 
 				//ここに入っているのが、暗号文実体のサイズ
-				szEncryptedContent = read_TAG_with_Check(BER_Class_Context, 0, &fStruct);
+				szEncryptedContent = read_TAG_with_Check(BER_Class_Context, false, 0);
 				ptEncryptedContent	= tellg();
-				if(fStruct != false){
-					error(0);
-				}
 
 		//------
 		//処理

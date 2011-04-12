@@ -47,7 +47,6 @@ void	Integer::encodeBER()
 //	Åúï‘íl
 //			ñ≥Çµ
 //==============================================================
-
 void	Integer::Set(int i)
 {
 	iValue = i;
