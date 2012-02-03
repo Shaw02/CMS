@@ -7,6 +7,12 @@
 本ドキュメントは、TAB=8 で記述されます。
 
 
+Version	1.90				2012.
+	・PKCS#7のEnveloped-Data Typeに対応させた。
+	（今までは、Encrypted-Data Typeを出力していました。）
+	・デフォルトは、よりセキュリティー性の高いEnveloped-Data Typeを出力します。
+
+
 
 Version 1.00				2011. 4.12
 	・暗号文・暗号鍵ファイルを、RFC勧告に従った形式で出力するようにした。
