@@ -149,6 +149,9 @@ void	PKCS7_6_Output::Set_Encryption(
 			unsigned	int		mode)
 {
 	unsigned	char*	_CEK;
+	unsigned	int*	iCEK;
+	unsigned	int		i = 0;
+	unsigned	int		n;
 
 	//------------------
 	//暗号モジュールの取得
@@ -157,7 +160,14 @@ void	PKCS7_6_Output::Set_Encryption(
 	//------------------
 	//Password文字列のハッシュ値を、暗号鍵にする。
 	_CEK	= new unsigned char [(cCE->szKey<32)?32:cCE->szKey];
+	iCEK	= (unsigned	int*)_CEK;
 	cSHA256.CalcHash(_CEK, (void *)strPassword->c_str(), strPassword->length());
+	while(i<8){
+		n = iCEK[i];
+		iCEK[i] = ((n>>24) & 0xFF) | ((n>>8) & 0xFF00) | ((n & 0xFF00)<<8) | ((n & 0xFF)<<24);
+		i++;
+	}
+
 	CEK.Set((char *)_CEK, cCE->szKey);
 	delete	_CEK;
 

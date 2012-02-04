@@ -78,10 +78,20 @@ void	PKCS7_6_Input::Set_Encryption(
 {
 	Encryption*			cCE		= encrypted_data.encryptedContentInfo.contentEncryptionAlgorithm;
 	unsigned	char*	_CEK	= new unsigned char [cCE->szKey];
+	unsigned	int*	iCEK	= (unsigned	int*)_CEK;
+	unsigned	int		i = 0;
+	unsigned	int		n;
 
 	//------------------
 	//Password文字列のハッシュ値を、暗号鍵にする。
 	cSHA256.CalcHash(_CEK, (void *)strPassword->c_str(), strPassword->length());
+
+	while(i<8){
+		n = iCEK[i];
+		iCEK[i] = ((n>>24) & 0xFF) | ((n>>8) & 0xFF00) | ((n & 0xFF00)<<8) | ((n & 0xFF)<<24);
+		i++;
+	}
+
 	CEK.Set((char *)_CEK, cCE->szKey);
 	delete	_CEK;
 

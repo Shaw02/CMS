@@ -1,0 +1,258 @@
+================================================================
+
+	ACMS(PKCS#7)対応暗号・復号処理ソフトウェア　マニュアル
+
+================================================================
+
+本ドキュメントは、TAB=8 で記述されます。
+
+
+
+１．特徴
+━━━━━━━━━━━━
+(1) 暗号メッセージ構文(Cryptographic Message Syntax:CMS)（RFC.5652）に準拠しています。
+　　（※拡張子は標準化されていない為、独自拡張子です。）
+　　【暗号文ファイル（*.p7）】
+	PKCS#7 Cryptographic Message Syntax (CMS)
+	・Enveloped-data Type
+	・Encrypted-data Type
+　　【暗号鍵ファイル（*.key）】
+	PKCS#8 Public-Key Cryptography Standards
+	Private-Key Information Syntax Specification Version 1.2
+	※対称鍵における秘密鍵用の規格ですが、共通鍵を格納しています。
+
+
+(2) SSE2(SIMD)命令を用いて、高速に暗号・復号処理を行います。
+　　（※DES暗号はSIMD化されていません。）
+
+
+(3) アセンブリ言語・Ｃ言語によるソースファイル及び、
+　　Visual C++.net 2008 Express Editionのプロジェクトファイル付属。
+
+　　尚、本クラスや、ソースコードの流用をする際は、ご一報ください。
+　　又、本クラスや、ソースコードの利用により発生したいかなる損害に
+　　つきましては法律が許容する最大限において責任を負いませんので、
+　　使用者の責任の元、ご利用頂ければ幸いです。
+
+
+
+
+
+２．使い方
+━━━━━━━━━━━━
+ＣＵＩ（コマンドライン・ユーザー・インターフェイス）アプリケーションです。
+以下の通り、コマンドラインに打ち込んでください。
+
+CMS [filename.ext] [/option]
+
+《オプション解説》
+　filename.ext	…　復号するファイル名(拡張子".p7"は省いてください)
+		　　もしくは、暗号化したいファイル名を指定します。
+
+[/option]	…　オプションです。
+
+	/D	復号処理をします。　(Default)
+	/E	暗号処理をします。
+
+	/T(n)	出力のファイル形式を指定します。
+		　3 : Enveloped-data Type　(Default)
+		　　　　↑セキュリティ性確保の為、なるべくこちらをお使いください。
+		　6 : Encrypted-data Type
+		　　　　↑過去バージョン（AES Ver,1.00）の出力形式です。
+
+	/M(n)	使用する暗号アルゴリズムを指定します。
+		　1 …　DES-CBC
+		　2 …　DES-3EDE-CBC
+		　3 …　AES-CBC 128bit
+		　4 …　AES-CBC 192bit
+		　5 …　AES-CBC 256bit　(Default)
+
+	/W(s)	パスワードを指定します。
+		・Enveloped-data Typeを出力する（/T3を指定）時は、
+		　必ずパスワードを設定してください。
+		・Encrypted-data Typeを出力する（/T6を指定）時に
+		　設定しなかった場合は、暗号鍵は疑似乱数で作成し、
+		　暗号鍵ファイル"filename.ext.key"に鍵を保存します。
+
+	/Fk(s)	暗号鍵ファイルを指定します。
+		このオプションを使用時は、必ず、Encrypted-data Type
+		（オプションで/T6）を指定してください。
+		暗号／復号時に、指定されたファイルを暗号鍵にします。
+
+
+
+【使用例】
+
+(1) パスワードを用いて暗号化する。
+────────────────────────────
+CMS [filename.ext] /E /W[password]
+
+とコマンドラインに打ち込む事で、以下のファイルを生成します。
+尚、暗号鍵に使用する文字列は、256bit相当の情報量がある方が良いかと思います。
+
+　filename.ext.p7	…　暗号文ファイル（PKCS#7形式）
+
+
+(2) パスワードを用いて復号する。
+────────────────────────────
+CMS [filename.ext] /W[password]
+
+とコマンドラインに打ち込む事で、以下のファイルを用いて復号します。
+　filename.ext.p7	…　暗号文
+
+
+
+(3) パスワードを用いて復号する（過去バージョン(AES Ver,1.00)で作成した暗号化ファイル）。
+────────────────────────────
+CMS [filename.ext] /T6 /W[password]
+
+とコマンドラインに打ち込んでください。
+
+
+
+
+
+３．技術的な解説
+━━━━━━━━━━━━
+【出力形式について】
+(1) PKCS#7 Enveloped-data Type（封筒化タイプ）
+────────────────────────────
+このファイルは、以下の内容が格納されます。
+◆受信者情報（暗号鍵管理手法の情報）
+　　このソフトでは、鍵導出（パスワード）にのみ対応しています。
+　　受信者が「パスワード」の場合は、以下の情報が格納されます。
+　　　・使用する鍵導出アルゴリズム
+　　　・使用する鍵ラップ・アルゴリズム
+　　　・暗号化されたコンテンツ用暗号鍵
+◆送信者情報
+　　通常は、暗号文作成者の公開鍵証明書一覧及び、失効証明書一覧を格納しますが、
+　　このソフトでは、格納していません。
+◆使用した暗号アルゴリズム
+◆暗号文本体
+
+
+暗号処理は、以下の手順で行われます。
+・コンテンツ用暗号鍵を、疑似乱数で作成。
+・受信者情報で指定された方法で、コンテンツ用暗号鍵を暗号化
+・平文を、コンテンツ用暗号鍵で暗号化
+
+
+
+(2) PKCS#7 Encrypted-data Type（暗号化タイプ）
+────────────────────────────
+暗号文の他には、使用した暗号アルゴリズムと、そのパラメータが格納されます。
+指定された鍵をコンテンツ用暗号鍵とします。
+過去ヴァージョン（AES version 1.00）の出力ファイルとの互換性の為に実装しています。
+
+
+
+【暗号アルゴリズムについて】
+(1) DES
+────────────────────────────
+Data Encryption Standard（データ暗号化標準）の略。
+アメリカ合衆国の【旧】国家暗号規格です。
+現在では、10000台のコンピューターを用いれば22時間で解読できた事例があり、
+使用はお勧めしません。政府、軍事においても、使用禁止となりました。
+
+暗号鍵長：56bit
+
+
+
+(2) DES-3EDE
+────────────────────────────
+DESを3回繰り返す暗号です。
+こちらは、非推奨暗号で。
+
+暗号鍵長：168bit
+
+
+
+(3) AES
+────────────────────────────
+AESとは、Advanced Encryption Standardの略。
+アメリカ合衆国の新暗号規格で、2001年に仕様が公開された。
+暗号鍵長を３種類から選択できる。
+暗号鍵長が低い程、高速で処理できるが、セキュリティー性は低下します。
+暗号鍵長が高い程、処理が低速になりますが、セキュリティー性は上がります。
+
+本ソフトウェアでは、暗号処理部はアセンブリ言語にてSIME(SSE2)命令セット
+を使用して記述されているため、従来より高速に処理可能です。
+
+暗号鍵長
+・AES-CBC-128	128bit
+・AES-CBC-192	192bit
+・AES-CBC-256	256bit
+
+
+
+
+
+４．著作権
+━━━━━━━━━━━━
+
+Copyright (c) A.Watanabe (2011 - 2012), All Rights Reserved
+
+●連絡先
+・E-mail	sha_w@nifty.com
+・URL		http://homepage1.nifty.com/~sha_w/
+・mixi		http://mixi.jp/show_profile.pl?id=16558
+
+
+
+●ＡＥＳ
+────────
+Joan Daemen博士, Vincent Rijmen博士
+
+
+●ＳＨＡ
+────────
+アメリカ国家安全保障局（NSA）
+
+
+●Mersenne Twister
+────────
+Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura, All rights reserved.
+松本眞教授　西村拓士助手
+
+
+   A C-program for MT19937, with initialization improved 2002/1/26.
+   Coded by Takuji Nishimura and Makoto Matsumoto.
+
+   Before using, initialize the state by using init_genrand(seed)  
+   or init_by_array(init_key, key_length).
+
+   Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+   All rights reserved.                          
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+     1. Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+
+     2. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+
+     3. The names of its contributors may not be used to endorse or promote 
+        products derived from this software without specific prior written 
+        permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+   Any feedback is very welcome.
+   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+   email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
+
