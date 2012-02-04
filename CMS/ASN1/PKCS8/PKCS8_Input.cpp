@@ -14,7 +14,6 @@ PKCS8_Input::PKCS8_Input(const char*	strFileName,const char _strName[]):
 	PKCS8(_strName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -30,9 +29,9 @@ PKCS8_Input::~PKCS8_Input(void)
 //		ヘッダー構造チェック
 //--------------------------------------------------------------
 //	●引数
-//			unsigned	char	cType	コンテンツタイプ
+//			無し
 //	●返値
-//			unsigned	int				コンテンツのサイズ
+//			無し
 //==============================================================
 void	PKCS8_Input::Get_PrivateKeyInfo()
 {
@@ -60,13 +59,13 @@ void	PKCS8_Input::Get_PrivateKeyInfo()
 		//attributes           [0]  IMPLICIT Attributes OPTIONAL }
 }
 //==============================================================
-//		ヘッダー構造チェック
+//		鍵の取得
 //--------------------------------------------------------------
 //	●引数
 //			unsigned	char*		_key		暗号鍵を格納するポインタ
 //			unsigned	int			_szKey		暗号鍵のサイズ（チェック用）
 //	●返値
-//			unsigned	char*					暗号鍵
+//			無し
 //==============================================================
 void	PKCS8_Input::Get_PrivateKey(
 			unsigned	char*		_key,
@@ -78,14 +77,14 @@ void	PKCS8_Input::Get_PrivateKey(
 	memcpy(_key, privateKey.strValue.c_str(), _szKey);
 }
 //==============================================================
-//		ヘッダー構造チェック
+//		鍵の取得（アルゴリズムのチェック付）
 //--------------------------------------------------------------
 //	●引数
 //			algorithmIdentifier*	_algorithm	暗号アルゴリズム
 //			unsigned	char*		_key		暗号鍵を格納するポインタ
 //			unsigned	int			_szKey		暗号鍵のサイズ（チェック用）
 //	●返値
-//			unsigned	char*					暗号鍵
+//			無し
 //==============================================================
 void	PKCS8_Input::Get_PrivateKey_with_check(
 			AlgorithmIdentifier*	_algorithm,

@@ -13,7 +13,6 @@ PKCS7_6_Input::PKCS7_6_Input(const char*	strFileName):
 	PKCS7_Input(strFileName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -69,9 +68,10 @@ void	PKCS7_6_Input::Set_Encryption(
 //--------------------------------------------------------------
 //	●引数
 //			string*				strPassword		パスワード
-//			unsigned	int		mode			使用するコンテンツ暗号
 //	●返値
+//			無し
 //	●処理
+//			パスワードを暗号鍵にする。
 //==============================================================
 void	PKCS7_6_Input::Set_Encryption(
 			string*				strPassword)
@@ -92,7 +92,7 @@ void	PKCS7_6_Input::Set_Encryption(
 //	●引数
 //			FileOutput*			f_Plain			平文ファイル
 //	●返値
-//			ObjectIdentifier*	_contentType	
+//			無し
 //	●処理
 //			暗号鍵（*.Key）ファイルを暗号鍵にして暗号化
 //==============================================================

@@ -1,12 +1,13 @@
 #include "StdAfx.h"
 #include "PKCS7.h"
 
+
 	//暗号
-	DES_CBC			PKCS7::cDES_CBC;
-	DES_EDE3_CBC	PKCS7::cTDES_CBC;
-	AES_CBC128		PKCS7::cAES_CBC128;		//SIMDを使う関係で、
-	AES_CBC192		PKCS7::cAES_CBC192;		//staticに置く必要あり。
-	AES_CBC256		PKCS7::cAES_CBC256;		//(__declspec(align(16)))
+	__declspec(align(16))	DES_CBC			PKCS7::cDES_CBC;
+	__declspec(align(16))	DES_EDE3_CBC	PKCS7::cTDES_CBC;
+	__declspec(align(16))	AES_CBC128		PKCS7::cAES_CBC128;		//SIMDを使う関係で、
+	__declspec(align(16))	AES_CBC192		PKCS7::cAES_CBC192;		//staticに置く必要あり。
+	__declspec(align(16))	AES_CBC256		PKCS7::cAES_CBC256;		//(__declspec(align(16)))
 
 	//ハッシュ
 	SHA1			PKCS7::cSHA1;			//SHAハッシュ

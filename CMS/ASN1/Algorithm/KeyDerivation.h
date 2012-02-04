@@ -23,6 +23,11 @@ class KeyDerivation :
 	public AlgorithmIdentifier
 {
 //--------------
+//•Ï”
+public:
+			unsigned	int		dkLen;		//
+
+//--------------
 //ŠÖ”
 public:
 	KeyDerivation(const char _strName[]="Key Derivation");

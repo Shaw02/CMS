@@ -16,11 +16,13 @@ public:
 unsigned	int			read_ContentInfo(unsigned int type);
 unsigned	int			read_EnvelopedData(EnvelopedData* _envelopedData);
 unsigned	int			read_EncryptedData(EncryptedData* _encryptedData);
+unsigned	int			read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo);
 
 			void		read_RecipientInfos(RecipientInfos* _recipientInfos);
 			void		read_PasswordRecipientInfo(PasswordRecipientInfo* _passwordRecipientInfo);
-unsigned	int			read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo);
-		Encryption*		read_ContentEncryptionAlgorithm();
 		HMAC*			read_HmacAlgorithm();
+		Encryption*		read_ContentEncryptionAlgorithm();
+		Encryption*		read_KeyWrapAlgorithm(PWRI_KEK* _pwri_kek);
+		Encryption*		read_keyEncryptionAlgorithm();
 		KeyDerivation*	read_KeyDerivationAlgorithm();
 };

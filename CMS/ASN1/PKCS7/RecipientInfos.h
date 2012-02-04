@@ -22,9 +22,10 @@ RecipientInfos ::= SET SIZE (1..MAX) OF RecipientInfo
 
 	//------
 	//鍵導出（パスワード）
+	bool					fPassword;
 	PasswordRecipientInfo	cPassword;			//パスワード
 	PBKDF2*					cPBKDF2;			//	= PBKDF2(&cHMAC);		//
-	PWRI_KEK				cPWRI_KEK;			//
+	PWRI_KEK*				cPWRI_KEK;			//
 
 //--------------
 //関数

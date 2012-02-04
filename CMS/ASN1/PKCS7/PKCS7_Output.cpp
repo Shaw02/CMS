@@ -40,4 +40,3 @@ void	PKCS7_Output::write_header(void)
 	encodeBER();
 	write_BERcode(Get_BERcode(), Get_BERsize());
 }
-

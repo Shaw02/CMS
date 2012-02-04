@@ -26,7 +26,7 @@ PasswordRecipientInfo ::= SEQUENCE {
 	Integer					version;					//cmsVersion
 	KeyDerivation*			keyDerivation;				//※このクラス側で解放する。
 	Context					keyDerivationAlgorithm;
-	Encryption*				keyEncryptionAlgorithm;
+	Encryption*				keyEncryptionAlgorithm;		//※このクラス側で解放する。
 	OctetString				EncryptedKey;				//
 
 //--------------
@@ -37,5 +37,5 @@ PasswordRecipientInfo ::= SEQUENCE {
 				void	SetInfo(KeyDerivation* _keyDerivation, Encryption* keyEncryption);
 
 				void	SetKey(void* ptPassword, unsigned int szPassword, void* Key, unsigned int szKey);
-				void	GetKey(void* ptPassword, unsigned int szPassword, void* Key, unsigned int szKey);
+				int		GetKey(void* ptPassword, unsigned int szPassword, void* Key, unsigned int szKey);
 };

@@ -1,0 +1,79 @@
+================================================================
+
+	参考文献・資料
+
+================================================================
+
+本ドキュメントは、TAB=8 で記述されます。
+
+
+
+■文献
+━━━━━━━━
+(著)尾関 和彦	情報技術のための離散系数学入門（共立出版社）
+
+intel		IA-32 インテル(R) アーキテクチャ　ソフトウェア・デベロッパーズ・マニュアル
+			上巻：基本アーキテクチャ（資料番号253665-013J）
+			中巻A：命令セット・リファレンスA-M （資料番号253666-013J）
+			中巻B：命令セット・リファレンスN-Z （資料番号253667-013J）
+			下巻：システム・プログラミング・ガイド（資料番号253668-013J）
+
+intel		インテル・アーキテクチャ最適化マニュアル
+		資料番号242816J-003
+
+intel		インテル(R) アーキテクチャ最適化
+		資料番号：730795J-001
+
+
+
+■標準類
+━━━━━━━━
+T-REC-X.680	Abstract Syntax Notation One (ASN.1):
+		Specification of basic notation
+
+T-REC-X.690	ASN.1 encoding rules:
+		Specification of Basic Encoding Rules (BER),
+		Canonical Encoding Rules (CER) and
+		Distinguished Encoding Rules (DER)
+
+Fips. 46-3	DATA ENCRYPTION STANDARD (DES)
+
+Fips.180-3	Secure Hash Standard (SHS)
+
+Fips. 197	ADVANCED ENCRYPTION STANDARD (AES)
+
+RFC. 2104	HMAC: Keyed-Hashing for Message Authentication
+
+RFC. 2202	Test Cases for HMAC-MD5 and HMAC-SHA-1
+
+RFC. 2315	PKCS #7: Cryptographic Message Syntax (CMS)
+
+RFC. 2898	PKCS #5: Password-Based Cryptography Specification
+		Version 2.0
+
+RFC. 3211	Password-based Encryption for CMS
+
+RFC. 3370	Cryptographic Message Syntax (CMS) Algorithms
+
+RFC. 3565	Use of the Advanced Encryption Standard (AES) Encryption
+		Algorithm in Cryptographic Message Syntax (CMS)
+
+RFC. 3714	US Secure Hash Algorithm 1 (SHA1)
+
+RFC. 3874	A 224-bit One-way Hash Function: SHA-224
+
+RFC. 4231	Identifiers and Test Vectors for
+		HMAC-SHA-224, HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512
+
+RFC. 4634	US Secure Hash Algorithms (SHA and HMAC-SHA)
+
+RFC. 5208	PKCS #8: Public-Key Cryptography Standards:
+		Private-Key Information Syntax Specification Version 1.2
+
+RFC. 5652	Cryptographic Message Syntax (CMS)
+
+RFC. 5754	Using SHA2 Algorithms with Cryptographic Message Syntax
+
+RFC. 6070	PKCS #5: Password-Based Key Derivation Function 2 (PBKDF2)
+		Test Vectors
+

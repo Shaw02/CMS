@@ -6,6 +6,11 @@
 class FileOutput :
 	public ofstream
 {
+//--------------
+//•Ï”
+
+//--------------
+//ŠÖ”
 public:
 		FileOutput(const char*	strFileName);
 		~FileOutput(void);

@@ -45,7 +45,7 @@ void	PWRI_KEK::Clear_Key()
 {
 	unsigned	i;
 
-	EncryptionAlgorithm->Clear_Key();
+	keyWrapAlgorithm->Clear_Key();
 
 	i = strKey.size();
 	while(i > 0){
@@ -70,7 +70,7 @@ void	PWRI_KEK::Clear_Key()
 //==============================================================
 void	PWRI_KEK::Set_Key(void *key)
 {
-	EncryptionAlgorithm->Set_Key(key);
+	keyWrapAlgorithm->Set_Key(key);
 }
 //==============================================================
 //			Key Wrap
@@ -87,18 +87,18 @@ int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
 	unsigned	char*	cCEK	= (unsigned char*)CEK;
 
 	unsigned	int		szECEK	= szCEK + 4;
-	unsigned	int		szKEB	= EncryptionAlgorithm->szBlock;
+	unsigned	int		szKEB	= keyWrapAlgorithm->szBlock;
 
 	unsigned	int	i,j;
 
-				char*	cBuff0;		//暗号化用のバッファ
-				char*	cBuff;		//暗号化用のバッファ（アライメント）
+	unsigned	char*	cBuff0;		//暗号化用のバッファ
+	unsigned	char*	cBuff;		//暗号化用のバッファ（アライメント）
 
 	//ラップされたコンテンツ用暗号鍵"CEK"のサイズ
 	szECEK  += szKEB - (szECEK % szKEB) - ((szECEK % szKEB)?0:szKEB);
 
 	//暗号用のバッファを確保。アライメントも考慮する。
-	cBuff0	= new char [szECEK + szKEB];
+	cBuff0	= new unsigned char [szECEK + szKEB];
 	cBuff	= cBuff0 + szKEB - ((int)cBuff0 % szKEB) - (((int)cBuff0 % szKEB)?0:szKEB);
 
 	//コンテンツ用暗号鍵"CEK"のSize
@@ -126,12 +126,12 @@ int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
 	}
 
 	//Key Wrap
-	EncryptionAlgorithm->init();
-	EncryptionAlgorithm->encipher(cBuff, szECEK);
-	EncryptionAlgorithm->encipher(cBuff, szECEK);
+	keyWrapAlgorithm->init();
+	keyWrapAlgorithm->encipher(cBuff, szECEK);
+	keyWrapAlgorithm->encipher(cBuff, szECEK);
 
 	strEncrptedKey.resize(szECEK);
-	strEncrptedKey.assign(cBuff, szECEK);
+	strEncrptedKey.assign((char *)cBuff, szECEK);
 
 	delete	cBuff0;
 
@@ -148,46 +148,56 @@ int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
 //==============================================================
 int	PWRI_KEK::KeyUnWrap(void *data,unsigned int szData)
 {
-	unsigned	char*	cData	= (unsigned char*)data;
+//	unsigned	char*	cData	= (unsigned char*)data;
 
 	unsigned	int		szKEK;
-	unsigned	int		szCEK	= EncryptionAlgorithm->szBlock;
+	unsigned	int		szKEB	= keyWrapAlgorithm->szBlock;
 
 	unsigned	int		i;
-	unsigned	int		n		= szData / szCEK;		//ブロック数
-	unsigned	int		ptData	= szData - (szCEK*2);
+	unsigned	int		n		= szData / szKEB;		//ブロック数
+	unsigned	int		ptData	= szData - (szKEB*2);
+
+	unsigned	char*	cBuff0;		//暗号化用のバッファ
+	unsigned	char*	cBuff;		//暗号化用のバッファ（アライメント）
+
+	cBuff0	= new unsigned char [szData + szKEB];
+	cBuff	= cBuff0 + szKEB - ((int)cBuff0 % szKEB) - (((int)cBuff0 % szKEB)?0:szKEB);
+
+	memcpy(cBuff, data, szData);
 
 	//Using the n-1'th ciphertext block as the IV,
-	EncryptionAlgorithm->SetIV(&cData[ptData]);
+	keyWrapAlgorithm->SetIV(&cBuff[ptData]);
 
 	//decrypt the n'th ciphertext block.
-	ptData += szCEK;
-	EncryptionAlgorithm->decrypt(&cData[ptData]);
+	ptData += szKEB;
+	keyWrapAlgorithm->decrypt(&cBuff[ptData]);
 
 	//Using the decrypted n'th ciphertext block as the IV,
-	EncryptionAlgorithm->SetIV(&cData[ptData]);
+	keyWrapAlgorithm->SetIV(&cBuff[ptData]);
 
 	//decrypt the 1st ... n-1'th ciphertext blocks.
-	EncryptionAlgorithm->decipher(data, szData-szCEK);
+	keyWrapAlgorithm->decipher(cBuff, szData-szKEB);
 
 	//Decrypt the inner layer of encryption using the KEK.
-	EncryptionAlgorithm->init();
-	EncryptionAlgorithm->decipher(data, szData);
+	keyWrapAlgorithm->init();
+	keyWrapAlgorithm->decipher(cBuff, szData);
 
 	//Check
-	if(	((cData[1] ^ 0xFF) == cData[4])
-	 &&	((cData[2] ^ 0xFF) == cData[5])
-	 &&	((cData[3] ^ 0xFF) == cData[6])){
-		szKEK = cData[0];
+	if(	((cBuff[1] ^ 0xFF) == cBuff[4])
+	 &&	((cBuff[2] ^ 0xFF) == cBuff[5])
+	 &&	((cBuff[3] ^ 0xFF) == cBuff[6])){
+		szKEK = cBuff[0];
 		strKey.resize(szKEK);
 		i = 0;
 		while(i < szKEK){
-			strKey[i] = cData[4 + i];
+			strKey[i] = cBuff[4 + i];
 			i++;
 		}
 	} else {
 		szKEK = -1;
 	}
+
+	delete	cBuff0;
 
 	return(szKEK);
 }
@@ -204,8 +214,10 @@ void	PWRI_KEK::Set_PWRI_KEK(unsigned int mode, __m128i IV)
 	//ASN.1の定義
 	Set();			//oid
 //	EncryptionAlgorithm = _algorithm;
-	EncryptionAlgorithm	= Get_Encryption(mode,IV);
-	Set_Construct(EncryptionAlgorithm);
+	keyWrapAlgorithm	= Get_Encryption(mode,IV);
+	Set_Construct(keyWrapAlgorithm);
+
+	szKey = keyWrapAlgorithm->szKey;
 }
 //==============================================================
 //				暗号モジュールの取得

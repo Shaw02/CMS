@@ -14,7 +14,6 @@ EncryptedContentInfo::EncryptedContentInfo(const char _strName[]):
 	encryptedContent(0)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -26,7 +25,6 @@ EncryptedContentInfo::EncryptedContentInfo(const char _strName[]):
 EncryptedContentInfo::~EncryptedContentInfo(void)
 {
 }
-
 //==============================================================
 //				オブジェクトの設定
 //--------------------------------------------------------------
@@ -114,7 +112,6 @@ int		EncryptedContentInfo::encrypt(
 //			unsigned char*	CEK			暗号鍵
 //			FileInput*		f_Cipherf	入力ファイル（暗号文）
 //			FileOutput*		f_Plain		出力ファイル（平文）
-//			unsigned int	szContent	サイズ
 //	●返値
 //			int				0			正常
 //							-1			異常

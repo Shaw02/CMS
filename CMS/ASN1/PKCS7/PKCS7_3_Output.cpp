@@ -13,7 +13,6 @@ PKCS7_3_Output::PKCS7_3_Output(const char*	strFileName):
 	PKCS7_Output(strFileName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -25,7 +24,6 @@ PKCS7_3_Output::PKCS7_3_Output(const char*	strFileName):
 PKCS7_3_Output::~PKCS7_3_Output(void)
 {
 }
-
 //==============================================================
 //				オブジェクトの設定
 //--------------------------------------------------------------
@@ -72,7 +70,7 @@ void	PKCS7_3_Output::MakeEncryption(unsigned int		mode)
 
 	//------------------
 	//セッション鍵は乱数より自動生成
-	_CEK	= new unsigned char [cCE->szKey];
+	_CEK	= new unsigned char [(cCE->szKey<32)?32:cCE->szKey];
 	cRandom->get256(_CEK);
 	CEK.Set((char *)_CEK, cCE->szKey);
 	delete	_CEK;

@@ -14,7 +14,6 @@ PKCS7_Input::PKCS7_Input(const char*	strFileName,const char _strName[]):
 	PKCS7(_strName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -53,9 +52,9 @@ unsigned int	PKCS7_Input::read_ContentInfo(unsigned int type)
 //		【ファイル読み込み】EnvelopedData
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			EnvelopedData*	_envelopedData		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
-//			unsigned	int					暗号文のポインタ
+//			unsigned		int					暗号文のポインタ
 //==============================================================
 unsigned	int	PKCS7_Input::read_EnvelopedData(EnvelopedData* _envelopedData)
 {
@@ -89,12 +88,12 @@ unsigned	int	PKCS7_Input::read_EnvelopedData(EnvelopedData* _envelopedData)
 	return(ptEncryptedContent);
 }
 //==============================================================
-//		ヘッダー構造チェック
+//		【ファイル読み込み】EncryptedData
 //--------------------------------------------------------------
 //	●引数
-//			
+//			EncryptedData*	_encryptedData		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
-//			unsigned	int					暗号文のポインタ
+//			unsigned		int					暗号文のポインタ
 //==============================================================
 unsigned	int	PKCS7_Input::read_EncryptedData(EncryptedData* _encryptedData)
 {
@@ -122,10 +121,41 @@ unsigned	int	PKCS7_Input::read_EncryptedData(EncryptedData* _encryptedData)
 	return(ptEncryptedContent);
 }
 //==============================================================
+//		【ファイル読み込み】EncryptedContentInfo
+//--------------------------------------------------------------
+//	●引数
+//			EncryptedContentInfo*	ECinfo	読み込み内容を格納するオブジェクトのポインタ
+//	●返値
+//			unsigned	int					暗号文のポインタ
+//==============================================================
+unsigned	int		PKCS7_Input::read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo)
+{
+	//contentType ContentType,
+	ObjectIdentifier		contentType;					//暗号文のType
+	Encryption*				cCE;
+	unsigned	int			szEncryptedContent;
+
+	//encryptedContentInfo
+	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
+
+		//contentType 
+		read_Object_Identifier(&contentType);
+
+		//contentEncryptionAlgorithm
+		cCE = read_ContentEncryptionAlgorithm();
+
+		//ここに入っているのが、暗号文実体のサイズ
+		szEncryptedContent	= read_TAG_with_Check(BER_Class_Context, false, 0);
+
+	//EncryptedContentInfoを設定
+	ECinfo->Set(&contentType, cCE, szEncryptedContent);
+	return(tellg());
+}
+//==============================================================
 //		【ファイル読み込み】RecipientInfos
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			RecipientInfos*	_recipientInfos		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
 //			無し
 //==============================================================
@@ -165,6 +195,7 @@ void	PKCS7_Input::read_RecipientInfos(RecipientInfos* _recipientInfos)
 				switch(read_tag){
 					//pwri [3] PasswordRecipientinfo
 					case(3):
+						_recipientInfos->fPassword = true;
 						read_PasswordRecipientInfo(&_recipientInfos->cPassword);
 						break;
 					default:
@@ -177,13 +208,14 @@ void	PKCS7_Input::read_RecipientInfos(RecipientInfos* _recipientInfos)
 				break;
 		}
 	}
+
 }
 
 //==============================================================
 //		【ファイル読み込み】PasswordRecipientinfo
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			PasswordRecipientInfo*	_passwordRecipientInfo		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
 //			無し
 //==============================================================
@@ -202,9 +234,7 @@ void	PKCS7_Input::read_PasswordRecipientInfo(PasswordRecipientInfo* _passwordRec
 	_keyDerivation = read_KeyDerivationAlgorithm();
 
 	//keyEncryptionAlgorithm KeyEncryptionAlgorithmIdentifier,
-	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
-
-		//■ to do
+	_keyEncryption = read_keyEncryptionAlgorithm();
 
 	_passwordRecipientInfo->SetInfo(_keyDerivation, _keyEncryption);
 
@@ -213,35 +243,39 @@ void	PKCS7_Input::read_PasswordRecipientInfo(PasswordRecipientInfo* _passwordRec
 }
 
 //==============================================================
-//		【ファイル読み込み】EncryptedContentInfo
+//		【ファイル読み込み】ハッシュ関数の取得
 //--------------------------------------------------------------
 //	●引数
-//			EncryptedContentInfo*	ECinfo	読み込み内容を格納するオブジェクトのポインタ
+//			無し
 //	●返値
-//			unsigned	int					暗号文のポインタ
+//			HMAC*				ハッシュ関数のポインタ
 //==============================================================
-unsigned	int		PKCS7_Input::read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo)
+HMAC*	PKCS7_Input::read_HmacAlgorithm()
 {
 	//contentType ContentType,
-	ObjectIdentifier		contentType;					//暗号文のType
-	Encryption*				cCE;
-	unsigned	int			szEncryptedContent;
+	ObjectIdentifier		_oid;
 
-	//encryptedContentInfo
+	HMAC*					cHMAC;
+
+	//HMAC Algorithm
+	//SEQUENCE
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
+		//algorithm OBJECT IDENTIFIER
+		read_Object_Identifier(&_oid);
+		if(cHMAC_SHA1.Check_OID(&_oid) != -1){
+			cHMAC = &cHMAC_SHA1;
+			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
+		} else if(cHMAC_SHA224.Check_OID(&_oid) != -1){
+			cHMAC = &cHMAC_SHA224;
+			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
+		} else if(cHMAC_SHA256.Check_OID(&_oid) != -1){
+			cHMAC = &cHMAC_SHA256;
+			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
+		} else {
+			errPrint("HmacAlgorithm",": Unknown HMAC algorithm.");
+		}
 
-		//contentType 
-		read_Object_Identifier(&contentType);
-
-		//contentEncryptionAlgorithm
-		cCE = read_ContentEncryptionAlgorithm();
-
-		//ここに入っているのが、暗号文実体のサイズ
-		szEncryptedContent	= read_TAG_with_Check(BER_Class_Context, false, 0);
-
-	//EncryptedContentInfoを設定
-	ECinfo->Set(&contentType, cCE, szEncryptedContent);
-	return(tellg());
+	return(cHMAC);
 }
 //==============================================================
 //		【ファイル読み込み】コンテンツ用暗号モジュールの取得
@@ -304,39 +338,103 @@ Encryption*	PKCS7_Input::read_ContentEncryptionAlgorithm()
 	return(cCE);
 }
 //==============================================================
-//		【ファイル読み込み】ハッシュ関数の取得
+//		【ファイル読み込み】コンテンツ用暗号モジュールの取得
 //--------------------------------------------------------------
 //	●引数
-//			無し
+//			PWRI_KEK*		_pwri_kek	PWRI_KEK
 //	●返値
-//			HMAC*				ハッシュ関数のポインタ
+//			Encryption*					暗号モジュールのポインタ
+//	●備考
+//			"PWRI_KEK"で使う、KeyWrap用の暗号を指定する。
+//			ここで、PWRI_KEKのszKeyを設定しておき、
+//			後で、PBKDF2関数のdkLenに設定する。
 //==============================================================
-HMAC*	PKCS7_Input::read_HmacAlgorithm()
+Encryption*	PKCS7_Input::read_KeyWrapAlgorithm(PWRI_KEK* _pwri_kek)
 {
 	//contentType ContentType,
 	ObjectIdentifier		_oid;
 
-	HMAC*					cHMAC;
+	OctetString		_IV;
+	__m128i			IV;
 
-	//HMAC Algorithm
+	Encryption*	cKE;
+
+	//EncryptionAlgorithm
 	//SEQUENCE
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
 		//algorithm OBJECT IDENTIFIER
 		read_Object_Identifier(&_oid);
-		if(cHMAC_SHA1.Check_OID(&_oid) != -1){
-			cHMAC = &cHMAC_SHA1;
-			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
-		} else if(cHMAC_SHA224.Check_OID(&_oid) != -1){
-			cHMAC = &cHMAC_SHA224;
-			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
-		} else if(cHMAC_SHA256.Check_OID(&_oid) != -1){
-			cHMAC = &cHMAC_SHA256;
-			read_TAG_with_Check(BER_Class_General, false, BER_TAG_NULL);
+		//暗号利用モード, 初期化ベクタIV を、設定
+		//追加の暗号アルゴリズムがある場合は、ここに追加。
+		if(_pwri_kek->ke_DES_CBC.Check_OID(&_oid) != -1){
+			read_Octet_Strings(&_IV);
+			memcpy(&IV, _IV.strValue.c_str(), sizeof(__int64));
+			_pwri_kek->ke_DES_CBC.Set_DES(IV.m128i_i64[0]);
+			cKE = &_pwri_kek->ke_DES_CBC;
+		} else if(_pwri_kek->ke_TDES_CBC.Check_OID(&_oid) != -1){
+			read_Octet_Strings(&_IV);
+			memcpy(&IV, _IV.strValue.c_str(), sizeof(__int64));
+			_pwri_kek->ke_TDES_CBC.Set_DES(IV.m128i_i64[0]);
+			cKE = &_pwri_kek->ke_TDES_CBC;
+		} else if(_pwri_kek->ke_AES_CBC128.Check_OID(&_oid) != -1){
+			read_Octet_Strings(&_IV);
+			memcpy(&IV, _IV.strValue.c_str(), sizeof(__m128i));
+			_pwri_kek->ke_AES_CBC128.Set_AES(IV);
+			cKE = &_pwri_kek->ke_AES_CBC128;
+		} else if(_pwri_kek->ke_AES_CBC192.Check_OID(&_oid) != -1){
+			read_Octet_Strings(&_IV);
+			memcpy(&IV, _IV.strValue.c_str(), sizeof(__m128i));
+			_pwri_kek->ke_AES_CBC192.Set_AES(IV);
+			cKE = &_pwri_kek->ke_AES_CBC192;
+		} else if(_pwri_kek->ke_AES_CBC256.Check_OID(&_oid) != -1){
+			read_Octet_Strings(&_IV);
+			memcpy(&IV, _IV.strValue.c_str(), sizeof(__m128i));
+			_pwri_kek->ke_AES_CBC256.Set_AES(IV);
+			cKE = &_pwri_kek->ke_AES_CBC256;
 		} else {
-			errPrint("HmacAlgorithm",": Unknown HMAC algorithm.");
+			errPrint("contentEncryptionAlgorithm",": Unknown encryption algorithm.");
 		}
 
-	return(cHMAC);
+		if(cKE->szBlock != _IV.strValue.size()){
+			errPrint("contentEncryptionAlgorithm",": Different Parameter size.");
+		}
+
+	_pwri_kek->keyWrapAlgorithm = cKE;
+	_pwri_kek->szKey = cKE->szKey;
+
+	return(cKE);
+}
+//==============================================================
+//		【ファイル読み込み】鍵用暗号モジュールの取得
+//--------------------------------------------------------------
+//	●引数
+//			無し
+//	●返値
+//			Encryption*				暗号モジュールのポインタ
+//==============================================================
+Encryption*	PKCS7_Input::read_keyEncryptionAlgorithm()
+{
+	//contentType ContentType,
+	ObjectIdentifier		_oid;
+	PWRI_KEK*				_pwri_kek	= new PWRI_KEK();
+
+	Encryption*	cKE;
+
+	//EncryptionAlgorithm
+	//SEQUENCE
+	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
+		//algorithm OBJECT IDENTIFIER
+		read_Object_Identifier(&_oid);
+		//暗号利用モード, 初期化ベクタIV を、設定
+		//追加の暗号アルゴリズムがある場合は、ここに追加。
+		if(_pwri_kek->Check_OID(&_oid) != -1){
+			read_KeyWrapAlgorithm(_pwri_kek);
+			cKE = _pwri_kek;
+		} else {
+			errPrint("contentEncryptionAlgorithm",": Unknown encryption algorithm.");
+		}
+
+	return(cKE);
 }
 //==============================================================
 //		【ファイル読み込み】鍵導出関数の取得
@@ -344,7 +442,7 @@ HMAC*	PKCS7_Input::read_HmacAlgorithm()
 //	●引数
 //			無し
 //	●返値
-//			HMAC*				鍵導出関数のポインタ
+//			KeyDerivation*		鍵導出関数のポインタ
 //==============================================================
 KeyDerivation*		PKCS7_Input::read_KeyDerivationAlgorithm()
 {
@@ -399,8 +497,8 @@ KeyDerivation*		PKCS7_Input::read_KeyDerivationAlgorithm()
 					cHMAC = read_HmacAlgorithm();
 				}
 			_pbkdf = new PBKDF2(cHMAC);
-			//■ to do 鍵長が不明な場合も考慮する。
 			_pbkdf->Set_PBKDF2((void *)_Salt.strValue.c_str(), _Salt.strValue.size(), _Count.iValue, _dkLen.iValue);
+			_keyDerivation = _pbkdf;
 		} else {
 			errPrint("KeyDerivationAlgorithm",": Unknown KeyDerivationAlgorithm algorithm.");
 		}

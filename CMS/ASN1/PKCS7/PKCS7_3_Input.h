@@ -28,8 +28,7 @@ public:
 
 	void	Get_EnvelopedData();
 
-//	void			StreamPointerMove_AlgorithmPara(void);
-//	void			StreamPointerMove_EncryptedContent(void);
+	void	Receipt(string*	strPassword);
 
 	void	decrypt(			FileOutput*			f_Plain);
 };

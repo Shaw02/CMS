@@ -245,7 +245,7 @@ OPSW::~OPSW(){
 //		ヘルプメッセージ
 //--------------------------------------------------------------
 //	●引数
-//			なし
+//			無し
 //	●返値
 //			無し
 //==============================================================
@@ -262,6 +262,9 @@ void	OPSW::print_help(){
 				"  /Fk[file(.key)]	File name of Cipher-Key. (Default = [filename].key)\n"
 				"  /W[PW]		Cipher-Key is SHA-256 hash of this PW(Pass Word).\n"
 				"  /H			help\n"
+				"  /T[n]			Type.\n"
+				"			   3 : Enveloped Data(default)\n"
+				"			   6 : Encryption Data\n"
 				"\n"
 				"  --- Decipher option ---\n"
 				"  /D			Decipher (Default)\n"
@@ -273,11 +276,7 @@ void	OPSW::print_help(){
 				"			   2 : 3-DES-CBC\n"
 				"			   3 : AES-CBC 128-bit\n"
 				"			   4 : AES-CBC 192-bit\n"
-				"			   5 : AES-CBC 256-bit(default)\n"
-				"  /T[n]			Type.\n"
-				"			   3 : Enveloped Data(default)\n"
-				"			   6 : Encryption Data\n" << endl;
-
+				"			   5 : AES-CBC 256-bit(default)\n" << endl;
 
 	exit(EXIT_SUCCESS);
 

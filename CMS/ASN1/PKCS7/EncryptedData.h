@@ -34,6 +34,4 @@ EncryptedData ::= SEQUENCE {
 				void	Set(ObjectIdentifier*		_type,
 							Encryption*				_algorithm,
 							unsigned	int			_szContent);
-//				int		encrypt(unsigned char* CEK, FileInput* f_Plain, FileOutput* f_Cipher,unsigned int szContent);
-//				int		decrypt(unsigned char* CEK, FileInput* f_Cipher, FileOutput* f_Plain,unsigned int szContent);
 };

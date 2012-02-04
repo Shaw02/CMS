@@ -18,15 +18,27 @@
 //		2011.11. 9	初版
 //======================================================================
 /****************************************************************/
+/*			定数定義											*/
+/****************************************************************/
+
+/****************************************************************/
 /*			クラス定義											*/
 /****************************************************************/
 class PWRI_KEK :
 	public Encryption
 {
 public:
+//--------------
+//変数
+
+/*
+PWRI_KEK-params ::= SEQUENCE {
+  keyWrapAlgorithm	AlgorithmIdentifier
+}
+*/
 	static	unsigned	int		oid[];
 
-			Encryption*				EncryptionAlgorithm;
+			Encryption*				keyWrapAlgorithm;
 
 	//アルゴリズム
 	static	DES_CBC					ke_DES_CBC;
@@ -45,7 +57,7 @@ public:
 					~PWRI_KEK(void);
 
 			void	Set_PWRI_KEK(unsigned int mode, __m128i IV);
-		Encryption*	PWRI_KEK::Get_Encryption(unsigned int mode, __m128i IV);
+		Encryption*	Get_Encryption(unsigned int mode, __m128i IV);
 
 			void	Set_Key(void *key);							//暗号鍵 設定
 			void	Clear_Key();								//鍵Zero化

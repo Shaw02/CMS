@@ -13,7 +13,6 @@ EncryptedData::EncryptedData(const char _strName[]):
 	Sequence(_strName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -60,38 +59,7 @@ void	EncryptedData::Set(
 	//------
 	//unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL
 	if(iVersion == 2){
-
 		//	to do	属性情報を入れる場合の処理。
-
 		Set_Construct(&unprotectedAttrs);
 	}
 }
-/*
-//==============================================================
-//				暗号
-//--------------------------------------------------------------
-//	●引数
-//			unsigned char*	CEK			暗号鍵
-//			FileInput*		f_Plain		入力ファイル（平文）
-//			FileOutput*		f_Cipher	出力ファイル（暗号文）
-//			unsigned int	szContent	サイズ
-//	●返値
-//			int				0			正常（これしか返さないけど…）
-//							-1			異常
-//	●注意
-//			これより前のASN.1データは、事前にエンコードしてファイルに出力しておく事。
-//			引数"f_Cipher"には、上述の途中までエンコードされたファイルオブジェクトを渡す。
-//==============================================================
-int		EncryptedData::encrypt(
-			unsigned char*	CEK,
-			FileInput*	f_Plain, 
-			FileOutput*	f_Cipher,
-			unsigned int szContent)
-{
-	unsigned	int	iResult;
-
-	iResult = encryptedContentInfo.encrypt(CEK, f_Plain, f_Cipher, szContent);
-
-	return(iResult);
-}
-*/

@@ -13,7 +13,6 @@ PrivateKeyInfo::PrivateKeyInfo(const char _strName[]):
 	Sequence(_strName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -29,7 +28,9 @@ PrivateKeyInfo::~PrivateKeyInfo(void)
 //		値を設定
 //--------------------------------------------------------------
 //	●引数
-//			ASN1* asn1		memberとなるobject
+//		AlgorithmIdentifier*	_algorithm		暗号鍵のアルゴリズム
+//					char		c[]				暗号鍵のポインタ
+//		unsigned	int			iSize			暗号鍵のサイズ
 //	●返値
 //			無し
 //==============================================================
@@ -51,6 +52,5 @@ void	PrivateKeyInfo::Set(
 	Set_Construct(&privateKey);
 
 	//attributes           [0]  IMPLICIT Attributes OPTIONAL }
-
 
 }

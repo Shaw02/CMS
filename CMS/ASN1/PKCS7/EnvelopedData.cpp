@@ -15,7 +15,6 @@ EnvelopedData::EnvelopedData(const char _strName[]):
 	unprotectedAttrs(1)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -80,6 +79,7 @@ void	EnvelopedData::Set(
 	//------
 	//unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL
 	if(unprotectedAttrs.Constructed.size() > 0){
+		//	to do	属性情報を入れる場合の処理。
 		Set_Construct(&unprotectedAttrs);
 	}
 }

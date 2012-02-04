@@ -221,9 +221,8 @@ void	decrypt()
 			//暗号ファイルの読み込み ＆ ASN.1構造分析
 			f_IN.t3	= new PKCS7_3_Input(cOpsw->strAESname.c_str());
 			f_IN.t3->Get_EnvelopedData();
-
-			//■ to do	受信者情報の照合
-
+			// 受信者情報の照合
+			f_IN.t3->Receipt(&cOpsw->strKeyWord);
 			// 暗号化（ファイル出力込み）
 			f_IN.t3->decrypt(&f_OUT);
 			// 暗号ファイル・オブジェクトの開放

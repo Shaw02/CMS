@@ -10,10 +10,10 @@
 //				無し
 //==============================================================
 RecipientInfos::RecipientInfos(const char _strName[]):
-	Set(_strName)
+	Set(_strName),
+	fPassword(false)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -39,11 +39,11 @@ RecipientInfos::~RecipientInfos(void)
 //--------------------------------------------------------------
 //	●引数
 //				int	type			受信者情報（鍵管理手法）のタイプ
-//										[0]	公開鍵暗号
-//										[1]	
-//										[2]	
+//										[0]	鍵配送 （KeyTransRecipientInfo）
+//										[1]	鍵合意 （KeyAgreeRecipientInfo）
+//										[2]	共通鍵暗号化鍵 （KEKRecipientInfo）
 //										[3]	鍵導出（パスワード）
-//										[4]	
+//										[4]	その他 （OtherRecipientInfo）
 //		Sequence*	_recipientinfo	受信者情報
 //	●返値
 //				無し
@@ -94,13 +94,15 @@ void	RecipientInfos::AddRecipient(
 
 	//------------------
 	//鍵導出
+	fPassword = true;
 
 	//※keyDerivationは、クラス"PasswordRecipientInfo"でメモリ開放を行う。
-	cPBKDF2	= new PBKDF2(hmac);
+	cPBKDF2		= new PBKDF2(hmac);
+	cPWRI_KEK	= new PWRI_KEK();
 
 	cPBKDF2->Set_PBKDF2(&i64Salt,sizeof(i64Salt),count,CEK->strValue.size());
-	cPWRI_KEK.Set_PWRI_KEK(mode, _IV);
-	cPassword.SetInfo(cPBKDF2, &cPWRI_KEK);
+	cPWRI_KEK->Set_PWRI_KEK(mode, _IV);
+	cPassword.SetInfo(cPBKDF2, cPWRI_KEK);
 	cPassword.SetKey((void *)strPassword->c_str(), strPassword->length(), (void *)CEK->strValue.c_str(), CEK->strValue.size());
 	AddRecipientInfo(3,&cPassword);
 }

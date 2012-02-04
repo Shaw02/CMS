@@ -13,7 +13,6 @@ PKCS7_3_Input::PKCS7_3_Input(const char*	strFileName):
 	PKCS7_Input(strFileName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -42,6 +41,33 @@ void	PKCS7_3_Input::Get_EnvelopedData()
 	ptEncryptedContent = read_EnvelopedData(&enveloped_data);
 }
 //==============================================================
+//			受信
+//--------------------------------------------------------------
+//	●引数
+//			string*	strPassword	パスワード
+//	●返値
+//			無し
+//==============================================================
+void	PKCS7_3_Input::Receipt(string*	strPassword)
+{
+	int	szCEK;
+	PasswordRecipientInfo*	_password	= &enveloped_data.recipientInfos.cPassword;
+
+	//"PasswordRecipientInfo"があるかチェック
+	if(enveloped_data.recipientInfos.fPassword = false){
+		errPrint("Decrypt",": 暗号文にPasswordRecipientInfoがありません。");
+	}
+
+	//鍵導出
+	szCEK = _password->GetKey((void*)strPassword->c_str(), strPassword->size(), (void*)_password->EncryptedKey.strValue.c_str(), _password->EncryptedKey.strValue.size());
+	if(szCEK != enveloped_data.encryptedContentInfo.contentEncryptionAlgorithm->szKey){
+		errPrint("Decrypt",": Passwordが違います。");
+	}
+
+	//コンテンツ用暗号鍵の設定
+	CEK.Set((char *)_password->keyEncryptionAlgorithm->GetKey(), szCEK);
+}
+//==============================================================
 //				暗号化
 //--------------------------------------------------------------
 //	●引数
@@ -63,4 +89,5 @@ void	PKCS7_3_Input::decrypt(
 	if(iResult != 0){
 		errPrint("Decrypt",": Content-Encryption-Key may be different.");
 	}
+
 }

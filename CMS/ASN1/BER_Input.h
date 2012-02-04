@@ -8,6 +8,11 @@ class BER_Input :
 	public FileInput
 {
 public:
+//--------------
+//•Ï”
+
+//--------------
+//ŠÖ”
 					BER_Input(const char*	strFileName);
 					~BER_Input(void);
 

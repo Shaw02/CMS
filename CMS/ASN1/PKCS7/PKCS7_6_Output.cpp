@@ -13,7 +13,6 @@ PKCS7_6_Output::PKCS7_6_Output(const char*	strFileName):
 	PKCS7_Output(strFileName)
 {
 }
-
 //==============================================================
 //		デストラクタ
 //--------------------------------------------------------------
@@ -25,7 +24,6 @@ PKCS7_6_Output::PKCS7_6_Output(const char*	strFileName):
 PKCS7_6_Output::~PKCS7_6_Output(void)
 {
 }
-
 //==============================================================
 //				オブジェクトの設定
 //--------------------------------------------------------------
@@ -75,7 +73,7 @@ void	PKCS7_6_Output::Set_Encryption(
 
 	//------------------
 	//鍵は乱数より自動生成
-	_CEK	= new unsigned char [cCE->szKey];
+	_CEK	= new unsigned char [(cCE->szKey<32)?32:cCE->szKey];
 
 	cRandom->get256(_CEK);
 	CEK.Set((char *)_CEK, cCE->szKey);
@@ -158,7 +156,7 @@ void	PKCS7_6_Output::Set_Encryption(
 
 	//------------------
 	//Password文字列のハッシュ値を、暗号鍵にする。
-	_CEK	= new unsigned char [cCE->szKey];
+	_CEK	= new unsigned char [(cCE->szKey<32)?32:cCE->szKey];
 	cSHA256.CalcHash(_CEK, (void *)strPassword->c_str(), strPassword->length());
 	CEK.Set((char *)_CEK, cCE->szKey);
 	delete	_CEK;
