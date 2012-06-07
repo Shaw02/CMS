@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<!-- Sitemap 1.0 -->
+</HEAD><BODY>
+<OBJECT type="text/site properties">
+	<param name="ImageType" value="Folder">
+</OBJECT>
+<UL>
+	<OBJECT type="text/sitemap">
+		<param name="Merge" value="help.css">
+
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="CMS対応暗号ユーティリティ">
+		<param name="Local" value="index.html">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="使い方">
+		<param name="Local" value="use.html">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="使い方 概要">
+			<param name="Local" value="use.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="オプションスイッチ">
+			<param name="Local" value="option.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="使用例 -複合化">
+			<param name="Local" value="decrypt.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="使用例 -暗号化">
+			<param name="Local" value="encrypt.html">
+			</OBJECT>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="仕様（技術資料）">
+		<param name="Local" value="specification.html">
+		</OBJECT>
+	<UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="仕様 概要">
+			<param name="Local" value="specification.html">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="対応ファイル形式">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="CMS (暗号メッセージ構文)">
+				<param name="Local" value="cms.html">
+				</OBJECT>
+			<UL>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="CMS（暗号メッセージ構文について）">
+					<param name="Local" value="cms.html">
+					</OBJECT>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="封筒化データ（Enveloped-Data）">
+					<param name="Local" value="enveloped.html">
+					</OBJECT>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="暗号化データ（Encrypted-Data）">
+					<param name="Local" value="encrypted.html">
+					</OBJECT>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="関連する定義">
+					</OBJECT>
+				<UL>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="暗号化コンテンツ （EncryptedContentInfo）">
+						<param name="Local" value="EncryptedContentInfo.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="受取人情報 （RecipientInfo）">
+						<param name="Local" value="RecipientInfo.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="鍵導出 （PasswordRecipientinfo）">
+						<param name="Local" value="PasswordRecipientinfo.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="アルゴリズム（AlgorithmIdentifier）">
+						<param name="Local" value="AlgorithmIdentifier.html">
+						</OBJECT>
+				</UL>
+			</UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="ASN.1（抽象構文表記法）について">
+				<param name="Local" value="asn1.html">
+				</OBJECT>
+			<UL>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="ASN.1（抽象構文表記法）">
+					<param name="Local" value="asn1.html">
+					</OBJECT>
+				<LI> <OBJECT type="text/sitemap">
+					<param name="Name" value="バイナリ符号化規則">
+					</OBJECT>
+				<UL>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="Basic Encoding Rule（BER）">
+						<param name="Local" value="ber.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="Canonical Encoding Rules（CER）">
+						<param name="Local" value="cer.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="Distinguished Encoding Rules（DER）">
+						<param name="Local" value="der.html">
+						</OBJECT>
+					<LI> <OBJECT type="text/sitemap">
+						<param name="Name" value="CER, DER共通の符号化ルール">
+						<param name="Local" value="cerder.html">
+						</OBJECT>
+				</UL>
+			</UL>
+		</UL>
+		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="対応アルゴリズム">
+			</OBJECT>
+		<UL>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="ダイジェスト">
+				<param name="Local" value="Digest.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="鍵管理手法">
+				<param name="Local" value="KeyEncryption.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="コンテンツ用暗号">
+				<param name="Local" value="ContentEncryption.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="メッセージ認証符号(MAC)">
+				<param name="Local" value="MessageAuthenticationCode.html">
+				</OBJECT>
+			<LI> <OBJECT type="text/sitemap">
+				<param name="Name" value="鍵導出">
+				<param name="Local" value="KeyDerivation.html">
+				</OBJECT>
+		</UL>
+	</UL>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="改訂履歴">
+		<param name="Local" value="revision.html">
+		</OBJECT>
+	<LI> <OBJECT type="text/sitemap">
+		<param name="Name" value="著作権">
+		<param name="Local" value="copyright.html">
+		</OBJECT>
+</UL>
+</BODY></HTML>

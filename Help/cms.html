@@ -1,0 +1,87 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>暗号メッセージ構文(CMS)</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2>暗号メッセージ構文(CMS)について</h2>
+
+<div class='block'>
+<p>
+暗号メッセージ構文(CMS)とは、電子署名や暗号文などの構文を定める規格（RFC.5652）です。<br>
+CMSでは、以下のタイプのデータを格納できます。<br>
+</p>
+
+<table summary="CMSで規定されるデータの種類">
+<caption>CMSの種類</caption>
+<tr><th>OID										</th>
+	<th>タイプ									</th>
+	<th>ファイルの内容							</th></tr>
+<tr><td>1.2.840.113549.1.7.1					</td>
+	<td>data									</td>
+	<td>データ									</td></tr>
+<tr><td>1.2.840.113549.1.7.2					</td>
+	<td>signed-data								</td>
+	<td>電子署名データ	　（公開鍵証明書のみの場合あり）</td></tr>
+<tr><td>1.2.840.113549.1.7.3					</td>
+<td><a href="enveloped.html">enveloped-data	</a></td>
+	<td>封筒化データ	　（暗号化データ ＋ 宛先情報）	</td></tr>
+<tr><td>1.2.840.113549.1.7.5					</td>
+<td>digested-data								</td>
+	<td>ダイジェストデータ						</td></tr>
+<tr><td>1.2.840.113549.1.7.6					</td>
+<td><a href="encrypted.html">encrypted-data	</a></td>
+	<td>暗号化データ							</td></tr>
+<tr><td>1.2.840.113549.1.9.16.1.2				</td>
+	<td>authenticated-data						</td>
+	<td>資格認証データ							</td></tr>
+</table>
+
+<p>
+暗号メッセージ構文（CMS）は、以下のASN.1によって定義されるContentInfo構造となります。<br>
+</p>
+<pre class="code">
+<strong>[ASN.1] ContentInfo (oid = 1.2.840.113549.1.9.16.1.6)</strong>
+ContentInfo ::= SEQUENCE {
+  contentType ContentType,
+  content [0] EXPLICIT ANY DEFINED BY contentType }
+</pre>
+
+<pre class="code">
+<a name="ContentType">ContentType</a> ::= OBJECT IDENTIFIER
+</pre>
+
+<table summary="ContentInfoについて">
+<caption>ContentInfoについて</caption>
+<tr><th>フィールド名	</th><th>内容	</th></tr>
+<tr><td>contentType	</td><td>contentに格納されるデータのタイプを示すoidが書かれる<br>
+							oidの値は、上の表「CMSの種類」の参照。</td></tr>
+<tr><td>content		</td><td>contentTypeで定義されたデータが格納される。<br>
+							このフィールドに、各タイプで定義されるそれぞれのデータが入る。</td></tr>
+</table>
+
+<p>
+つまり、BERで符号化したと仮定すると、以下のように符号化される。<br>
+</p>
+<pre class="code">
+30 <var>size</var>　　　… 0x06タグ(OID)及びそのデータと、0xA0タグ（Content）及びそのデータの、合計サイズ。
+  06 <var>size</var>　　　… 以下<var>oid</var>フィールドのデータサイズ[Byte]。
+    <var>oid</var>　　　…　各タイプのOID
+  A0 <var>size</var>　　　… 以下<var>content</var>フィールドのデータサイズ[Byte]。
+    <var>content</var>　　　…　各タイプで規定されたデータ列
+</pre>
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>

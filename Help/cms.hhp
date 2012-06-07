@@ -1,0 +1,44 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=cms.chm
+Contents file=cms.hhc
+Default topic=index.html
+Display compile progress=No
+Index file=cms.hhk
+Language=0x411 日本語
+Title=CMS対応 暗号ユーティリティ ヘルプ
+
+
+[FILES]
+index.html
+use.html
+option.html
+decrypt.html
+encrypt.html
+specification.html
+cms.html
+encrypted.html
+enveloped.html
+EncryptedContentInfo.html
+RecipientInfo.html
+PasswordRecipientinfo.html
+asn1.html
+ber.html
+cer.html
+der.html
+cerder.html
+Digest.html
+AlgorithmIdentifier.html
+KeyEncryption.html
+KeyDerivation.html
+ContentEncryption.html
+MessageAuthenticationCode.html
+copyright.html
+revision.html
+
+[ALIAS]
+HIDD_TOP=index.html ; 概要
+=use.html ; 使い方
+
+[INFOTYPES]
+

@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>ASN.1（抽象構文表記法）について</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2>ASN.1（抽象構文表記法）について</h2>
+
+<div class='block'>
+<p>
+多くのセキュリティー関連のデータ構造は、ASN.1（抽象構文表記法）によって定義されています。<br>
+これは、ソフトウェアの世界で言うところの、構造体の定義みたいなものです。<br>
+実際のデータは、別途に符号化規則により定義され、本ソフトウェアではBER（基本符号化規則）に対応しています。<br>
+</p>
+</div>
+
+<div class='block'>
+<h3>型</h3>
+<p>
+ASN.1（抽象構文表記法）には、以下の型があります。<br>
+詳細は、 T-REC-X.680 若しくは、 JIS X 5603 をご参照ください。<br>
+</p>
+<table>
+<tr><th>型のType			</th><th>内容			</th><tr>
+<tr><td>Boolean				</td><td>論理型			</td><tr>
+<tr><td>Integer				</td><td>整数型			</td><tr>
+<tr><td>Enumerated			</td><td>列挙型			</td><tr>
+<tr><td>Real				</td><td>実数型			</td><tr>
+<tr><td>Bitstring			</td><td>ビット列型		</td><tr>
+<tr><td>Octetstrings		</td><td>オクテット列型	</td><tr>
+<tr><td>Null				</td><td>ヌル型			</td><tr>
+<tr><td>Sequence			</td><td>順序列型		</td><tr>
+<tr><td>Sequence of			</td><td>単一順序列型	</td><tr>
+<tr><td>Set					</td><td>集合型			</td><tr>
+<tr><td>Set of				</td><td>単一集合型		</td><tr>
+<tr><td>Coice				</td><td>選択型			</td><tr>
+<tr><td>Select				</td><td>参照選択型		</td><tr>
+<tr><td>Tagged				</td><td>タグ付き型		</td><tr>
+<tr><td>Any					</td><td>任意型			</td><tr>
+<tr><td>object identifier	</td><td>オブジェクト識別子型	</td><tr>
+<tr><td>relative object identifier	</td><td>関連オブジェクト識別子型	</td><tr>
+<tr><td>embedded-pdv		</td><td>埋込みpdv型			</td><tr>
+<tr><td>external			</td><td>外部型					</td><tr>
+<tr><td>NumericString		</td><td>数字列					</td><tr>
+<tr><td>PrintableString		</td><td>印字可能文字列			</td><tr>
+<tr><td>TeletexString		</td><td>テレテックス文字列		</td><tr>
+<tr><td>VideotexString		</td><td>ビデオテックス文字列	</td><tr>
+<tr><td>VisibleString		</td><td>可視文字列				</td><tr>
+<tr><td>IA5String			</td><td>IA5文字列				</td><tr>
+<tr><td>GraphicString		</td><td>図形文字列				</td><tr>
+<tr><td>GeneralString		</td><td>一般文字列				</td><tr>
+<tr><td>GeneralizedTime		</td><td>一般化時刻型			</td><tr>
+<tr><td>UTCTime				</td><td>UTC時刻型				</td><tr>
+</table>
+</div>
+
+<div class='block'>
+<h3>符号化ルール</h3>
+<ul>
+<li><a href="ber.html">Basic Encoding Rule（BER）</a></li>
+<li><a href="cer.html">Canonical Encoding Rules（CER）</a></li>
+<li><a href="der.html">Distinguished Encoding Rules（DER）</a></li>
+<li><a href="cerder.html">CER, DER共通の符号化ルール</a></li>
+</ul>
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>

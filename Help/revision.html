@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>改訂履歴</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+<div class='block'>
+<h2>改訂履歴</h2>
+<table>
+<tr><th>ヴァージョン</th><th>内容</th><th>改定日</th></tr>
+<tr><td>1.92</td>
+	<td>マニュアルを、CHM（コンパイル済みHTMLヘルプファイル）形式にした。<br>
+		いずれ、GUI版を作るにあたっての布石かもしれない。</td>
+	<td>2012年 6月 5日</td></tr>
+<tr><td>1.91</td>
+	<td><ul>
+		<li>ドキュメントを若干、書き直した。</li>
+		<li>ヴァージョン1.00で作成した暗号化ファイル（鍵：パスワード）を復号できなかったバグを修正。</li>
+		</ul></td>
+	<td>2012年 2月 4日</td></tr>
+<tr><td>1.90</td>
+	<td>
+		<ul>
+		<li>ソフトの名称を、"AES"から"CMS"に変更した。</li>
+		<li>暗号メッセージ構文（CMS）の封筒化タイプ（Enveloped-Data Type）に対応しました。<br>
+			対応する鍵管理手法は、鍵導出（パスワード）のみ対応しています。
+			<ul>
+				<li>鍵導出関数：PBKDF2<br>　with HMAC-SHA-256（復号は、HMAC-SHA-1, HMAC-SHA-224にも対応しています）</li>
+				<li>鍵ラップ　：PWRI-KEK<br>　with コンテンツの暗号と同じアルゴリズム（復号は違っていても可能です）</li>
+			</ul>
+			※他の鍵管理手法（鍵配送(RSA暗号等)、鍵合意(Diffie-Hellman等)、等々）には対応していません。）</li>
+		<li>デフォルトで、Enveloped-Data Typeを処理するようにした。</li>
+		<li>DES暗号、3-DES暗号に対応（古い暗号ですので使用はお勧めしません）。</li>
+		</ul></td>
+	<td>2012年 2月 4日</td></tr>
+<tr><td>1.0</td>
+	<td>ＲＦＣにて勧告されている部分については、全てＲＦＣの勧告に従うよう、再設計した。<br>
+		暗号メッセージは、暗号メッセージ構文（CMS）の暗号化タイプ（Encrypted-Data Type）に対応しました。<br>
+		暗号鍵ファイルは、PKCS#8の構文に従っています。<br>
+		 ※ このため、過去ヴァージョンとの互換性は無くなりました。<br>
+		 ※ また、平文のハッシュ値を保存する仕様は、この改訂により無くなります。</td>
+	<td>2011年 4月12日</td></tr>
+<tr><td>─</td>
+	<td>各技術の著作権情報をドキュメントに追加。付け忘れていた。</td>
+	<td>2011年 1月27日</td></tr>
+<tr><td>─</td>
+	<td>暗号ファイル内に、元ファイルのSHA-256ハッシュを暗号化して格納し、<br>
+		復号時に元ファイルと同じハッシュ値であるか照合する仕様にした。<br>
+		（暗号メッセージ構文（CMS）では、標準化されていないため、未対応です。）</td>
+	<td>2011年 1月19日</td></tr>
+<tr><td>─</td>
+	<td>初版のセキュリティ対策のため、以下の仕様変更。
+		<ul><li>乱数生成について、擬似乱数"Mersenne Twister"によって得た値から、<br>
+			更に"SHA-256"によりハッシュ値化するようにした。<br>
+			暗号鍵自動生成時の暗号鍵及び、初期ベクトルIVは、この値を使用します。</li>
+			<li>オプションで、暗号鍵に文字列を指定できるようにした。</li>
+			<li>平文のSHA-256ハッシュを出力するようにした。</li>
+		</ul></td>
+	<td>2011年 1月17日</td></tr>
+<tr><td>─</td>
+	<td>初版（出力ファイルは独自形式）<br>
+		AES暗号のSIMD(SSE2)命令による高速化の研究として作成。<br>
+		暗号鍵自動生成の暗号鍵及び初期ベクトルIVは、<br>
+		擬似乱数"Mersenne Twister"のみを使用することより、<br>
+		暗号の強度は若干弱い事が想定される。</td>
+	<td>2011年 1月13日</td></tr>
+</table>
+</div>
+</div>
+
+</BODY>
+</HTML>

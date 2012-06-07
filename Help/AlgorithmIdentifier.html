@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>アルゴリズム（AlgorithmIdentifier）</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2>アルゴリズム（AlgorithmIdentifier）</h2>
+
+<div class='block'>
+
+<p>
+各アルゴリズムのoidと、そのパラメータが格納されます。<br>
+詳細は"RFC.3370"を参照してください。<br>
+</p>
+
+<pre class="code">
+AlgorithmIdentifier ::= SEQUENCE  {
+  algorithm OBJECT IDENTIFIER,
+  parameters ANY DEFINED BY algorithm OPTIONAL  }
+</pre>
+
+<table summary="AlgorithmIdentifierについて">
+<caption>AlgorithmIdentifierについて</caption>
+<tr><th>フィールド名	</th><th>内容	</th></tr>
+<tr><td>algorithm		</td><td>アルゴリズムを示すoidが格納される。</td></tr>
+<tr><td>parameters		</td><td>アルゴリズムに付随するパラメータを指定する。</td></tr>
+</table>
+
+</div>
+
+
+<div class="block">
+<h3><a name="DigestAlgorithmIdentifier" href="Digest.html">ダイジェストアルゴリズム（DigestAlgorithmIdentifier）</a></h3>
+<p>
+コンテンツのダイジェスト値（バイト列）を求めるためのアルゴリズムです。<br>
+SHA-1等。
+</p>
+<pre class="code">
+DigestAlgorithmIdentifier ::= AlgorithmIdentifier
+</pre>
+</div>
+
+<!--
+<div class="block">
+<h3><a name="SignatureAlgorithmIdentifier">署名アルゴリズム</a></h3>
+<p>
+コンテンツを署名するためのアルゴリズムです。
+RAS with SHA-1等。
+</p>
+<pre class="code">
+SignatureAlgorithmIdentifier ::= AlgorithmIdentifier
+</pre>
+</div>
+-->
+
+<div class="block">
+<h3><a name="KeyEncryptionAlgorithmIdentifier" href="KeyEncryption.html">鍵管理アルゴリズム（KeyEncryptionAlgorithmIdentifier）</a></h3>
+<p>
+コンテンツ用暗号鍵(CEK)を暗号化するためのアルゴリズムです。<br>
+パスワードによる暗号化など。
+</p>
+<pre class="code">
+KeyEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
+</pre>
+</div>
+
+<div class="block">
+<h3><a name="ContentEncryptionAlgorithmIdentifier" href="ContentEncryption.html">コンテンツ暗号アルゴリズム（ContentEncryptionAlgorithmIdentifier）</a></h3>
+<p>
+コンテンツを暗号・復号するためのアルゴリズムです。<br>
+DES, AES等。
+</p>
+<pre class="code">
+ContentEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
+</pre>
+</div>
+
+<div class="block">
+<h3><a name="MessageAuthenticationCodeAlgorithm" href="MessageAuthenticationCode.html">メッセージ認証符号(MAC)アルゴリズム</a></h3>
+<p>
+<p>
+コンテンツに改ざんが無いか確認するためのアルゴリズムです。<br>
+その他、鍵導出関数PBKDF2にも用いられ、本ソフトではこの用途にて使用しています。<br>
+HMAC-SHA-1等。
+</p>
+<pre class="code">
+MessageAuthenticationCodeAlgorithm ::= AlgorithmIdentifier
+</pre>
+</div>
+
+<div class="block">
+<h3><a name="KeyDerivationAlgorithmIdentifier" href="KeyDerivation.html">鍵導出アルゴリズム（KeyDerivationAlgorithmIdentifier）</a></h3>
+<p>
+パスワードによって鍵暗号用の暗号鍵(KEK)を求めるためのアルゴリズムです。<br>
+PBKDF2等があります。<br>
+</p>
+<pre class="code">
+KeyEncryptionAlgorithmIdentifier ::= AlgorithmIdentifier
+</pre>
+</div>
+
+
+</div>
+
+</BODY>
+</HTML>
