@@ -193,6 +193,13 @@ void	AES_CBC::decipher(void *data,unsigned int iSize)
 	unsigned	char*	cData		= (unsigned	char*)data;
 	unsigned	int		n			= 0;
 
+	if((iSize >= szBlock * 4) && (aesni == true)){
+		while(n < iSize){
+			vector = InvCipher_CBC4((__m128i*)&cData[n], vector);
+			n	+=	szBlock * 4;
+		}
+	}
+
 	while(n < iSize){
 		temp = _mm_xor_si128(InvCipher(_mm_load_si128((__m128i*)&cData[n])), vector);
 		vector	= _mm_load_si128((__m128i*)&cData[n]);
@@ -222,6 +229,14 @@ int		AES_CBC::decipher_last(void *data,unsigned int iSize)
 	unsigned	char	cntPadData;
 
 	//•œ†
+	if(aesni == true){
+		while(iSize > szBlock * 4){
+			vector = InvCipher_CBC4((__m128i*)&cData[n], vector);
+			n		+= szBlock * 4;
+			iSize	-= szBlock * 4;
+		}
+	}
+
 	while(iSize > 0){
 		temp = _mm_xor_si128(InvCipher(_mm_load_si128((__m128i*)&cData[n])), vector);
 		vector	= _mm_load_si128((__m128i*)&cData[n]);

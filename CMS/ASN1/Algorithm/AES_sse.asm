@@ -1,13 +1,30 @@
 ;=======================================================================|
 ;									|
 ;		High speed AES encipher / decipher			|
-;			with the SSE2 (SIMD) code			|
+;			with the SSE2 and AES-NI (SIMD) code		|
 ;									|
 ;				Programmed by				|
-;					(S.W.)	( A.Watanabe )		|
+;					S.W.	( A.Watanabe )		|
 ;									|
 ;=======================================================================|
+
+;=======================================================================|
+;__m128i  __fastcall	AES_NI_KeyExpansion128(unsigned int *ptrKs, unsigned char *key);
+;__m128i  __fastcall	AES_NI_KeyExpansion192(unsigned int *ptrKs, unsigned char *key);
+;__m128i  __fastcall	AES_NI_KeyExpansion256(unsigned int *ptrKs, unsigned char *key);
+;-----------------------------------------------------------------------|
+;*Contents								|
+;	Key Expansion							|
+;*Input									|
+;	ecx	unsigned int	*ptrKs	Pointer of Key schedule		|
+;*Output								|
+;	none								|
+;*Break									|
+;	eax, ecx, edx							|
+;	xmm0～7   (all SIMD Register)					|
+;=======================================================================|
 ;__m128i  __fastcall	AES_SSE_Cipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+;__m128i  __fastcall	AES_NI_Cipher( unsigned char cNr,unsigned int *ptrKs, __m128i data);
 ;-----------------------------------------------------------------------|
 ;*Contents								|
 ;	This function encrypt the Plain text of one block(16byte).	|
@@ -22,6 +39,7 @@
 ;	xmm1～7   (all SIMD Register)					|
 ;=======================================================================|
 ;__m128i  __fastcall	AES_SSE_InvCipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+;__m128i  __fastcall	AES_NI_InvCipher( unsigned char cNr,unsigned int *ptrKs, __m128i data);
 ;-----------------------------------------------------------------------|
 ;*Contents								|
 ;	This function decrypt the Cipher text of one block(16byte).	|
@@ -45,6 +63,7 @@
 ;****************************************************************
 ;●外部宣言
 ;printf			proto	near	C	_Format:ptr byte, var:VARARG 
+;dataPrint		proto	near	C	i:DWORD, n:PTR XMMWORD
 
 ;これは、Ｃ言語側にある。
 
@@ -58,18 +77,24 @@
 @SubWord3@4		proto	near	syscall		;(__fastcall)
 @InvSubWord@4		proto	near	syscall		;(__fastcall)
 
-@AES_SSE_Cipher@24	proto	near	syscall		;5.1	Cipher	(__fastcall)
+@AES_SSE_Cipher@24	proto	near	syscall		;5.1	Cipher		(__fastcall)
 ;AES_SSE_SubBytes	proto	near	stdcall		;5.1.1	SubBytes
 ;AES_SSE_ShiftRows	proto	near	stdcall		;5.1.2	ShiftRows
 ;AES_SSE_MixColumns	proto	near	stdcall		;5.1.3	MixColumns
 ;AES_SSE_AddRoundKey	proto	near	stdcall		;5.1.4	AddRoundKey
 
-@AES_SSE_InvCipher@24	proto	near	syscall		;5.2	InvCipher	(__fastcall)
-;AES_SSE_InvShiftRows	proto	near	stdcall		;5.2.1	InvShiftRows
-;AES_SSE_InvSubBytes	proto	near	stdcall		;5.2.2	InvSubBytes
-;AES_SSE_InvMixColumns	proto	near	stdcall		;5.2.3	InvMixColumns
-;AES_SSE_InvAddRoundKey	proto	near	stdcall		;5.2.4	InvAddRoundKey
+@AES_SSE_InvCipher@24	proto	near	syscall		;5.3	InvCipher	(__fastcall)
+;AES_SSE_InvShiftRows	proto	near	stdcall		;5.3.1	InvShiftRows
+;AES_SSE_InvSubBytes	proto	near	stdcall		;5.3.2	InvSubBytes
+;AES_SSE_InvMixColumns	proto	near	stdcall		;5.3.3	InvMixColumns
+;AES_SSE_InvAddRoundKey	proto	near	stdcall		;5.3.4	InvAddRoundKey
 
+@AES_NI_Cipher@24	proto	near	syscall		;5.1	Cipher		(__fastcall)
+@AES_NI_InvCipher@24	proto	near	syscall		;5.3	InvCipher	(__fastcall)
+
+@AES_NI_KeyExpansion128@8	proto	near	syscall	;5.2	Key Expansion	(__fastcall)
+@AES_NI_KeyExpansion192@8	proto	near	syscall	;5.2	Key Expansion	(__fastcall)
+@AES_NI_KeyExpansion256@8	proto	near	syscall	;5.2	Key Expansion	(__fastcall)
 
 ;****************************************************************
 ;*		variable					*
@@ -81,6 +106,9 @@ AES_SSE_Mask0		db	255,  0,  0,  0, 255,  0,  0,  0, 255,  0,  0,  0, 255,  0,  0
 AES_SSE_Mask1		db	  0,255,  0,  0,   0,255,  0,  0,   0,255,  0,  0,   0,255,  0,  0
 AES_SSE_Mask2		db	  0,  0,255,  0,   0,  0,255,  0,   0,  0,255,  0,   0,  0,255,  0
 AES_SSE_Mask3		db	  0,  0,  0,255,   0,  0,  0,255,   0,  0,  0,255,   0,  0,  0,255
+
+AES_KEY_Mask0		db	255,255,255,255, 255,255,255,255,   0,  0,  0,  0,   0,  0,  0,  0
+AES_KEY_Mask1		db	255,255,255,255,   0,  0,  0,  0, 255,255,255,255,   0,  0,  0,  0
 
 AES_SSE_00FF		dw	000FFh,000FFh,000FFh,000FFh, 000FFh,000FFh,000FFh,000FFh
 AES_SSE_011B		dw	0011Bh,0011Bh,0011Bh,0011Bh, 0011Bh,0011Bh,0011Bh,0011Bh
@@ -96,6 +124,9 @@ AES_SSE_FF00		dw	0FF00h,0FF00h,0FF00h,0FF00h, 0FF00h,0FF00h,0FF00h,0FF00h
 ;	●引数							|
 ;		_out		計算結果			|
 ;	●使用するレジスタ	xmm4～xmm7			|
+;		eax		ポインタ			|
+;		ebx		ポインタ			|
+;		ecx		ポインタ			|
 ;		xmm5		計算結果（偶数Bytes）		|
 ;		xmm4		加算値				|
 ;		xmm6		加算値				|
@@ -103,12 +134,16 @@ AES_SSE_FF00		dw	0FF00h,0FF00h,0FF00h,0FF00h, 0FF00h,0FF00h,0FF00h,0FF00h
 ;===============================================================|
 GF2Mul	macro	_out, _in, _n
 
+	lea	eax, XMMWORD PTR [AES_SSE_FF00]
+	lea	ebx, XMMWORD PTR [AES_SSE_00FF]
+	lea	ecx, XMMWORD PTR [AES_SSE_011B]
+
 	;-------
 	;x1
 	movdqa	xmm6, _in
 	movdqa	xmm4, _in
-	pand	xmm6, XMMWORD PTR [AES_SSE_FF00]
-	pand	xmm4, XMMWORD PTR [AES_SSE_00FF]
+	pand	xmm6, XMMWORD PTR [eax]
+	pand	xmm4, XMMWORD PTR [ebx]
 	psrlw	xmm6, 8
 
 if (_n AND 01h)
@@ -122,14 +157,14 @@ endif
 	;x2
 	psllw	xmm6, 1			;result <<= 1;
 	movdqa	xmm7, xmm6
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm6, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 	psllw	xmm4, 1			;result <<= 1;
 	movdqa	xmm7, xmm4
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm4, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 if (_n AND 02h)
@@ -141,14 +176,14 @@ endif
 	;x4
 	psllw	xmm6, 1			;result <<= 1;
 	movdqa	xmm7, xmm6
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm6, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 	psllw	xmm4, 1			;result <<= 1;
 	movdqa	xmm7, xmm4
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm4, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 if (_n AND 04h)
@@ -160,14 +195,14 @@ endif
 if (_n AND 08h)
 	psllw	xmm6, 1			;result <<= 1;
 	movdqa	xmm7, xmm6
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm6, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 	psllw	xmm4, 1			;result <<= 1;
 	movdqa	xmm7, xmm4
-	pcmpgtw	xmm7, XMMWORD PTR [AES_SSE_00FF]
-	pand	xmm7, XMMWORD PTR [AES_SSE_011B]
+	pcmpgtw	xmm7, XMMWORD PTR [ebx]
+	pand	xmm7, XMMWORD PTR [ecx]
 	pxor	xmm4, xmm7		;result ^= ((result & 0x100)?	0x11B	: 0);
 
 	pxor	_out, xmm6
@@ -390,7 +425,7 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	ret
 @InvSubWord@4	endp
 ;===============================================================|
-;	fips-197	5.1	Cipher				|
+;	fips-197	5.1	Cipher (SSE2)			|
 ;---------------------------------------------------------------|
 ;	●引数							|
 ;		cl	Nr	Round				|
@@ -409,27 +444,21 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 ;===============================================================|
 .code
 	align(16)
-@AES_SSE_Cipher@24	proc	SYSCALL	uses	ebx edi esi
-	push	ebp
+@AES_SSE_Cipher@24	proc	SYSCALL	uses	edi esi
 	movzx	edi, cl
-	mov	ebp, esp
-	mov	esi, edx	;esi = Pointer of Key stream
-	and	esp, -16
-	mov	ebx, 16		;ebx = Round's counter
-	shl	edi, 4		;esi = Last Round's counter
-	sub	esp, ebx	;esp = __m128i temp
-
 	movdqa	xmm4, XMMWORD PTR [AES_SSE_Mask0]
+	lea	esi, [edx + 16]			;esi = Pointer of Key stream
 	movdqa	xmm5, XMMWORD PTR [AES_SSE_Mask1]
+	add	edi, edi
 	movdqa	xmm6, XMMWORD PTR [AES_SSE_Mask2]
+	lea	edi, [edx + edi * 8]		;edi = Last Round's Pointer of Key stream
 	movdqa	xmm7, XMMWORD PTR [AES_SSE_Mask3]
 
 	;=======================
 	;◆Round (0)
 	;---------------
 	;AddRoundKey()
-	movdqa	xmm2, XMMWORD PTR [esi]
-
+	movdqa	xmm2, XMMWORD PTR [edx]
 
 	;=======================
 	;◆Round (1) ～ (Nr-1)
@@ -451,89 +480,136 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 		por	xmm0, xmm1
 
 ;		invoke	AES_SSE_MixColumns	;(+ SubBytesを同時に。)
-		movdqa	XMMWORD PTR [esp], xmm0
-		mov	ecx, DWORD PTR [esp]
+		movdqa	xmm1,xmm0
+		movd	ecx, xmm1
 		invoke	@SubWord3@4
-		mov	ecx, DWORD PTR [esp + 4]
-		mov	DWORD PTR [esp], eax
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
 		invoke	@SubWord3@4
-		mov	ecx, DWORD PTR [esp + 8]
-		mov	DWORD PTR [esp + 4], eax
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
 		invoke	@SubWord3@4
-		mov	ecx, DWORD PTR [esp + 12]
-		mov	DWORD PTR [esp + 8], eax
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
 		invoke	@SubWord3@4
-		mov	DWORD PTR [esp + 12], eax
-		movdqa	xmm1, XMMWORD PTR [esp]
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		por	xmm1, xmm2
 
-		movdqa	XMMWORD PTR [esp], xmm0
-		movdqa	xmm2, xmm1
-		mov	ecx, DWORD PTR [esp]
+		movdqa	xmm3, xmm1
+		psrld	xmm1, 8
+		pslld	xmm3, 24
+		por	xmm3, xmm1		;xmm3 = [3]
+
+		movdqa	xmm1,xmm0
+		movd	ecx, xmm1
 		invoke	@SubWord@4
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
+		invoke	@SubWord@4
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
+		invoke	@SubWord@4
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		movd	ecx, xmm1
+		por	xmm1, xmm2
+		invoke	@SubWord@4
+		movd	xmm2, eax
+		psrldq	xmm1, 4
+		pslldq	xmm2, 12
+		por	xmm1, xmm2
+
+		movdqa	xmm2, xmm1
+		pslld	xmm1, 16
+		psrld	xmm2, 16
+		por	xmm1, xmm2		;xmm2 = [2]
+		pxor	xmm3, xmm1		;xmm3 = [2] ^ [3]
+
+		movdqa	xmm2, xmm1
 		psrld	xmm1, 8
 		pslld	xmm2, 24
-		mov	ecx, DWORD PTR [esp + 4]
-		mov	DWORD PTR [esp], eax
-		invoke	@SubWord@4
-		por	xmm1, xmm2		;xmm1 = [3]
-		mov	ecx, DWORD PTR [esp + 8]
-		mov	DWORD PTR [esp + 4], eax
-		invoke	@SubWord@4
-		mov	ecx, DWORD PTR [esp + 12]
-		mov	DWORD PTR [esp + 8], eax
-		invoke	@SubWord@4
-		mov	DWORD PTR [esp + 12], eax
-		movdqa	xmm2, XMMWORD PTR [esp]
+		por	xmm1, xmm2		;xmm1 = [1]
+		pxor	xmm3, xmm1		;xmm1 = [1] ^ [2] ^ [3]
 
-		movdqa	XMMWORD PTR [esp], xmm0
-		movdqa	xmm3, xmm2
-		movdqa	xmm0, xmm2
-		mov	ecx, DWORD PTR [esp]
+		movd	ecx, xmm0
 		invoke	@SubWord2@4
-		pslld	xmm3, 16
-		psrld	xmm2, 16
-		mov	ecx, DWORD PTR [esp + 4]
-		mov	DWORD PTR [esp], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@SubWord2@4
-		por	xmm2, xmm3		;xmm2 = [2]
-		mov	ecx, DWORD PTR [esp + 8]
-		mov	DWORD PTR [esp + 4], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@SubWord2@4
-		movdqa	xmm3, xmm0
-		mov	ecx, DWORD PTR [esp + 12]
-		mov	DWORD PTR [esp + 8], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@SubWord2@4
-		psrld	xmm0, 24
-		pslld	xmm3, 8
-		mov	DWORD PTR [esp + 12], eax
-		pxor	xmm1, xmm2		;xmm1 = [2] ^ [3]
-		por	xmm0, xmm3		;xmm0 = [1]
-		movdqa	xmm2, XMMWORD PTR [esi + ebx]
-		pxor	xmm0, XMMWORD PTR [esp]	;xmm1 = [0] ^ [1]
-		add	ebx, 16
-		pxor	xmm0, xmm1
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		por	xmm0, xmm1
+
+		movdqa	xmm2, XMMWORD PTR [esi]
+		pxor	xmm0, xmm3
+		add	esi, 16
 
 		;AddRoundKey()
-	.until	(edi <= ebx)
+	.until	(edi <= esi)
 
 	;=======================
 	;◆Last Round (Nr)
 	pxor	xmm0, xmm2
+
 ;	invoke	AES_SSE_SubBytes
-	movdqa	XMMWORD PTR [esp], xmm0
-	mov	ecx, DWORD PTR [esp]
+	movd	ecx, xmm0
 	invoke	@SubWord@4
-	mov	ecx, DWORD PTR [esp + 4]
-	mov	DWORD PTR [esp], eax
+	movd	xmm2, eax
+	psrldq	xmm0, 4
+	pslldq	xmm2, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm2
 	invoke	@SubWord@4
-	mov	ecx, DWORD PTR [esp + 8]
-	mov	DWORD PTR [esp + 4], eax
+	movd	xmm2, eax
+	psrldq	xmm0, 4
+	pslldq	xmm2, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm2
 	invoke	@SubWord@4
-	mov	ecx, DWORD PTR [esp + 12]
-	mov	DWORD PTR [esp + 8], eax
+	movd	xmm2, eax
+	psrldq	xmm0, 4
+	pslldq	xmm2, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm2
 	invoke	@SubWord@4
-	mov	DWORD PTR [esp + 12], eax
-	movdqa	xmm0, XMMWORD PTR [esp]
+	movd	xmm2, eax
+	psrldq	xmm0, 4
+	pslldq	xmm2, 12
+	por	xmm0, xmm2
 
 ;	invoke	AES_SSE_ShiftRows	;[0] 0,1,2,3
 	pshufd	xmm1, xmm0, 00111001b	;[1] 1,2,3,0
@@ -545,17 +621,16 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 	pand	xmm3, xmm7
 	por	xmm1, xmm2
 	por	xmm0, xmm3
-	movdqa	xmm2, XMMWORD PTR [esi + ebx]
+	movdqa	xmm2, XMMWORD PTR [esi]
 	por	xmm0, xmm1
 
 	;AddRoundKey()
-	mov	esp, ebp
 	pxor	xmm0, xmm2
-	pop	ebp
+
 	ret
 @AES_SSE_Cipher@24	endp
 ;===============================================================|
-;	fips-197	5.2	InvCipher			|
+;	fips-197	5.3	InvCipher (SSE2)		|
 ;---------------------------------------------------------------|
 ;	●引数							|
 ;		cl	Nr	Round				|
@@ -573,50 +648,65 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 ;===============================================================|
 .code
 	align(16)
-@AES_SSE_InvCipher@24	proc	SYSCALL	uses	ebx esi
-	push	ebp
+@AES_SSE_InvCipher@24	proc	SYSCALL	uses	ebx edi esi
 	movzx	ebx, cl
-	mov	ebp, esp
-	shl	ebx, 4		;ebx = Round's counter
-	and	esp, -16
-	mov	esi, edx	;esi = Pointer of Key stream
-	movdqa	xmm2, XMMWORD PTR [esi + ebx]
-	sub	esp, 16		;esp = __m128i temp
+	mov	edi, edx			;esi = Last
+	add	ebx, ebx
+	lea	eax, XMMWORD PTR [AES_SSE_Mask0]
+	lea	esi, [edx + ebx * 8]		;esi = Pointer of Key stream
+	lea	ecx, XMMWORD PTR [AES_SSE_Mask2]
+	movdqa	xmm2, XMMWORD PTR [esi]
+	lea	ebx, XMMWORD PTR [AES_SSE_Mask1]
+
 
 	;=======================
 	;◆Round (Nr)
 	;AddRoundKey()
+
 	pxor	xmm0, xmm2
-	sub	ebx, 16
+	lea	edx, XMMWORD PTR [AES_SSE_Mask3]
 
 ;	invoke	AES_SSE_InvShiftRows	;[0] 0,1,2,3
 	pshufd	xmm1, xmm0, 00111001b	;[1] 1,2,3,0
 	pshufd	xmm2, xmm0, 01001110b	;[2] 2,3,0,1
-	pand	xmm1, XMMWORD PTR [AES_SSE_Mask3]
-	pand	xmm2, XMMWORD PTR [AES_SSE_Mask2]
+	pand	xmm1, XMMWORD PTR [edx]
+	pand	xmm2, XMMWORD PTR [ecx]
 	pshufd	xmm3, xmm0, 10010011b	;[3] 3,0,1,2
-	pand	xmm0, XMMWORD PTR [AES_SSE_Mask0]
-	pand	xmm3, XMMWORD PTR [AES_SSE_Mask1]
+	pand	xmm0, XMMWORD PTR [eax]
+	pand	xmm3, XMMWORD PTR [ebx]
 	por	xmm1, xmm2
 	por	xmm0, xmm3
 	por	xmm0, xmm1
 
+	sub	esi, 16
+
 ;	invoke	AES_SSE_InvSubBytes
-	movdqa	XMMWORD PTR [esp], xmm0
-	mov	ecx, DWORD PTR [esp]
+	movd	ecx, xmm0
 	invoke	@InvSubWord@4
-	mov	ecx, DWORD PTR [esp + 4]
-	mov	DWORD PTR [esp], eax
+	movd	xmm1, eax
+	psrldq	xmm0, 4
+	pslldq	xmm1, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm1
 	invoke	@InvSubWord@4
-	mov	ecx, DWORD PTR [esp + 8]
-	mov	DWORD PTR [esp + 4], eax
+	movd	xmm1, eax
+	psrldq	xmm0, 4
+	pslldq	xmm1, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm1
 	invoke	@InvSubWord@4
-	mov	ecx, DWORD PTR [esp + 12]
-	mov	DWORD PTR [esp + 8], eax
+	movd	xmm1, eax
+	psrldq	xmm0, 4
+	pslldq	xmm1, 12
+	movd	ecx, xmm0
+	por	xmm0, xmm1
 	invoke	@InvSubWord@4
-	mov	DWORD PTR [esp + 12], eax
-	movdqa	xmm2, XMMWORD PTR [esi + ebx]
-	movdqa	xmm0, XMMWORD PTR [esp]
+	movd	xmm1, eax
+	psrldq	xmm0, 4
+	pslldq	xmm1, 12
+	movdqa	xmm2, XMMWORD PTR [esi]
+	por	xmm0, xmm1
+
 
 	;=======================
 	;◆Round (Nr-1) ～ (1)
@@ -647,44 +737,576 @@ InvSBox	db	052h,009h,06ah,0d5h,030h,036h,0a5h,038h,0bfh,040h,0a3h,09eh,081h,0f3h
 		pxor	xmm0, xmm1
 
 	;	invoke	AES_SSE_InvShiftRows	;[0] 0,1,2,3
+		lea	edx, XMMWORD PTR [AES_SSE_Mask3]
 		pshufd	xmm1, xmm0, 00111001b	;[1] 1,2,3,0
+		lea	ecx, XMMWORD PTR [AES_SSE_Mask2]
 		pshufd	xmm2, xmm0, 01001110b	;[2] 2,3,0,1
-		pand	xmm1, XMMWORD PTR [AES_SSE_Mask3]
-		pand	xmm2, XMMWORD PTR [AES_SSE_Mask2]
+		lea	eax, XMMWORD PTR [AES_SSE_Mask0]
+		pand	xmm1, XMMWORD PTR [edx]
+		pand	xmm2, XMMWORD PTR [ecx]
 		pshufd	xmm3, xmm0, 10010011b	;[3] 3,0,1,2
-		pand	xmm0, XMMWORD PTR [AES_SSE_Mask0]
-		pand	xmm3, XMMWORD PTR [AES_SSE_Mask1]
+		lea	ebx, XMMWORD PTR [AES_SSE_Mask1]
+		pand	xmm0, XMMWORD PTR [eax]
+		pand	xmm3, XMMWORD PTR [ebx]
 		por	xmm1, xmm2
 		por	xmm0, xmm3
 		por	xmm0, xmm1
 
+		sub	esi, 16
+
 	;	invoke	AES_SSE_InvSubBytes
-		movdqa	XMMWORD PTR [esp], xmm0
-		mov	ecx, DWORD PTR [esp]
+		movd	ecx, xmm0
 		invoke	@InvSubWord@4
-		mov	ecx, DWORD PTR [esp + 4]
-		mov	DWORD PTR [esp], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@InvSubWord@4
-		mov	ecx, DWORD PTR [esp + 8]
-		mov	DWORD PTR [esp + 4], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@InvSubWord@4
-		mov	ecx, DWORD PTR [esp + 12]
-		mov	DWORD PTR [esp + 8], eax
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movd	ecx, xmm0
+		por	xmm0, xmm1
 		invoke	@InvSubWord@4
-		mov	DWORD PTR [esp + 12], eax
-		sub	ebx, 16
-		movdqa	xmm0, XMMWORD PTR [esp]
-		movdqa	xmm2, XMMWORD PTR [esi + ebx]
-	.until(zero?)
+		movd	xmm1, eax
+		psrldq	xmm0, 4
+		pslldq	xmm1, 12
+		movdqa	xmm2, XMMWORD PTR [esi]
+		por	xmm0, xmm1
+
+	.until(edi >= esi)
 
 	;=======================
 	;◆Round (0)
 
 	;AddRoundKey()
-	mov	esp, ebp
 	pxor	xmm0, xmm2
-	pop	ebp
+
 	ret
 @AES_SSE_InvCipher@24	endp
+
+;===============================================================|
+;	fips-197	5.1	Cipher (AES-NI)			|
+;---------------------------------------------------------------|
+;	●引数							|
+;		cl	Nr	Round				|
+;		edx	ptrKS	Pointer of Key stream		|
+;		xmm0		Plain Text			|
+;	●返値							|
+;		xmm0		Cipher Text			|
+;	●使用するレジスタ					|
+;		eax		関数からの返り値		|
+;		ecx		関数への引数			|
+;		ebx	=  1<<4	Key Stream読み込み用のカウンタ	|
+;		edi	= cl<<4	Key Streamの最終カウンタ値	|
+;		esi	= edx	Key Streamのポインタ		|
+;===============================================================|
+.code
+	align(16)
+@AES_NI_Cipher@24	proc	SYSCALL	uses	ebx edi esi
+	lea	esi, [edx + 16]			;esi = Pointer of Key stream
+
+	pxor	xmm0, XMMWORD PTR [edx]		;w0
+	aesenc	xmm0, XMMWORD PTR [esi]		;w1
+	movzx	edi, cl
+
+	lea	eax, [esi + 16]			;前もって、アドレスを計算しておく。
+	lea	ebx, [esi + 32]			;（Core DUO, Core iシリーズの最適化）
+	lea	ecx, [esi + 48]
+	add	edi, edi
+	add	esi, 64
+	aesenc	xmm0, XMMWORD PTR [eax]		;w2
+	aesenc	xmm0, XMMWORD PTR [ebx]		;w3
+	aesenc	xmm0, XMMWORD PTR [ecx]		;w4
+	lea	edi, [edx + edi * 8]		;edi = Last Round's Pointer of Key stream
+
+	lea	eax, [esi + 16]			;前もって、アドレスを計算しておく。
+	lea	ebx, [esi + 32]			;（Core DUO, Core iシリーズの最適化）
+	lea	ecx, [esi + 48]
+	lea	edx, [esi + 64]
+
+	aesenc	xmm0, XMMWORD PTR [esi]		;w5
+	aesenc	xmm0, XMMWORD PTR [eax]		;w6
+	aesenc	xmm0, XMMWORD PTR [ebx]		;w7
+	aesenc	xmm0, XMMWORD PTR [ecx]		;w8
+	add	esi, 80
+	aesenc	xmm0, XMMWORD PTR [edx]		;w9
+
+	;=======================
+	;◆Round (10) ～ (Nr-1)
+	align(16)
+	.while	(edi > esi)
+		lea	eax, [esi + 16]			;前もって、アドレスを計算しておく。
+		aesenc	xmm0, XMMWORD PTR [esi]		;
+		aesenc	xmm0, XMMWORD PTR [eax]		;
+		add	esi, 32
+	.endw
+
+	;=======================
+	;◆Last Round (Nr)
+	aesenclast	xmm0, XMMWORD PTR [esi]
+
+	ret
+@AES_NI_Cipher@24	endp
+
+;===============================================================|
+;	fips-197	5.3	InvCipher (AES-NI)		|
+;---------------------------------------------------------------|
+;	●引数							|
+;		cl	Nr	Round				|
+;		edx	ptrKS	Pointer of Key stream		|
+;		xmm0		Cipher Text			|
+;	●返値							|
+;		xmm0		Plain Text			|
+;	●使用するレジスタ					|
+;		eax		関数からの返り値		|
+;		ecx		関数への引数			|
+;		ebx	= cl<<4	Key Stream読み込み用のカウンタ	|
+;		esi	= edx	Key Streamのポインタ		|
+;===============================================================|
+.code
+	align(16)
+@AES_NI_InvCipher@24	proc	SYSCALL	uses	ebx edi esi
+	movzx	ebx, cl
+	add	ebx, ebx
+	lea	esi, [edx + ebx * 8]		;esi = Pointer of Key stream
+
+	;=======================
+	;◆Round (Nr)
+	lea	eax, [esi - 16]			;前もって、アドレスを計算しておく。
+	lea	ebx, [esi - 32]			;（Core DUO, Core iシリーズの最適化）
+	lea	ecx, [esi - 48]
+	lea	edi, [esi - 64]
+	pxor	xmm0, XMMWORD PTR [esi]
+	aesimc	xmm5, XMMWORD PTR [eax]
+	sub	esi, 80
+	aesimc	xmm4, XMMWORD PTR [ebx]
+	aesdec	xmm0, xmm5
+	aesimc	xmm3, XMMWORD PTR [ecx]
+	aesdec	xmm0, xmm4
+	aesimc	xmm2, XMMWORD PTR [edi]
+	aesdec	xmm0, xmm3
+
+	lea	eax, [esi - 16]			;前もって、アドレスを計算しておく。
+	lea	ebx, [esi - 32]			;（Core DUO, Core iシリーズの最適化）
+	lea	ecx, [esi - 48]
+	lea	edi, [esi - 64]
+
+	aesimc	xmm5, XMMWORD PTR [esi]
+	aesdec	xmm0, xmm2
+	aesimc	xmm4, XMMWORD PTR [eax]
+	aesdec	xmm0, xmm5
+	aesimc	xmm3, XMMWORD PTR [ebx]
+	aesdec	xmm0, xmm4
+	aesimc	xmm2, XMMWORD PTR [ecx]
+	aesdec	xmm0, xmm3
+	aesimc	xmm1, XMMWORD PTR [edi]
+	aesdec	xmm0, xmm2
+	sub	esi, 80
+	aesdec	xmm0, xmm1
+
+	;=======================
+	;◆Round (10) ～ (Nr-1)
+	align(16)
+	.while	(edx < esi)
+		lea	eax, [esi - 16]		;前もって、アドレスを計算しておく。
+		aesimc	xmm2, XMMWORD PTR [esi]
+		aesimc	xmm1, XMMWORD PTR [eax]
+		aesdec	xmm0, xmm2
+		sub	esi, 32
+		aesdec	xmm0, xmm1
+	.endw
+	;=======================
+	;◆Last Round (Nr)
+	aesdeclast	xmm0, XMMWORD PTR [esi]
+
+	ret
+@AES_NI_InvCipher@24	endp
+
+;===============================================================|
+;	fips-197	5.2	Key Expansion (AES-NI)		|
+;---------------------------------------------------------------|
+;	●引数							|
+;		ecx	ptrKS	Pointer of Key stream		|
+;		edx	key	Pointer of Key			|
+;	●返値							|
+;		none						|
+;	●使用するレジスタ					|
+;		eax, ecx, edx	ポインタ計算用			|
+;		xmm0-7		鍵計算用			|
+;===============================================================|
+.code
+@AES_NI_KeyExpansion128@8	proc	SYSCALL
+
+	movdqu		xmm1, XMMWORD PTR [edx]
+	movdqa		XMMWORD PTR [ecx],xmm1
+
+	aeskeygenassist	xmm2, xmm1, 01h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 02h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 04h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 08h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 10h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 20h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 40h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 80h
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 1bh
+	call		AES_NI_KeyExpansion128_Sub
+
+	aeskeygenassist	xmm2, xmm1, 36h
+;	call		AES_NI_KeyExpansion128_Sub
+;
+;	ret
+@AES_NI_KeyExpansion128@8	endp
+
+AES_NI_KeyExpansion128_Sub	proc
+	movdqa		xmm3, xmm1
+	lea		ecx,  XMMWORD PTR [ecx + 16]
+	pslldq		xmm3, 4
+	pshufd		xmm2, xmm2, 11111111b	;3,3,3,3
+	pxor		xmm1, xmm3
+	pslldq		xmm3, 4
+	pxor		xmm1, xmm2
+	pxor		xmm1, xmm3
+	pslldq		xmm3, 4
+	pxor		xmm1, xmm3
+	movdqa		XMMWORD PTR [ecx], xmm1
+
+	ret
+AES_NI_KeyExpansion128_Sub	endp
+
+;---------------------------------------------------------------|
+@AES_NI_KeyExpansion192@8	proc	SYSCALL
+
+;	xmm0	読み込み
+;	xmm1	読み込み
+;	xmm2	シフト用＆合成
+;	xmm3	シフト用
+;	xmm4	aeskeygenassist
+;	xmm5	一時
+;	xmm6	AES_KEY_Mask0
+;	xmm7	AES_KEY_Mask1
+
+	movdqa		xmm6, XMMWORD PTR [AES_KEY_Mask0]
+	movdqa		xmm7, XMMWORD PTR [AES_KEY_Mask1]
+
+;	;[0]
+	lea		eax, XMMWORD PTR [edx + 16]
+	movdqu		xmm0, XMMWORD PTR [edx]	;[0][1][2][3]
+	movdqu		xmm1, XMMWORD PTR [eax]	;[4][5][6][7]
+	movdqa		XMMWORD PTR [ecx], xmm0
+	pand		xmm1, xmm6		;[4][5][-][-]
+
+;	;[1]
+	movdqa		xmm2, xmm0
+	aeskeygenassist	xmm4, xmm1, 01h
+	lea		eax, XMMWORD PTR [ecx + 16]
+	pshufd		xmm4, xmm4, 01010101b	;1,1,1,1
+	pslldq		xmm2, 8			;  = [-][-][1][0]
+	pxor		xmm1, xmm2		; += [-][-][1][0]
+	pslldq		xmm4, 8			;  = [-][-][s][s]
+	pxor		xmm1, xmm4		; += [-][-][s][s]
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2		; += [-][-][1][1]
+	movdqa		XMMWORD PTR [eax], xmm1	;[4][5][6][7]
+
+;	;[2]
+	movdqa		xmm2, xmm0
+	lea		eax, XMMWORD PTR [ecx + 32]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	pslldq		xmm3, 8
+	pshufd		xmm0, xmm1, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	movdqa		XMMWORD PTR [eax], xmm0	;[8][9][10][11]
+
+;	;[3]
+	movdqa		xmm2, xmm1
+	lea		eax, XMMWORD PTR [ecx + 48]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm0
+	aeskeygenassist	xmm1, xmm0, 02h
+	pslldq		xmm3, 8
+	pshufd		xmm1, xmm1, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3		;[6][7][8][9]
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	movdqa		XMMWORD PTR [eax], xmm1	;[12][13][14][15]
+
+;	;[4]
+	movdqa		xmm2, xmm0
+	lea		eax, XMMWORD PTR [ecx + 64]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	pslldq		xmm3, 8
+	pshufd		xmm4, xmm1, 11111111b	;[15][15][15][15]
+	pxor		xmm2, xmm3		;[10][11][12][13]
+	pand		xmm4, xmm6		;[15][15][- ][- ]
+	movdqa		xmm5, xmm2		
+	pand		xmm5, xmm7		;[10][- ][12][-]
+	pslldq		xmm5, 4
+	pxor		xmm5, xmm2
+	pxor		xmm5, xmm4
+	aeskeygenassist	xmm0, xmm5, 04h
+	pshufd		xmm0, xmm0, 01010101b	;3,3,3,3
+	pslldq		xmm0, 8
+	pxor		xmm0, xmm5
+	movdqa		XMMWORD PTR [eax], xmm0	;[16][17][18][19]
+
+;	;[5]
+	movdqa		xmm2, xmm1
+	lea		ecx, XMMWORD PTR [eax + 16]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm0
+	pslldq		xmm3, 8
+	pshufd		xmm1, xmm0, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	movdqa		XMMWORD PTR [ecx], xmm1	;[20][21][22][23]
+
+;	;[6]
+	movdqa		xmm2, xmm0
+	lea		ecx, XMMWORD PTR [eax + 32]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	aeskeygenassist	xmm0, xmm1, 08h
+	pslldq		xmm3, 8
+	pshufd		xmm0, xmm0, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	movdqa		XMMWORD PTR [ecx], xmm0	;[24][25][26][27]
+
+;	;[7]
+	movdqa		xmm2, xmm1
+	lea		ecx, XMMWORD PTR [eax + 48]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm0
+	pslldq		xmm3, 8
+	pshufd		xmm4, xmm0, 11111111b
+	pxor		xmm2, xmm3
+	pand		xmm4, xmm6
+	movdqa		xmm5, xmm2		
+	pand		xmm5, xmm7
+	pslldq		xmm5, 4
+	pxor		xmm5, xmm2
+	pxor		xmm5, xmm4
+	aeskeygenassist	xmm1, xmm5, 10h
+	pshufd		xmm1, xmm1, 01010101b	;3,3,3,3
+	pslldq		xmm1, 8
+	pxor		xmm1, xmm5
+	movdqa		XMMWORD PTR [ecx], xmm1	;[28][29][30][31]
+
+;	;[8]
+	movdqa		xmm2, xmm0
+	lea		eax, XMMWORD PTR [ecx + 16]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	pslldq		xmm3, 8
+	pshufd		xmm0, xmm1, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	movdqa		XMMWORD PTR [eax], xmm0
+
+;	;[9]
+	movdqa		xmm2, xmm1
+	lea		eax, XMMWORD PTR [ecx + 32]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm0
+	aeskeygenassist	xmm1, xmm0, 20h
+	pslldq		xmm3, 8
+	pshufd		xmm1, xmm1, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	movdqa		XMMWORD PTR [eax], xmm1
+
+;	;[10]
+	movdqa		xmm2, xmm0
+	lea		eax, XMMWORD PTR [ecx + 48]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	pslldq		xmm3, 8
+	pshufd		xmm4, xmm1, 11111111b
+	pxor		xmm2, xmm3
+	pand		xmm4, xmm6
+	movdqa		xmm5, xmm2		
+	pand		xmm5, xmm7
+	pslldq		xmm5, 4
+	pxor		xmm5, xmm2
+	pxor		xmm5, xmm4
+	aeskeygenassist	xmm0, xmm5, 40h
+	pshufd		xmm0, xmm0, 01010101b	;3,3,3,3
+	pslldq		xmm0, 8
+	pxor		xmm0, xmm5
+	movdqa		XMMWORD PTR [eax], xmm0
+
+;	;[11]
+	movdqa		xmm2, xmm1
+	lea		ecx, XMMWORD PTR [eax + 16]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm0
+	pslldq		xmm3, 8
+	pshufd		xmm1, xmm0, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm1, xmm2
+	movdqa		XMMWORD PTR [ecx], xmm1
+
+;	;[12]
+	movdqa		xmm2, xmm0
+	lea		ecx, XMMWORD PTR [eax + 32]
+	psrldq		xmm2, 8
+	movdqa		xmm3, xmm1
+	aeskeygenassist	xmm0, xmm1, 80h
+	pslldq		xmm3, 8
+	pshufd		xmm0, xmm0, 11111111b	;3,3,3,3
+	pxor		xmm2, xmm3
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	pslldq		xmm2, 4
+	pxor		xmm0, xmm2
+	movdqa		XMMWORD PTR [ecx], xmm0
+
+	ret
+@AES_NI_KeyExpansion192@8	endp
+;---------------------------------------------------------------|
+@AES_NI_KeyExpansion256@8	proc	SYSCALL
+
+	lea		eax, XMMWORD PTR [edx + 16]
+	movdqu		xmm0, XMMWORD PTR [edx]
+	movdqu		xmm1, XMMWORD PTR [eax]
+
+	lea		eax, XMMWORD PTR [ecx + 16]
+	movdqa		XMMWORD PTR [ecx], xmm0
+	movdqa		XMMWORD PTR [eax], xmm1
+
+	aeskeygenassist	xmm2, xmm1, 01h
+	call		AES_NI_KeyExpansion256_Sub
+
+	aeskeygenassist	xmm2, xmm1, 02h
+	call		AES_NI_KeyExpansion256_Sub
+
+	aeskeygenassist	xmm2, xmm1, 04h
+	call		AES_NI_KeyExpansion256_Sub
+
+	aeskeygenassist	xmm2, xmm1, 08h
+	call		AES_NI_KeyExpansion256_Sub
+
+	aeskeygenassist	xmm2, xmm1, 10h
+	call		AES_NI_KeyExpansion256_Sub
+
+	aeskeygenassist	xmm2, xmm1, 20h
+	call		AES_NI_KeyExpansion256_Sub
+
+	movdqa		xmm3, xmm0
+	lea		ecx,  XMMWORD PTR [ecx + 32]
+	pslldq		xmm3, 4
+	aeskeygenassist	xmm2, xmm1, 40h
+	pxor		xmm0, xmm3
+	pslldq		xmm3, 4
+	pshufd		xmm2, xmm2, 11111111b	;3,3,3,3
+	pxor		xmm0, xmm3
+	pslldq		xmm3, 4
+	pxor		xmm0, xmm2
+	pxor		xmm0, xmm3
+	movdqa		XMMWORD PTR [ecx], xmm0
+
+	ret
+@AES_NI_KeyExpansion256@8	endp
+
+AES_NI_KeyExpansion256_Sub	proc
+	movdqa		xmm3, xmm0
+	lea		ecx,  XMMWORD PTR [ecx + 32]
+	pslldq		xmm3, 4
+	pxor		xmm0, xmm3
+	pslldq		xmm3, 4
+	pshufd		xmm2, xmm2, 11111111b	;3,3,3,3
+	pxor		xmm0, xmm3
+	pslldq		xmm3, 4
+	pxor		xmm0, xmm2
+	pxor		xmm0, xmm3
+	movdqa		XMMWORD PTR [ecx], xmm0
+
+	movdqa		xmm3, xmm1
+	lea		edx,  XMMWORD PTR [ecx + 16]
+	pslldq		xmm3, 4
+	aeskeygenassist	xmm2, xmm0, 0
+	pxor		xmm1, xmm3
+	pslldq		xmm3, 4
+	pshufd		xmm2, xmm2, 10101010b	;2,2,2,2
+	pxor		xmm1, xmm3
+	pslldq		xmm3, 4
+	pxor		xmm1, xmm2
+	pxor		xmm1, xmm3
+	movdqa		XMMWORD PTR [edx], xmm1
+
+	ret
+AES_NI_KeyExpansion256_Sub	endp
+
 ;****************************************************************
 	end

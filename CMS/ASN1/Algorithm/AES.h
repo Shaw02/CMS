@@ -61,12 +61,25 @@ union _mm_i32
 /****************************************************************/
 //ÉAÉZÉìÉuÉäåæåÍÇ≈èëÇ©ÇÍÇΩä÷êî	"AES_sse.asm"
 extern "C"{
+	//--------------------------			
+	//SSE2
 				__m128i	__fastcall	AES_SSE_Cipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
 				__m128i	__fastcall	AES_SSE_InvCipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+
 //	unsigned	int		__fastcall	SubWord(unsigned int data);
 //	unsigned	int		__fastcall	SubWord2(unsigned int data);
 //	unsigned	int		__fastcall	SubWord3(unsigned int data);
 //	unsigned	int		__fastcall	InvSubWord(unsigned int data);
+
+	//--------------------------			
+	//AES-NI
+				void	__fastcall	AES_NI_KeyExpansion128(unsigned int *ptrKs, unsigned char *key);
+				void	__fastcall	AES_NI_KeyExpansion192(unsigned int *ptrKs, unsigned char *key);
+				void	__fastcall	AES_NI_KeyExpansion256(unsigned int *ptrKs, unsigned char *key);
+				__m128i	__fastcall	AES_NI_Cipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+				__m128i	__fastcall	AES_NI_InvCipher(unsigned char cNr,unsigned int *ptrKs, __m128i data);
+//				__m128i	__fastcall	AES_NI_InvCipher_CBC4(unsigned char cNr,unsigned int *ptrKs, __m128i* data, __m128i vector);
+
 }
 
 /****************************************************************/
@@ -85,6 +98,7 @@ public:
 											//For this standard, Nk = 4, 6, or 8. (Also see Sec. 6.3.)
 	unsigned	char	Nr;					//Number of rounds, which is a function of Nk and Nb (which is fixed).
 											//For this standard, Nr = 10, 12, or 14. (Also see Sec. 6.3.)
+	bool				aesni;
 
 //Function
 public:
@@ -116,6 +130,7 @@ protected:
 
 	void	KeyExpansion(unsigned char *key);					//5.2	Key Expansion
 	__m128i	InvCipher(__m128i data);							//5.3	InvCipher
+	__m128i	InvCipher_CBC4(__m128i* data, __m128i vector);		//5.3	InvCipher
 	__m128i	InvShiftRows(__m128i data);							//5.3.1	InvShiftRows
 	__m128i	InvSubBytes(__m128i data);							//5.3.2	InvSubBytes
 	__m128i	InvMixColumns(__m128i data);						//5.3.3	InvMixColumns

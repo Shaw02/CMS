@@ -7,6 +7,7 @@ class OPSW {
 public:
 //--------------
 //変数
+				int			fSIMD;			//SIMDあるか？
 				int			iMode;			//暗号利用モード
 				int			iType;			//ファイルタイプ
 				int			iCount;			//繰り返し回数

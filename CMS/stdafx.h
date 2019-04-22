@@ -11,6 +11,7 @@
 #include <time.h>
 #include <tchar.h>
 #include <nmmintrin.h>
+#include <wmmintrin.h>
 
 #include <iomanip>
 #include <string>
@@ -111,8 +112,8 @@ extern	MT_SHA*	cRandom;
 /****************************************************************/
 /*			プロトタイプ										*/
 /****************************************************************/
-void		dataPrint(int n, void *Data);
-void		dataPrint32(int n, void *Data);
+extern "C"	void		dataPrint(int n, void *Data);
+extern "C"	void		dataPrint32(int n, void *Data);
 void		errPrint(const char *strFile, const char *strMSG);
 __int64		ReadTSC();
-
+int			ChkSIMD();

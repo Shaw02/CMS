@@ -31,6 +31,22 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 	char	cOption;			//オプションチェック用　文字
 	char	iFlagFilnameExt;	//拡張子あったかのフラグ
 
+	//----------------------------------------------------
+	//SIMD命令のチェック
+	fSIMD = ChkSIMD();
+	switch(fSIMD){
+		case(1):
+			cout << "Detect SSE2 instruction sets." << endl;
+			break;
+		case(2):
+			cout << "Detect AES-NI instruction sets." << endl;
+			break;
+		default:
+			cout << "SIMD instruction do not found." << endl;
+			exit(-1);
+			break;
+	}
+
 	//----------------------------------
 	//■オプション処理
 	iCount=1;	//コマンド名は飛ばす
@@ -251,10 +267,10 @@ OPSW::~OPSW(){
 //==============================================================
 void	OPSW::print_help(){
 
-	cout	<<	"AES cipher decorder and encoder.\n"
-				"Copyright (C) S.W. (A.Watanabe) 2011\n"
+	cout	<<	"CMS（RFC.5652 ＆ PKCS#7）utility\n"
+				"Copyright (C) S.W. (A.Watanabe) 2011-2013\n"
 				"\n"
-				"AES [ /options ] [filename]\n"
+				"CMS [ /options ] [filename]\n"
 				"\n"
 				"  --- Common option ---\n"
 				"  filename		File name of Plain-Text.\n"

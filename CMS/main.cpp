@@ -44,7 +44,7 @@ void	errPrint(const char *strFile, const char *strMSG)
 //	●返値
 //			無し
 //==============================================================
-void	dataPrint(int n, void *Data)
+extern "C"	void	dataPrint(int n, void *Data)
 {
 	unsigned	char*	cData	= (unsigned char*)Data;
 				int		i		= 0;
@@ -65,7 +65,7 @@ void	dataPrint(int n, void *Data)
 //	●返値
 //			無し
 //==============================================================
-void	dataPrint32(int n, void *Data)
+extern "C"	void	dataPrint32(int n, void *Data)
 {
 	unsigned	int*	cData	= (unsigned int*)Data;
 				int		i		= 0;
@@ -89,10 +89,46 @@ void	dataPrint32(int n, void *Data)
 __int64	ReadTSC()
 {
 	__asm{
-		cpuid
+;		cpuid
 		rdtsc
 	}
 }
+//==============================================================
+//			SIMDに対応しているかチェック
+//--------------------------------------------------------------
+//	●引数
+//			無し
+//	●返値
+//			__int64		プロセス時間
+//==============================================================
+int	ChkSIMD(){
+	__asm{
+		push	ebx
+		push	ecx
+		push	edx
+
+		mov		eax, 1
+		cpuid
+		test	ecx, 002000000h
+		jnz		ChkSIMD_AESNI
+		test	edx, 004000000h		;//SSE2 check
+		jnz		ChkSIMD_SSE2
+		mov		eax, 0
+		jmp		ChkSIMD_END
+ChkSIMD_SSE2:
+		mov		eax, 1
+		jmp		ChkSIMD_END
+ChkSIMD_AESNI:
+		mov		eax, 2
+;		jmp		ChkSIMD_END
+ChkSIMD_END:
+
+		pop		edx
+		pop		ecx
+		pop		ebx
+	}
+}
+
 //==============================================================
 //			暗号処理ルーチン
 //--------------------------------------------------------------
@@ -276,13 +312,52 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 
 	unsigned	__int64	cycles = ReadTSC();		//プログラム起動時のクロック数
 
+#ifdef	_DEBUG
+
+	static	const	char	iKey128[]={	0x2b, 0x7e, 0x15, 0x16, 
+										0x28, 0xae, 0xd2, 0xa6, 
+										0xab, 0xf7, 0x15, 0x88, 
+										0x09, 0xcf, 0x4f, 0x3c};
+
+	static	const	char	iKey192[]={	0x8e, 0x73, 0xb0, 0xf7, 
+										0xda, 0x0e, 0x64, 0x52, 
+										0xc8, 0x10, 0xf3, 0x2b, 
+										0x80, 0x90, 0x79, 0xe5, 
+										0x62, 0xf8, 0xea, 0xd2, 
+										0x52, 0x2c, 0x6b, 0x7b};
+
+	static	const	char	iKey256[]={	0x60, 0x3d, 0xeb, 0x10,
+										0x15, 0xca, 0x71, 0xbe,
+										0x2b, 0x73, 0xae, 0xf0,
+										0x85, 0x7d, 0x77, 0x81,
+										0x1f, 0x35, 0x2c, 0x07,
+										0x3b, 0x61, 0x08, 0xd7,
+										0x2d, 0x98, 0x10, 0xa3,
+										0x09, 0x14, 0xdf, 0xf4};
+
+	AES_CBC128	cENC128;
+	AES_CBC192	cENC192;
+	AES_CBC256	cENC256;
+
+	printf("----------------\n");
+	printf("KeyExp 128\n");
+	cENC128.Set_Key((void*)iKey128);
+
+	printf("----------------\n");
+	printf("KeyExp 192\n");
+	cENC192.Set_Key((void*)iKey192);
+
+	printf("----------------\n");
+	printf("KeyExp 256\n");
+	cENC256.Set_Key((void*)iKey256);
+
+#else
+	
 	//乱数の種用
 	union {
 		unsigned	int		i[4];
 		unsigned	__int64	i64[2];
 	} __declspec(align(16)) randSeed;
-
-	//----------------------------------------------------
 
 	//------------------
 	//乱数作成
@@ -294,6 +369,7 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 	//オプション処理
 	cOpsw	= new OPSW(argc, argv);
 
+
 	//------------------
 	//処理開始
 	if(cOpsw->cDecipher == 0){
@@ -304,6 +380,9 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 
 	delete	cOpsw;
 	delete	cRandom;
+
+
+#endif
 
 	cout	<<	"Success.\n"
 				"Process cycles = "	<<	ReadTSC() - cycles	<<	endl;
