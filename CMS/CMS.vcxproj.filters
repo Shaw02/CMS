@@ -1,0 +1,425 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ソース ファイル\File">
+      <UniqueIdentifier>{2d713052-b05e-42ac-a1fa-f0e724df3e03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN">
+      <UniqueIdentifier>{9d1a0c87-38fd-484f-84cf-d929e73a13f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\PKCS#8%28Key%29">
+      <UniqueIdentifier>{9f475e22-4a87-409c-9bc6-3506a1b52309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\PKCS#7%28CMS%29">
+      <UniqueIdentifier>{e740f01d-e74a-4ce1-906f-a91185a5004a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm">
+      <UniqueIdentifier>{eec72f7a-3c83-4398-a268-7ff9c00524b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm\Encryption">
+      <UniqueIdentifier>{a8738bb8-efaa-4a6d-a67f-f98335894e2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm\Digest">
+      <UniqueIdentifier>{c2b3d5fd-51b8-485b-9ba7-b40cda9e182d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm\Random">
+      <UniqueIdentifier>{a074ca60-6497-4d48-9928-9280eed1a2f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm\HMAC">
+      <UniqueIdentifier>{f811a526-47c2-482a-87b5-125dffda1de4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\ASN\Algorithm\PBKDF">
+      <UniqueIdentifier>{ab215c75-59c3-480a-aee5-ab7dcdffeaf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\File">
+      <UniqueIdentifier>{8caea228-a545-423b-8aa1-a460e03ab851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN">
+      <UniqueIdentifier>{72cb1e4c-824a-47d6-909b-6676f47031d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\PKCS#7%28CMS%29">
+      <UniqueIdentifier>{cf2b6a93-e578-49e2-b789-1e77fe938fc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\PKCS#8%28Key%29">
+      <UniqueIdentifier>{5afbfe88-c5b1-40a8-9ce6-6da0733122b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm">
+      <UniqueIdentifier>{23ef6014-13c7-44dc-9361-f7192b94d7c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm\Encryption">
+      <UniqueIdentifier>{6e4ebdc4-979d-4d60-b7f2-7121957c9491}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm\Digest">
+      <UniqueIdentifier>{15cdc1f5-74d0-46d5-ab3b-bf2bc448d7dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm\Random">
+      <UniqueIdentifier>{c3b76108-3fb2-4535-aab4-08c511785dae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm\HMAC">
+      <UniqueIdentifier>{9ef349e2-c0d4-40b6-aca1-f9140745ce28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\ASN\Algorithm\PBKDF">
+      <UniqueIdentifier>{03486a17-7e36-4d93-bd21-6092d3201115}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Option.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInput.cpp">
+      <Filter>ソース ファイル\File</Filter>
+    </ClCompile>
+    <ClCompile Include="FileOutput.cpp">
+      <Filter>ソース ファイル\File</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\ASN1.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\BER_Input.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\BER_Output.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Context.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Integer.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\ObjectIdentifier.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\OctetString.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Sequence.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Set.cpp">
+      <Filter>ソース ファイル\ASN</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS8\PKCS8.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS8\PKCS8_Input.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS8\PKCS8_Output.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS8\PrivateKeyInfo.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\ContentInfo.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\EncryptedContentInfo.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\EncryptedData.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\EnvelopedData.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PasswordRecipientInfo.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_3_Input.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_3_Output.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_6_Input.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_6_Output.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_Input.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\PKCS7_Output.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\PKCS7\RecipientInfos.cpp">
+      <Filter>ソース ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AlgorithmIdentifier.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AES.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AES_CBC.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AES_CBC128.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AES_CBC192.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\AES_CBC256.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\DES.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\DES_CBC.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\DES_EDE3.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\DES_EDE3_CBC.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\Encryption.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\PWRI-KEK.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\Digest.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\SHA-1.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\SHA-224.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\SHA-256.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\SHA.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Digest</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\MT.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Random</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\MT_SHA.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\Random</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-1.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-224.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-256.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\HMAC.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\KeyDerivation.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\PBKDF</Filter>
+    </ClCompile>
+    <ClCompile Include="ASN1\Algorithm\PBKDF2.cpp">
+      <Filter>ソース ファイル\ASN\Algorithm\PBKDF</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ASN1\Algorithm\AES_sse.asm">
+      <Filter>ソース ファイル\ASN\Algorithm\Encryption</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Option.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInput.h">
+      <Filter>ヘッダー ファイル\File</Filter>
+    </ClInclude>
+    <ClInclude Include="FileOutput.h">
+      <Filter>ヘッダー ファイル\File</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\ASN1.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\BER_Input.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\BER_Output.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Context.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Integer.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\ObjectIdentifier.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\OctetString.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Sequence.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Set.h">
+      <Filter>ヘッダー ファイル\ASN</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\ContentInfo.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\EncryptedContentInfo.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\EncryptedData.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\EnvelopedData.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PasswordRecipientInfo.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_3_Input.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_3_Output.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_6_Input.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_6_Output.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_Input.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\PKCS7_Output.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS7\RecipientInfos.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#7%28CMS%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS8\PKCS8.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS8\PKCS8_Input.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS8\PKCS8_Output.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\PKCS8\PrivateKeyInfo.h">
+      <Filter>ヘッダー ファイル\ASN\PKCS#8%28Key%29</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AlgorithmIdentifier.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AES.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AES_CBC.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AES_CBC128.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AES_CBC192.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\AES_CBC256.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\DES.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\DES_CBC.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\DES_EDE3.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\DES_EDE3_CBC.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\Encryption.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\PWRI-KEK.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Encryption</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\Digest.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\SHA-1.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\SHA-224.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\SHA-256.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\SHA.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Digest</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\MT.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\MT_SHA.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-1.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-224.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-256.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\HMAC.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\HMAC</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\KeyDerivation.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\PBKDF</Filter>
+    </ClInclude>
+    <ClInclude Include="ASN1\Algorithm\PBKDF2.h">
+      <Filter>ヘッダー ファイル\ASN\Algorithm\PBKDF</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{29BF5BD1-0FE5-498D-B482-E98414B44135}</ProjectGuid>
+    <RootNamespace>CMS</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <UseOfAtl>Static</UseOfAtl>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.28803.298</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <AssemblerOutput>All</AssemblerOutput>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CallingConvention>Cdecl</CallingConvention>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ASN1\Algorithm\AES.cpp" />
+    <ClCompile Include="ASN1\Algorithm\AES_CBC.cpp" />
+    <ClCompile Include="ASN1\Algorithm\AES_CBC128.cpp" />
+    <ClCompile Include="ASN1\Algorithm\AES_CBC192.cpp" />
+    <ClCompile Include="ASN1\Algorithm\AES_CBC256.cpp" />
+    <ClCompile Include="ASN1\Algorithm\AlgorithmIdentifier.cpp" />
+    <ClCompile Include="ASN1\Algorithm\DES.cpp" />
+    <ClCompile Include="ASN1\Algorithm\DES_CBC.cpp" />
+    <ClCompile Include="ASN1\Algorithm\DES_EDE3.cpp" />
+    <ClCompile Include="ASN1\Algorithm\DES_EDE3_CBC.cpp" />
+    <ClCompile Include="ASN1\Algorithm\Digest.cpp" />
+    <ClCompile Include="ASN1\Algorithm\Encryption.cpp" />
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-1.cpp" />
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-224.cpp" />
+    <ClCompile Include="ASN1\Algorithm\HMAC-SHA-256.cpp" />
+    <ClCompile Include="ASN1\Algorithm\HMAC.cpp" />
+    <ClCompile Include="ASN1\Algorithm\KeyDerivation.cpp" />
+    <ClCompile Include="ASN1\Algorithm\MT.cpp" />
+    <ClCompile Include="ASN1\Algorithm\MT_SHA.cpp" />
+    <ClCompile Include="ASN1\Algorithm\PBKDF2.cpp" />
+    <ClCompile Include="ASN1\Algorithm\PWRI-KEK.cpp" />
+    <ClCompile Include="ASN1\Algorithm\SHA-1.cpp" />
+    <ClCompile Include="ASN1\Algorithm\SHA-224.cpp" />
+    <ClCompile Include="ASN1\Algorithm\SHA-256.cpp" />
+    <ClCompile Include="ASN1\Algorithm\SHA.cpp" />
+    <ClCompile Include="ASN1\ASN1.cpp" />
+    <ClCompile Include="ASN1\BER_Input.cpp" />
+    <ClCompile Include="ASN1\BER_Output.cpp" />
+    <ClCompile Include="ASN1\Context.cpp" />
+    <ClCompile Include="ASN1\Integer.cpp" />
+    <ClCompile Include="ASN1\ObjectIdentifier.cpp" />
+    <ClCompile Include="ASN1\OctetString.cpp" />
+    <ClCompile Include="ASN1\PKCS7\ContentInfo.cpp" />
+    <ClCompile Include="ASN1\PKCS7\EncryptedContentInfo.cpp" />
+    <ClCompile Include="ASN1\PKCS7\EncryptedData.cpp" />
+    <ClCompile Include="ASN1\PKCS7\EnvelopedData.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PasswordRecipientInfo.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_3_Input.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_3_Output.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_6_Input.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_6_Output.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_Input.cpp" />
+    <ClCompile Include="ASN1\PKCS7\PKCS7_Output.cpp" />
+    <ClCompile Include="ASN1\PKCS7\RecipientInfos.cpp" />
+    <ClCompile Include="ASN1\PKCS8\PKCS8.cpp" />
+    <ClCompile Include="ASN1\PKCS8\PKCS8_Input.cpp" />
+    <ClCompile Include="ASN1\PKCS8\PKCS8_Output.cpp" />
+    <ClCompile Include="ASN1\PKCS8\PrivateKeyInfo.cpp" />
+    <ClCompile Include="ASN1\Sequence.cpp" />
+    <ClCompile Include="ASN1\Set.cpp" />
+    <ClCompile Include="FileInput.cpp" />
+    <ClCompile Include="FileOutput.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Option.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ASN1\Algorithm\AES_sse.asm">
+      <AssembledCodeListingFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(ProjectName)</AssembledCodeListingFile>
+      <ListAllAvailableInformation Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ListAllAvailableInformation>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ASN1\Algorithm\AES.h" />
+    <ClInclude Include="ASN1\Algorithm\AES_CBC.h" />
+    <ClInclude Include="ASN1\Algorithm\AES_CBC128.h" />
+    <ClInclude Include="ASN1\Algorithm\AES_CBC192.h" />
+    <ClInclude Include="ASN1\Algorithm\AES_CBC256.h" />
+    <ClInclude Include="ASN1\Algorithm\AlgorithmIdentifier.h" />
+    <ClInclude Include="ASN1\Algorithm\DES.h" />
+    <ClInclude Include="ASN1\Algorithm\DES_CBC.h" />
+    <ClInclude Include="ASN1\Algorithm\DES_EDE3.h" />
+    <ClInclude Include="ASN1\Algorithm\DES_EDE3_CBC.h" />
+    <ClInclude Include="ASN1\Algorithm\Digest.h" />
+    <ClInclude Include="ASN1\Algorithm\Encryption.h" />
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-1.h" />
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-224.h" />
+    <ClInclude Include="ASN1\Algorithm\HMAC-SHA-256.h" />
+    <ClInclude Include="ASN1\Algorithm\HMAC.h" />
+    <ClInclude Include="ASN1\Algorithm\KeyDerivation.h" />
+    <ClInclude Include="ASN1\Algorithm\MT.h" />
+    <ClInclude Include="ASN1\Algorithm\MT_SHA.h" />
+    <ClInclude Include="ASN1\Algorithm\PBKDF2.h" />
+    <ClInclude Include="ASN1\Algorithm\PWRI-KEK.h" />
+    <ClInclude Include="ASN1\Algorithm\SHA-1.h" />
+    <ClInclude Include="ASN1\Algorithm\SHA-224.h" />
+    <ClInclude Include="ASN1\Algorithm\SHA-256.h" />
+    <ClInclude Include="ASN1\Algorithm\SHA.h" />
+    <ClInclude Include="ASN1\ASN1.h" />
+    <ClInclude Include="ASN1\BER_Input.h" />
+    <ClInclude Include="ASN1\BER_Output.h" />
+    <ClInclude Include="ASN1\Context.h" />
+    <ClInclude Include="ASN1\Integer.h" />
+    <ClInclude Include="ASN1\ObjectIdentifier.h" />
+    <ClInclude Include="ASN1\OctetString.h" />
+    <ClInclude Include="ASN1\PKCS7\ContentInfo.h" />
+    <ClInclude Include="ASN1\PKCS7\EncryptedContentInfo.h" />
+    <ClInclude Include="ASN1\PKCS7\EncryptedData.h" />
+    <ClInclude Include="ASN1\PKCS7\EnvelopedData.h" />
+    <ClInclude Include="ASN1\PKCS7\PasswordRecipientInfo.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_3_Input.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_3_Output.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_6_Input.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_6_Output.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_Input.h" />
+    <ClInclude Include="ASN1\PKCS7\PKCS7_Output.h" />
+    <ClInclude Include="ASN1\PKCS7\RecipientInfos.h" />
+    <ClInclude Include="ASN1\PKCS8\PKCS8.h" />
+    <ClInclude Include="ASN1\PKCS8\PKCS8_Input.h" />
+    <ClInclude Include="ASN1\PKCS8\PKCS8_Output.h" />
+    <ClInclude Include="ASN1\PKCS8\PrivateKeyInfo.h" />
+    <ClInclude Include="ASN1\Sequence.h" />
+    <ClInclude Include="ASN1\Set.h" />
+    <ClInclude Include="FileInput.h" />
+    <ClInclude Include="FileOutput.h" />
+    <ClInclude Include="Option.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>

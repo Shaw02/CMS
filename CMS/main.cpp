@@ -144,7 +144,7 @@ void	encrypt()
 	static	ObjectIdentifier			contentType	= ObjectIdentifier((unsigned int*)oid_PKCS7_1, sizeof(oid_PKCS7_1)/sizeof(unsigned int));
 
 	//変数
-	static	FileInput			f_IN	= FileInput(cOpsw->strBINname.c_str());				//ファイル入力用
+	static	FileInput*			f_IN	= new FileInput(cOpsw->strBINname.c_str());				//ファイル入力用
 
 	union{
 		PKCS7_3_Output*	t3;
@@ -173,7 +173,7 @@ void	encrypt()
 			// (2) 受信者情報のセット（現状は、鍵導出（パスワード）のみ対応）
 			f_OUT.t3->AddRecipient(&cOpsw->strKeyWord, cOpsw->iCount, cOpsw->iMode);
 			// (3) 暗号化（ファイル出力込み）
-			f_OUT.t3->encrypt(&f_IN, &contentType);
+			f_OUT.t3->encrypt(f_IN, &contentType);
 			// 暗号ファイル・オブジェクトの開放
 			delete f_OUT.t3;
 			break;
@@ -203,7 +203,7 @@ void	encrypt()
 				}
 			}
 			// 暗号化（ファイル出力込み）
-			f_OUT.t6->encrypt(&f_IN, &contentType);
+			f_OUT.t6->encrypt(f_IN, &contentType);
 			// 暗号ファイル・オブジェクトの開放
 			delete f_OUT.t6;
 			break;
@@ -232,7 +232,7 @@ void	decrypt()
 	//変数
 //	unsigned	int	iType	= 6;		//PKCS#7のタイプ
 
-	static	FileOutput			f_OUT	= FileOutput(cOpsw->strBINname.c_str());		//ファイル出力用
+	static	FileOutput*			f_OUT	= new FileOutput(cOpsw->strBINname.c_str());		//ファイル出力用
 
 	union{
 		PKCS7_3_Input*	t3;
@@ -260,7 +260,7 @@ void	decrypt()
 			// 受信者情報の照合
 			f_IN.t3->Receipt(&cOpsw->strKeyWord);
 			// 暗号化（ファイル出力込み）
-			f_IN.t3->decrypt(&f_OUT);
+			f_IN.t3->decrypt(f_OUT);
 			// 暗号ファイル・オブジェクトの開放
 			delete f_IN.t3;
 			break;
@@ -282,7 +282,7 @@ void	decrypt()
 				f_IN.t6->Set_Encryption(&cOpsw->strKeyWord);
 			}
 			// 暗号化（ファイル出力込み）
-			f_IN.t6->decrypt(&f_OUT);
+			f_IN.t6->decrypt(f_OUT);
 			// 暗号ファイル・オブジェクトの開放
 			delete f_IN.t6;
 			break;
