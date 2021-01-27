@@ -2,51 +2,51 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�Í����b�Z�[�W�\��(CMS)</Title>
+<Title>暗号メッセージ構文(CMS)</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 
-<h2>�Í����b�Z�[�W�\��(CMS)�ɂ���</h2>
+<h2>暗号メッセージ構文(CMS)について</h2>
 
 <div class='block'>
 <p>
-�Í����b�Z�[�W�\��(CMS)�Ƃ́A�d�q������Í����Ȃǂ̍\�����߂�K�i�iRFC.5652�j�ł��B<br>
-CMS�ł́A�ȉ��̃^�C�v�̃f�[�^���i�[�ł��܂��B<br>
+暗号メッセージ構文(CMS)とは、電子署名や暗号文などの構文を定める規格（RFC.5652）です。<br>
+CMSでは、以下のタイプのデータを格納できます。<br>
 </p>
 
-<table summary="CMS�ŋK�肳���f�[�^�̎��">
-<caption>CMS�̎��</caption>
+<table summary="CMSで規定されるデータの種類">
+<caption>CMSの種類</caption>
 <tr><th>OID										</th>
-	<th>�^�C�v									</th>
-	<th>�t�@�C���̓��e							</th></tr>
+	<th>タイプ									</th>
+	<th>ファイルの内容							</th></tr>
 <tr><td>1.2.840.113549.1.7.1					</td>
 	<td>data									</td>
-	<td>�f�[�^									</td></tr>
+	<td>データ									</td></tr>
 <tr><td>1.2.840.113549.1.7.2					</td>
 	<td>signed-data								</td>
-	<td>�d�q�����f�[�^	�@�i���J���ؖ����݂̂̏ꍇ����j</td></tr>
+	<td>電子署名データ	　（公開鍵証明書のみの場合あり）</td></tr>
 <tr><td>1.2.840.113549.1.7.3					</td>
 <td><a href="enveloped.html">enveloped-data	</a></td>
-	<td>�������f�[�^	�@�i�Í����f�[�^ �{ ������j	</td></tr>
+	<td>封筒化データ	　（暗号化データ ＋ 宛先情報）	</td></tr>
 <tr><td>1.2.840.113549.1.7.5					</td>
 <td>digested-data								</td>
-	<td>�_�C�W�F�X�g�f�[�^						</td></tr>
+	<td>ダイジェストデータ						</td></tr>
 <tr><td>1.2.840.113549.1.7.6					</td>
 <td><a href="encrypted.html">encrypted-data	</a></td>
-	<td>�Í����f�[�^							</td></tr>
+	<td>暗号化データ							</td></tr>
 <tr><td>1.2.840.113549.1.9.16.1.2				</td>
 	<td>authenticated-data						</td>
-	<td>���i�F�؃f�[�^							</td></tr>
+	<td>資格認証データ							</td></tr>
 </table>
 
 <p>
-�Í����b�Z�[�W�\���iCMS�j�́A�ȉ���ASN.1�ɂ���Ē�`�����ContentInfo�\���ƂȂ�܂��B<br>
+暗号メッセージ構文（CMS）は、以下のASN.1によって定義されるContentInfo構造となります。<br>
 </p>
 <pre class="code">
 <strong>[ASN.1] ContentInfo (oid = 1.2.840.113549.1.9.16.1.6)</strong>
@@ -59,24 +59,24 @@ ContentInfo ::= SEQUENCE {
 <a name="ContentType">ContentType</a> ::= OBJECT IDENTIFIER
 </pre>
 
-<table summary="ContentInfo�ɂ���">
-<caption>ContentInfo�ɂ���</caption>
-<tr><th>�t�B�[���h��	</th><th>���e	</th></tr>
-<tr><td>contentType	</td><td>content�Ɋi�[�����f�[�^�̃^�C�v������oid���������<br>
-							oid�̒l�́A��̕\�uCMS�̎�ށv�̎Q�ƁB</td></tr>
-<tr><td>content		</td><td>contentType�Œ�`���ꂽ�f�[�^���i�[�����B<br>
-							���̃t�B�[���h�ɁA�e�^�C�v�Œ�`����邻�ꂼ��̃f�[�^������B</td></tr>
+<table summary="ContentInfoについて">
+<caption>ContentInfoについて</caption>
+<tr><th>フィールド名	</th><th>内容	</th></tr>
+<tr><td>contentType	</td><td>contentに格納されるデータのタイプを示すoidが書かれる<br>
+							oidの値は、上の表「CMSの種類」の参照。</td></tr>
+<tr><td>content		</td><td>contentTypeで定義されたデータが格納される。<br>
+							このフィールドに、各タイプで定義されるそれぞれのデータが入る。</td></tr>
 </table>
 
 <p>
-�܂�ABER�ŕ����������Ɖ��肷��ƁA�ȉ��̂悤�ɕ����������B<br>
+つまり、BERで符号化したと仮定すると、以下のように符号化される。<br>
 </p>
 <pre class="code">
-30 <var>size</var>�@�@�@�c 0x06�^�O(OID)�y�т��̃f�[�^�ƁA0xA0�^�O�iContent�j�y�т��̃f�[�^�́A���v�T�C�Y�B
-  06 <var>size</var>�@�@�@�c �ȉ�<var>oid</var>�t�B�[���h�̃f�[�^�T�C�Y[Byte]�B
-    <var>oid</var>�@�@�@�c�@�e�^�C�v��OID
-  A0 <var>size</var>�@�@�@�c �ȉ�<var>content</var>�t�B�[���h�̃f�[�^�T�C�Y[Byte]�B
-    <var>content</var>�@�@�@�c�@�e�^�C�v�ŋK�肳�ꂽ�f�[�^��
+30 <var>size</var>　　　… 0x06タグ(OID)及びそのデータと、0xA0タグ（Content）及びそのデータの、合計サイズ。
+  06 <var>size</var>　　　… 以下<var>oid</var>フィールドのデータサイズ[Byte]。
+    <var>oid</var>　　　…　各タイプのOID
+  A0 <var>size</var>　　　… 以下<var>content</var>フィールドのデータサイズ[Byte]。
+    <var>content</var>　　　…　各タイプで規定されたデータ列
 </pre>
 
 </div>

@@ -2,21 +2,21 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�����o�A���S���Y���iKey Derivation Algorithm�j</Title>
+<Title>鍵導出アルゴリズム（Key Derivation Algorithm）</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 
 <div class="block">
-<h2><a name="KeyDerivation">�����o�A���S���Y���iKey Derivation Algorithm�j</a></h2>
+<h2><a name="KeyDerivation">鍵導出アルゴリズム（Key Derivation Algorithm）</a></h2>
 
 <p>
-�����̃A���S���Y���́A�p�X���[�h�����Í�����(KEK)�ɕϊ�����ׂɎg���܂��B<br>
+これらのアルゴリズムは、パスワードを鍵暗号化鍵(KEK)に変換する為に使われます。<br>
 </p>
 
 <h3><a name="PBKDF2">PBKDF2</a></h3>
@@ -24,10 +24,10 @@
 <dt>PBKDF2</dt><dd>1.2.840.113549.1.5.12</dd>
 </dl>
 <p>
-PBKDF1�ł̓p�X���[�h�������SHA-1���̃_�C�W�F�X�g�֐��ɂƂ����ĈÍ���KEK���v�Z�������A
-�X�Ȃ�Z�L�����e�B����Ƃ���HMAC-SHA-1���̌��t���_�C�W�F�X�g�֐���p���ĈÍ���KEK���v�Z����A���S���Y���B<br>
-PBKDF2�̏ڍׂ́A"RFC 2898 [PKCS#5]"���Q�Ƃ��Ă��������B<br>
-�֘A���鑽���̃p�����[�^�́A�ݒ肳�ꂽ�p�X���[�h���献�Í��p��(KEK)���v�Z���邽�߂Ɏg���܂��B<br>
+PBKDF1ではパスワード文字列をSHA-1等のダイジェスト関数にとおして暗号鍵KEKを計算したが、
+更なるセキュリティ向上としてHMAC-SHA-1等の鍵付きダイジェスト関数を用いて暗号鍵KEKを計算するアルゴリズム。<br>
+PBKDF2の詳細は、"RFC 2898 [PKCS#5]"を参照してください。<br>
+関連する多くのパラメータは、設定されたパスワードから鍵暗号用鍵(KEK)を計算するために使われます。<br>
 </p>
 <pre class="code">
 parameters ::= SEQUENCE {
@@ -41,67 +41,67 @@ parameters ::= SEQUENCE {
     parameters NULL } }
 </pre>
 
-<table summary="PBKDF2�̃p�����[�^�ɂ���">
-<caption>PBKDF2�̃p�����[�^�ɂ���</caption>
-<tr><th>�t�B�[���h��		</th>
-	<th>���e				</th></tr>
+<table summary="PBKDF2のパラメータについて">
+<caption>PBKDF2のパラメータについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容				</th></tr>
 <tr><td>salt</td>
-	<td><a href="MessageAuthenticationCode.html">�Í��w�I�[�������֐��ihMAC���j</a>�ɓ��͂���l</td></tr>
+	<td><a href="MessageAuthenticationCode.html">暗号学的擬似乱数関数（hMAC等）</a>に入力する値</td></tr>
 <tr><td>iterationCount</td>
-	<td>�J��Ԃ���</td></tr>
+	<td>繰り返し回数</td></tr>
 <tr><td>keyLength</td>
-	<td>���Í�����(KEK)�̃T�C�Y[Byte]</td></tr>
+	<td>鍵暗号化鍵(KEK)のサイズ[Byte]</td></tr>
 <tr><td>prf</td>
-	<td>�g�p����<a href="MessageAuthenticationCode.html">�Í��w�I�[�������֐��ihMAC���j</a>��oid�B�ȗ����́AhMAC-SHA1�ƂȂ�B</td></tr>
+	<td>使用する<a href="MessageAuthenticationCode.html">暗号学的擬似乱数関数（hMAC等）</a>のoid。省略時は、hMAC-SHA1となる。</td></tr>
 </table>
 </div>
 
 <div class="block">
-<h4>�����o�̃v���Z�X</h4>
+<h4>鍵導出のプロセス</h4>
 
 <table>
-<caption>�\�L�ɂ���</caption>
-<tr><th>c				</th><td>�J��Ԃ���							</td><td>���̐���	</td></tr>
-<tr><th>DK				</th><td>�p�X���[�h�ɂ�蓾��ꂽ��				</td><td>8bit��		</td></tr>
-<tr><th>dkLen			</th><td>DK�̒���								</td><td>���̐���	</td></tr>
-<tr><th>hLen			</th><td>�[�������֐�(PRF)�̏o�͂�8bit��̒���	</td><td>���̐���	</td></tr>
-<tr><th>l				</th><td>DK�̃u���b�N�̒���						</td><td>���̐���	</td></tr>
-<tr><th>P				</th><td>�p�X���[�h								</td><td>8bit��		</td></tr>
-<tr><th>PRF				</th><td>�y��ƂȂ�<a href="MessageAuthenticationCode.html">�Í��w�I�[�������֐�</a>�iHMAC-SHA-1���j	</td><td>			</td></tr>
-<tr><th>S				</th><td>�\���g									</td><td>8bit��		</td></tr>
-<tr><th>T[1] �` T[l]	</th><td>���Ԓl									</td><td>8bit��		</td></tr>
-<tr><th>U[1] �` U[c]	</th><td>���Ԓl									</td><td>8bit��		</td></tr>
-<tr><th>||				</th><td>�A��									</td><td>			</td></tr>
+<caption>表記について</caption>
+<tr><th>c				</th><td>繰り返し回数							</td><td>正の整数	</td></tr>
+<tr><th>DK				</th><td>パスワードにより得られた鍵				</td><td>8bit列		</td></tr>
+<tr><th>dkLen			</th><td>DKの長さ								</td><td>正の整数	</td></tr>
+<tr><th>hLen			</th><td>擬似乱数関数(PRF)の出力の8bit列の長さ	</td><td>正の整数	</td></tr>
+<tr><th>l				</th><td>DKのブロックの長さ						</td><td>正の整数	</td></tr>
+<tr><th>P				</th><td>パスワード								</td><td>8bit列		</td></tr>
+<tr><th>PRF				</th><td>土台となる<a href="MessageAuthenticationCode.html">暗号学的擬似乱数関数</a>（HMAC-SHA-1等）	</td><td>			</td></tr>
+<tr><th>S				</th><td>ソルト									</td><td>8bit列		</td></tr>
+<tr><th>T[1] ～ T[l]	</th><td>中間値									</td><td>8bit列		</td></tr>
+<tr><th>U[1] ～ U[c]	</th><td>中間値									</td><td>8bit列		</td></tr>
+<tr><th>||				</th><td>連結									</td><td>			</td></tr>
 </table>
 
 <p>
-PBKDF2�̃p�����[�^�́A�p�X���[�h(P)�A�\���g(S)�A�J��Ԃ���(c)�A��DK�̒���(dkLen)����Ȃ�B<br>
-�܂��ADK�̃u���b�N��(l)�ƁA�ŏI�u���b�N�̃o�C�g��(r)�����߂�B<br>
-�܂�A���o���錮��(dkKen)���[�������֐�(PRF)�̏o�͒�(hLen)�Ŋ������A���Ɨ]�����߂�B<br>
+PBKDF2のパラメータは、パスワード(P)、ソルト(S)、繰り返し回数(c)、鍵DKの長さ(dkLen)からなる。<br>
+まず、DKのブロック長(l)と、最終ブロックのバイト長(r)を求める。<br>
+つまり、導出する鍵長(dkKen)を擬似乱数関数(PRF)の出力長(hLen)で割った、商と余を求める。<br>
 </p>
 <pre class="code">
-l �� dkLen �� hLen�@�@�i�����_�؂�グ�j
-r �� dkLen mod hLen�@�i�܂�A�@dkLen �| l �~ hLen�j
+l ＝ dkLen ÷ hLen　　（小数点切り上げ）
+r ＝ dkLen mod hLen　（つまり、　dkLen － l × hLen）
 </pre>
 
 <p>
-�֐�F�ɂ��A��(DK)�̊e�u���b�N�̒l�����߂�B<br>
+関数Fにより、鍵(DK)の各ブロックの値を求める。<br>
 </p>
 <pre class="code">
-T[<var>1</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>1</var>)�@�@�c�@�o�͂���f�[�^���́AhLen�o�C�g
-T[<var>2</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>2</var>)�@�@�c�@�o�͂���f�[�^���́AhLen�o�C�g
-T[<var>3</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>3</var>)�@�@�c�@�o�͂���f�[�^���́AhLen�o�C�g
+T[<var>1</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>1</var>)　　…　出力するデータ長は、hLenバイト
+T[<var>2</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>2</var>)　　…　出力するデータ長は、hLenバイト
+T[<var>3</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>3</var>)　　…　出力するデータ長は、hLenバイト
 ...
-T[<var>l</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>l</var>)�@�@�c�@�o�͂���f�[�^���́Ar�o�C�g
+T[<var>l</var>] = F (<var>P</var>, <var>S</var>, <var>c</var>, <var>l</var>)　　…　出力するデータ長は、rバイト
 
 DK = T[<var>1</var>] || T[<var>2</var>] || ... || T[<var>l</var>]
 </pre>
 
 <p>
-�֐�F�ɂ��ẮA�^�������֐�(PRF)�ւ̌����p�X���[�h(P)�Ƃ��āA
-�w�\���g(S)�A�u���b�N�ԍ��i4Byte�j�x�̃o�C�g��ɑ΂��āA
-�J��Ԃ���(c)��A�^�������֐�(PRF)�ɒʂ��B<br>
-�e��̋^�������֐�(PRF)�̏o�͂ɂ��āA�r���I�_���a(XOR)�����l���֐�F�̏o�͂Ƃ���B<br>
+関数Fについては、疑似乱数関数(PRF)への鍵をパスワード(P)として、
+『ソルト(S)、ブロック番号（4Byte）』のバイト列に対して、
+繰り返し回数(c)回、疑似乱数関数(PRF)に通す。<br>
+各回の疑似乱数関数(PRF)の出力について、排他的論理和(XOR)した値を関数Fの出力とする。<br>
 </p>
 <pre class="code">
 U[<var>1</var>] = PRF (<var>P</var>, <var>S</var> || INT(<var>i</var>) ) 

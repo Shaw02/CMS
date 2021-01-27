@@ -2,23 +2,23 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>���l��� �iRecipientInfo�j</Title>
+<Title>受取人情報 （RecipientInfo）</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 
-<h2>���l��� �iRecipientInfo�j</h2>
+<h2>受取人情報 （RecipientInfo）</h2>
 
 <div class='block'>
 
 <p>
-���Ǘ��̎�@�ɂ���āA���ꂼ�ꂱ�ƂȂ�\���̃f�[�^���i�[����܂��B<br>
-�{�\�t�g�ł́A�����o�i�p�X���[�h�j�ɂ��Í��݂̂ɑΉ����Ă��܂��B<br>
+鍵管理の手法によって、それぞれことなる構造のデータが格納されます。<br>
+本ソフトでは、鍵導出（パスワード）による暗号のみに対応しています。<br>
 </p>
 
 <pre class="code">
@@ -34,20 +34,20 @@ RecipientInfo ::= CHOICE {
 <a name="EncryptedKey">EncryptedKey</a> ::= OCTET STRING
 </pre>
 
-<table summary="PasswordRecipientinfo�ɂ���">
-<caption>PasswordRecipientinfo�ɂ���</caption>
-<tr><th>�t�B�[���h��		</th>
-	<th>���e				</th></tr>
+<table summary="PasswordRecipientinfoについて">
+<caption>PasswordRecipientinfoについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容				</th></tr>
 <tr><td>KeyTransRecipientInfo</td>
-	<td>���z���@�i�Ώ̌��Í��A���S���Y����p�������Ǘ���@�ł��B�j</td></tr>
+	<td>鍵配送　（対称鍵暗号アルゴリズムを用いた鍵管理手法です。）</td></tr>
 <tr><td>KeyAgreeRecipientInfo</td>
-	<td>�����Ӂ@�i�����ӃA���S���Y����p�������Ǘ���@�ł��B�j</td></tr>
+	<td>鍵合意　（鍵合意アルゴリズムを用いた鍵管理手法です。）</td></tr>
 <tr><td>KEKRecipientInfo</td>
-	<td>���ʌ��Í������@�i���ʌ��Í��A���S���Y���i�Í����͎��O�ɋ��L���j��p���錮�Ǘ���@�ł��B�j</td></tr>
+	<td>共通鍵暗号化鍵　（共通鍵暗号アルゴリズム（暗号鍵は事前に共有化）を用いる鍵管理手法です。）</td></tr>
 <tr><td><a href="PasswordRecipientinfo.html">PasswordRecipientinfo</a></td>
-	<td>�����o�@�i�p�X���[�h����p���錮�Ǘ���@�ł��B�j</td></tr>
+	<td>鍵導出　（パスワード等を用いる鍵管理手法です。）</td></tr>
 <tr><td>OtherRecipientInfo</td>
-	<td>���̑�</td></tr>
+	<td>その他</td></tr>
 </table>
 
 

@@ -2,34 +2,34 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�ڎ�</Title>
+<Title>目次</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
-<h2>�T�v</h2>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+<h2>概要</h2>
 <p>
-	�P��t�@�C���ɑ΂��āA�Í��E�������s���\�t�g�E�F�A�ł��B<br>
-	���o�͂���Í��t�@�C���͐��E�I�ɕW���ł���Í����b�Z�[�W�\���iCMS�FRFC.5652�j�ɏ������Ă���A�ȉ��̓���������܂��B<br>
+	単一ファイルに対して、暗号・復号を行うソフトウェアです。<br>
+	入出力する暗号ファイルは世界的に標準である暗号メッセージ構文（CMS：RFC.5652）に準拠しており、以下の特徴があります。<br>
 </p>
 <ul>
-<li>�^��������p���鎖�ɂ��A�����p�X���[�h�ł�����قȂ����Í�������������܂��B<br>
-	���ׁ̈A�Ⴆ�Β莞�񍐓��A��莞�Ԃœ�����e�̕��͂�������ꍇ�ɂ����āA�Í������قȂ邽�߈Í����O�̕��͂������s�\�ɂȂ�܂��B</li>
-<li>�p�����A���S���Y���Ƃ��̃p�����[�^�i�����̌���p�X���[�h�������j�̓t�@�C�����ɕۑ�����邽�߁A
-	�������̍ۂ͐��������������̓p�X���[�h���w�肷�邾���ŕ����ł��܂��B</li>
-<li>����A�Í����b�Z�[�W�\���iCMS�j�ɑΉ������Í��\�t�g���o�Ă�����A�Í��t�@�C���Ɍ݊���������܂��B<br>
-	���ׁ̈A�Í��t�@�C���ɗp����ꂽ�A���S���Y���ɂ����Ή����Ă���΁A�Í��t�@�C���𑊌݂Ɉ�����͂��ł��B<br>
-	�i�\�t�g�����Ή����Ă���΁A�Í��t�@�C�����̂͗l�X�ȃA���S���Y�����g����d�l�ɂȂ��Ă��܂��B�j</li>
+<li>疑似乱数を用いる事により、同じパスワードでも毎回異なった暗号文が生成されます。<br>
+	その為、例えば定時報告等、一定時間で同一内容の文章が送られる場合において、暗号文が異なるため暗号化前の文章が推測不能になります。</li>
+<li>用いたアルゴリズムとそのパラメータ（平文の鍵やパスワードを除く）はファイル中に保存されるため、
+	復号時の際は正しい鍵もしくはパスワードを指定するだけで復号できます。</li>
+<li>今後、暗号メッセージ構文（CMS）に対応した暗号ソフトが出てきたら、暗号ファイルに互換性があります。<br>
+	その為、暗号ファイルに用いられたアルゴリズムにさえ対応していれば、暗号ファイルを相互に扱えるはずです。<br>
+	（ソフト側が対応していれば、暗号ファイル自体は様々なアルゴリズムが使える仕様になっています。）</li>
 </ul>
 
 <p>
-	���A�`�d�r�Í��������ł́A�A�Z���u������ɂ�SIMD(SSE2)���߃Z�b�g���g�p���ċL�q����Ă���܂��B<br>
-	�܂��AAES-NI���߃Z�b�g�ɑΉ������b�o�t�̏ꍇ�́A�����̖��߃Z�b�g���g�p���܂��B<br>
-	���̂��߁A�`�d�r�Í��������ɏ����\�ƂȂ��Ă���܂��B<br>
+	又、ＡＥＳ暗号処理部では、アセンブリ言語にてSIMD(SSE2)命令セットを使用して記述されております。<br>
+	また、AES-NI命令セットに対応したＣＰＵの場合は、それらの命令セットを使用します。<br>
+	そのため、ＡＥＳ暗号を高速に処理可能となっております。<br>
 </p>
 </div>
 

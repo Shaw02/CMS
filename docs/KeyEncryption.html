@@ -2,33 +2,33 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�p�X���[�h�ɂ�錮�Ǘ���@</Title>
+<Title>パスワードによる鍵管理手法</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 
 <div class="block">
-<h2><a name="KeyDerivation">�����o�ɂ�錮�Ǘ�</a></h2>
+<h2><a name="KeyDerivation">鍵導出による鍵管理</a></h2>
 
 <p>
-�p�X���[�h�����Í����p�̌��ɕϊ�����ׂɎg���܂��B<br>
-�p�X���[�h���瓱�o���ꂽ���Í����p�̌�(KEK)�́A�R���e���c�Í����p�̌�(CEK)���Í������邽�߂Ɏg���܂��B<br>
-�����o�A���S���Y���ł́A�ȉ��Ɏ����Q�̃A���S���Y�����w�肳��܂��B<br>
+パスワードを鍵暗号化用の鍵に変換する為に使われます。<br>
+パスワードから導出された鍵暗号化用の鍵(KEK)は、コンテンツ暗号化用の鍵(CEK)を暗号化するために使われます。<br>
+鍵導出アルゴリズムでは、以下に示す２つのアルゴリズムが指定されます。<br>
 </p>
 
 
 <li><a href="KeyDerivation.html">Key Derivation Algorithm</a><br>
-	�p�X���[�h���献�Í����p�̌�(KEK)�𓱏o����A���S���Y���ł��B
+	パスワードから鍵暗号化用の鍵(KEK)を導出するアルゴリズムです。
 </li>
 <li>Key Encryption Algorithms<br>
-	�R���e���c�p�̈Í���CEK�i�������琶�������j���Í�������Í��A���S���Y���ł��B<br>
-	�A���S���Y���ɂ��ẮA�ȉ����Q�ƁB
-	���́A<a href="KeyDerivation.html">�����o�֐�</a>�Ńp�X���[�h���瓱�o������(KEK)���g�p���܂��B
+	コンテンツ用の暗号鍵CEK（乱数から生成される）を暗号化する暗号アルゴリズムです。<br>
+	アルゴリズムについては、以下を参照。
+	鍵は、<a href="KeyDerivation.html">鍵導出関数</a>でパスワードから導出した鍵(KEK)を使用します。
 </li>
 
 <h3><a name="PWRI">id-alg-PWRI-KEK</a></h3>
@@ -36,71 +36,71 @@
 <dt>id-alg-PWRI-KEK</dt><dd>1.2.840.113549.1.9.16.3.9</dd>
 </dl>
 <p>
-�����o�i�p�X���[�h�j��p���āA�R���e���c�Í�����(CEK)���Í�������A���S���Y���ł��B<br>
-�����o�i�p�X���[�h�j�ɂ�錮�Ǘ��ł́A�K���I�Ȏ�@�Ƃ��āA���̃A���S���Y�����g�p����܂��B<br>
-�ڍׂ́A"RFC.3211"���Q�ƁB
+鍵導出（パスワード）を用いて、コンテンツ暗号化鍵(CEK)を暗号化するアルゴリズムです。<br>
+鍵導出（パスワード）による鍵管理では、習慣的な手法として、このアルゴリズムが使用されます。<br>
+詳細は、"RFC.3211"を参照。
 </p>
 
 <pre class="code">
 parameters ::= <a href="AlgorithmIdentifier.html">AlgorithmIdentifier</a>
 </pre>
 
-<table summary="parameters�ɂ���">
-<caption>parameters�ɂ���</caption>
-<tr><th>�t�B�[���h��		</th>
-	<th>���e				</th></tr>
+<table summary="parametersについて">
+<caption>parametersについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容				</th></tr>
 <tr><td><a href="AlgorithmIdentifier.html">AlgorithmIdentifier</a></td>
-	<td>�R���e���c�p��(CEK)���Í������邽�߂̃A���S���Y���iTriple-DES CBC, AES-CBC���j�B<br>
-		�R���e���c�̈Í����ɗp�����A���S���Y���Ɠ���ł���K�v�͖������A
-		���̏ꍇ�͓����ȏ�̃Z�L�����e�B�ƂȂ�悤�ɒ��ӂ���<br>
-		�i�Ⴆ�΁ARC2/40���Ń��b�s���O����Triple-DES���́A�Í����x�Ō����ȃC���s�[�_���X�s�����𓱂��B�j<br>
-		�u���b�N�Í���OFB���[�h�y��ECB���[�h��ARC4���̂����Ȃ�KSG (keystream generator)�Í��͎g�p���ׂ��ł͂Ȃ��B<br>
+	<td>コンテンツ用鍵(CEK)を暗号化するためのアルゴリズム（Triple-DES CBC, AES-CBC等）。<br>
+		コンテンツの暗号化に用いたアルゴリズムと同一である必要は無いが、
+		その場合は同等以上のセキュリティとなるように注意する<br>
+		（例えば、RC2/40鍵でラッピングしたTriple-DES鍵は、暗号強度で厳密なインピーダンス不整合を導く。）<br>
+		ブロック暗号のOFBモード及びECBモードや、RC4等のいかなるKSG (keystream generator)暗号は使用すべきではない。<br>
 		</td></tr>
 </table>
 
 
-<h4><a name="KeyWrap">Key Wrap �̃v���Z�X</a></h4>
+<h4><a name="KeyWrap">Key Wrap のプロセス</a></h4>
 
 <p>
-�܂��A�R���e���c�Í�����(CEK)���A�ȉ��̒ʂ萮�`����B
+まず、コンテンツ暗号化鍵(CEK)を、以下の通り整形する。
 </p>
 <ol type="1">
-<li>�R���e���c�Í�����(CEK)�̃o�C�g���́A�P�o�C�g�̃J�E���g�l�B</li>
-<li>�R���e���c�Í�����(CEK)�̍ŏ��̂R�o�C�g�̃r�b�g�P�ʂ̕␔���܂ރ`�F�b�N�l�B</li>
-<li>�R���e���c�Í�����(CEK)</li>
-<li>�����_���p�f�B���O�ŁA���`�����R���e���c�p�Í����������Í����A���S���Y���̃u���b�N���̔{���ɂȂ�悤�ɂ���B<br>
-	�p�f�B���O�f�[�^�͈Í��_�G���x�������Ȃ����A�\���s�\���͏�����B<br>
-	��ɒm��ꂽ�f�[�^���ł���̂ŁAPKCS#5�p�f�B���O�͎g��Ȃ��悤�ɒ��ӂ���B<br>
+<li>コンテンツ暗号化鍵(CEK)のバイト数の、１バイトのカウント値。</li>
+<li>コンテンツ暗号化鍵(CEK)の最初の３バイトのビット単位の補数を含むチェック値。</li>
+<li>コンテンツ暗号化鍵(CEK)</li>
+<li>ランダムパディングで、整形したコンテンツ用暗号化鍵が鍵暗号化アルゴリズムのブロック長の倍数になるようにする。<br>
+	パディングデータは暗号論敵強度を持たないが、予測不可能性は助ける。<br>
+	常に知られたデータ長であるので、PKCS#5パディングは使わないように注意する。<br>
 	</li>
 </ol>
 <p>
-�܂�A���̕��т̍\���ɂȂ�B<br>
-SS �c �R���e���c�Í�����(CEK) �o�C�g�̃J�E���g�l<br>
-CC �c �`�F�b�N�l<br>
-XX �c �R���e���c�Í�����(CEK)<br>
-PP �c �p�f�B���O (�v�����ꂽ�ꍇ)<br>
+つまり、この並びの構造になる。<br>
+SS … コンテンツ暗号化鍵(CEK) バイトのカウント値<br>
+CC … チェック値<br>
+XX … コンテンツ暗号化鍵(CEK)<br>
+PP … パディング (要求された場合)<br>
 </p>
 <table>
 <tr><td>SS</td><td>CC</td><td>XX XX XX ... XX</td><td>PP PP ... PP</td></tr>
 </table>
 
 <p>
-���ɁA���̐��`�����R���e���c�p�Í���(CEK)���A�Q��Í��������{����B<br>
-���̂Ƃ��Aparameters�Ŏw�肳�ꂽ�Í��A���S���Y����p���A
-�Q��ڂ̈Í����ɂ����Ă͏������x�N�^(IV)�̓��Z�b�g�����A���̂܂܎g���B<br>
-���A�ݒ肷��Í���(KEK)�́A<a href="KeyDerivation.html">�����o�֐�(KDF)</a>�Ńp�X���[�h���瓱���o�����Í�����p����B<br>
+次に、この整形したコンテンツ用暗号鍵(CEK)を、２回暗号化を実施する。<br>
+このとき、parametersで指定された暗号アルゴリズムを用い、
+２回目の暗号化においては初期化ベクタ(IV)はリセットせず、そのまま使う。<br>
+尚、設定する暗号鍵(KEK)は、<a href="KeyDerivation.html">鍵導出関数(KDF)</a>でパスワードから導き出した暗号鍵を用いる。<br>
 </p>
 
-<h4><a name="KeyUnwrap">Key Unwrap �̃v���Z�X</a></h4>
+<h4><a name="KeyUnwrap">Key Unwrap のプロセス</a></h4>
 
 <p>
-�Í������ꂽ�f�[�^�u���b�N����n�Ƃ���B<br>
+暗号化されたデータブロック数をnとする。<br>
 </p>
 <ol type="2">
-<li>�悸�A�Í����W���[���̏������x�N�^IV���A(n-1)�Ԗڂ̃u���b�N�̒l�ɐݒ肵�A(n)�Ԗ�(�ŏI)�̃u���b�N�𕜍�����B</li>
-<li>���ɁA��������(n)�Ԗ�(�ŏI)�̃u���b�N���������x�N�^(IV)�ɂ��A1�`(n-1)�Ԗڂ̃u���b�N�𕜍�����B</li>
-<li>�Í����W���[���̃p�����[�^�ǂ���̏������x�N�^IV�ɐݒ肵�Ȃ����A1�`(n)�Ԗڂ܂ł̑S�u���b�N�𕜍�����B</li>
-<li>1�o�C�g�ڂ������B2�`4�o�C�g�ڂ��`�F�b�N�n�A5�o�C�g�ځ`���R���e���c�p�Í���CEK�̕����ƂȂ�B</li>
+<li>先ず、暗号モジュールの初期化ベクタIVを、(n-1)番目のブロックの値に設定し、(n)番目(最終)のブロックを復号する。</li>
+<li>次に、復号した(n)番目(最終)のブロックを初期化ベクタ(IV)にし、1～(n-1)番目のブロックを復号する。</li>
+<li>暗号モジュールのパラメータどおりの初期化ベクタIVに設定しなおし、1～(n)番目までの全ブロックを復号する。</li>
+<li>1バイト目が鍵長。2～4バイト目がチェック地、5バイト目～がコンテンツ用暗号鍵CEKの平文となる。</li>
 </ol>
 
 

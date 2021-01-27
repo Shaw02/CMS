@@ -2,22 +2,22 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�Í����R���e���c �iEncryptedContentInfo�j</Title>
+<Title>暗号化コンテンツ （EncryptedContentInfo）</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 
-<h2>�Í����R���e���c �iEncryptedContentInfo�j</h2>
+<h2>暗号化コンテンツ （EncryptedContentInfo）</h2>
 
 <div class='block'>
 <p>
-���̃t�B�[���h�ɂ́A�Í������ꂽ�R���e���c�ƁA���̏�񂪊i�[����܂��B<br>
-ASN.1�ɂ��L�q�͈ȉ��̒ʂ�B<br>
+このフィールドには、暗号化されたコンテンツと、その情報が格納されます。<br>
+ASN.1による記述は以下の通り。<br>
 </p>
 <pre class="code">
 EncryptedContentInfo ::= SEQUENCE {
@@ -30,18 +30,18 @@ EncryptedContentInfo ::= SEQUENCE {
 EncryptedContent ::= OCTET STRING
 </pre>
 
-<table summary="EncryptedContentInfo�ɂ���">
-<caption>EncryptedContentInfo�ɂ���</caption>
-<tr><th>�t�B�[���h��		</th>
-	<th>���e			</th></tr>
+<table summary="EncryptedContentInfoについて">
+<caption>EncryptedContentInfoについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容			</th></tr>
 <tr><td>contentType</td>
-	<td>encryptedContent�Ɋi�[�����A�Í������ꂽ�R���e���c�̃^�C�v������oid���������B<br>
-		�ʏ�́AData�^�C�v(oid = 1.2.840.113549.1.7.1)</td></tr>
+	<td>encryptedContentに格納される、暗号化されたコンテンツのタイプを示すoidが書かれる。<br>
+		通常は、Dataタイプ(oid = 1.2.840.113549.1.7.1)</td></tr>
 <tr><td><a href="AlgorithmIdentifier.html#ContentEncryptionAlgorithmIdentifier">contentEncryptionAlgorithm</a></td>
-	<td>�Í��̃A���S���Y���ƃp�����[�^���i�[�����B</td></tr>
+	<td>暗号のアルゴリズムとパラメータが格納される。</td></tr>
 <tr><td>encryptedContent</td>
-	<td>�Í������ꂽ�R���e���c���i�[�����B<br>
-		�R���e���c�������ꍇ�́A���̎�i�ɂ���Ē񋟂����B</td></tr>
+	<td>暗号化されたコンテンツが格納される。<br>
+		コンテンツが無い場合は、他の手段によって提供される。</td></tr>
 </table>
 
 </div>

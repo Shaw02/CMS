@@ -2,30 +2,30 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>�_�C�W�F�X�g�A���S���Y��</Title>
+<Title>ダイジェストアルゴリズム</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
-<h2>�_�C�W�F�X�g�A���S���Y��</h2>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+<h2>ダイジェストアルゴリズム</h2>
 
 <p>
-���b�Z�[�W�̃_�C�W�F�X�g�l�����߂�A���S���Y���ł��B
+メッセージのダイジェスト値を求めるアルゴリズムです。
 </p>
 
 <!--
 <div class="block">
-<h3><a name="MD2">MD2�@�iPKCS#1�Ēǉ���`�j</a></h3>
+<h3><a name="MD2">MD2　（PKCS#1て追加定義）</a></h3>
 <dl>
 <dt>MD2</dt><dd>1.2.840.113549.2.2</dd>
 </dl>
 <p>
-�֐��ɂ��Ă̏ڍׂ́A"RFC 1321 [MD5]"���Q�ƁB<br>
-parameters�́ANULL�łȂ���΂Ȃ�Ȃ��B<br>
+関数についての詳細は、"RFC 1321 [MD5]"を参照。<br>
+parametersは、NULLでなければならない。<br>
 </p>
 <pre class="code">
 parameters ::= NULL
@@ -38,8 +38,8 @@ parameters ::= NULL
 <dt>MD5</dt><dd>1.2.840.113549.2.5</dd>
 </dl>
 <p>
-�֐��ɂ��Ă̏ڍׂ́A"RFC 1319 [MD2]"���Q�ƁB<br>
-parameters�́ANULL�łȂ���΂Ȃ�Ȃ��B<br>
+関数についての詳細は、"RFC 1319 [MD2]"を参照。<br>
+parametersは、NULLでなければならない。<br>
 </p>
 <pre class="code">
 parameters ::= NULL
@@ -53,13 +53,13 @@ parameters ::= NULL
 <dt>SHA-1</dt><dd>1.3.14.3.2.26</dd>
 </dl>
 <p>
-160�r�b�g���̃n�b�V���֐��ł��B<br>
-1995�N�ɍ��ƈ��S�ۏ�ǁiNSA�j�ɂ���ĊJ������A�A�����J���{�̕W���n�b�V���֐��Ƃ��Ďg�p����Ă��܂����B<br>
-2005�N�ɐƎ㐫����������A�č����{�ł�2010�N�ɉ^�p��~��SHA-2�ւ̈ڍs�𐄏�����Ă��܂��B<br>
+160ビット長のハッシュ関数です。<br>
+1995年に国家安全保障局（NSA）によって開発され、アメリカ政府の標準ハッシュ関数として使用されていました。<br>
+2005年に脆弱性が発見され、米国政府では2010年に運用停止しSHA-2への移行を推奨されています。<br>
 </p>
 <p>
-�֐��ɂ��Ă̏ڍׂ́A"FIPS Pub 180-1"��������"RFC.4634"���Q�ƁB<br>
-parameters�͏ȗ��\�ł��邪�A�ȗ����ꂽ�ꍇ��NULL���w�肳�ꂽ���̂Ƃ݂Ȃ��B<br>
+関数についての詳細は、"FIPS Pub 180-1"もしくは"RFC.4634"を参照。<br>
+parametersは省略可能であるが、省略された場合はNULLが指定されたものとみなす。<br>
 </p>
 <pre class="code">
 parameters ::= NULL
@@ -75,17 +75,17 @@ parameters ::= NULL
 <!-- <dt>SHA-512</dt><dd>2.16.840.1.101.3.4.2.3</dd> -->
 </dl>
 <p>
-224, 256, 384, 512�r�b�g���̃n�b�V���֐��ł��i�{�\�t�g�ł́A224, 256�r�b�g���ɑΉ����Ă��܂��j�B<br>
-2001�N�ɃA�����J�����W���Z�p�����iNIST�j�y�э��ƈ��S�ۏ�ǁiNSA�j�ɂ����\���ꂽ�n�b�V���֐��ł��B<br>
-2005�N��SHA-1�̐Ǝ㐫���������ꂽ�����ASHA-2�ւ̈ڍs�𐄏�����Ă��܂��B<br>
-�������Ȃ���ASHA-2���ASHA-1�̉�����̋Z�p�ɂ���ׁA
-�V���ȃn�b�V���֐�SHA-3�����肳��Ă��܂��i2012�N���݁A����͏I���]���i�K�j�B<br>
+224, 256, 384, 512ビット長のハッシュ関数です（本ソフトでは、224, 256ビット長に対応しています）。<br>
+2001年にアメリカ国立標準技術研究（NIST）及び国家安全保障局（NSA）により公表されたハッシュ関数です。<br>
+2005年にSHA-1の脆弱性が発見された事より、SHA-2への移行を推奨されています。<br>
+しかしながら、SHA-2も、SHA-1の延長上の技術にある為、
+新たなハッシュ関数SHA-3が策定されています（2012年現在、公募は終わり評価段階）。<br>
 </p>
 <p>
-SHA-2�S�ʂɂ��Ă̏ڍׂ́A"FIPS Pub 180-2"���Q�ƁB<br>
-SHA-224�ɂ��Ă̏ڍׂ́A"RFC.3874 [SHA224]"���Q�ƁB<br>
-�Í����b�Z�[�W�\��(CMS)�ɂ�����SHA-2�̎g�p�@�ɂ��ẮA"RFC.5754"���Q�ƁB
-parameters�͏ȗ��\�ł��邪�A�ȗ����ꂽ�ꍇ��NULL���w�肳�ꂽ���̂Ƃ݂Ȃ��B<br>
+SHA-2全般についての詳細は、"FIPS Pub 180-2"を参照。<br>
+SHA-224についての詳細は、"RFC.3874 [SHA224]"を参照。<br>
+暗号メッセージ構文(CMS)におけるSHA-2の使用法については、"RFC.5754"を参照。
+parametersは省略可能であるが、省略された場合はNULLが指定されたものとみなす。<br>
 </p>
 <pre class="code">
 parameters ::= NULL

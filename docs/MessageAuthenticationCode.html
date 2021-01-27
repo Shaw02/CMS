@@ -2,22 +2,22 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>���b�Z�[�W�F�ؕ���(MAC)�A���S���Y��</Title>
+<Title>メッセージ認証符号(MAC)アルゴリズム</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 <div class='block'>
-<h2>���b�Z�[�W�F�ؕ���(MAC)�A���S���Y��</h2>
+<h2>メッセージ認証符号(MAC)アルゴリズム</h2>
 
 <p>
-�R���e���c�ɉ����񂪖������m�F���邽�߂̃A���S���Y���ł��B<br>
-���̑��A�����o�֐�PBKDF2�ɂ��p�����A�{�\�t�g�ł͂��̗p�r�ɂĎg�p���Ă��܂��B<br>
-HMAC�ɂ��Ă̏ڍׂ́A"rfc.2104 [HMAC]"���Q�ƁB
+コンテンツに改ざんが無いか確認するためのアルゴリズムです。<br>
+その他、鍵導出関数PBKDF2にも用いられ、本ソフトではこの用途にて使用しています。<br>
+HMACについての詳細は、"rfc.2104 [HMAC]"を参照。
 </p>
 
 <h3><a name="SHA1">HMAC-SHA</a></h3>
@@ -27,8 +27,8 @@ HMAC�ɂ��Ă̏ڍׂ́A"rfc.2104 [HMAC]"���Q�ƁB
 <dt>HMAC-SHA-256</dt><dd>1.2.840.113549.2.9</dd>
 </dl>
 <p>
-�֐��ɂ��Ă̏ڍׂ́A"rfc.4634 [SHA]"���Q�ƁB<br>
-parameters�͏ȗ��\�ł��邪�A�ȗ����ꂽ�ꍇ��NULL���w�肳�ꂽ���̂Ƃ݂Ȃ��B<br>
+関数についての詳細は、"rfc.4634 [SHA]"を参照。<br>
+parametersは省略可能であるが、省略された場合はNULLが指定されたものとみなす。<br>
 </p>
 <pre class="code">
 parameters ::= NULL

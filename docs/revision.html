@@ -2,81 +2,81 @@
 <HTML>
 <HEAD>
 <meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<meta http-equiv='Content-Type' content='text/html;charset=Shift_JIS'>
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
 <meta http-equiv='Content-Style-Type' content='text/css'>
 <link rel="stylesheet" type="text/css" href="help.css">
-<Title>��������</Title>
+<Title>改訂履歴</Title>
 </HEAD>
 <BODY>
 
 <div id='contents'>
-<h1>CMS�Ή��@�Í��^�������[�e�B���e�B</h1>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
 <div class='block'>
-<h2>��������</h2>
+<h2>改訂履歴</h2>
 <table>
-<tr><th>���@�[�W����</th><th>���e</th><th>�����</th></tr>
+<tr><th>ヴァージョン</th><th>内容</th><th>改定日</th></tr>
 <tr><td>1.93</td>
-	<td>AES-NI���߁iintel core i5, i7�V���[�Y�ȍ~�j�ɑΉ������B<br>
-		�{���߂����ڂ��ꂽ�b�o�t�̏ꍇ�A�`�d�r�Í��̏������x�������Ȃ�܂��B<br>
-		�i�������Ԃ��A�Í����ŏ]���̖�16���A�����ŏ]���̖�12���ɂȂ�܂��B�j<br>
-		�i��Intel(R) Core(TM) i5-2520M CPU �ɂāA100MByte�̃t�@�C���ł̌v�����ʁj</td>
-	<td>2015�N12��16��</td></tr>
+	<td>AES-NI命令（intel core i5, i7シリーズ以降）に対応した。<br>
+		本命令が搭載されたＣＰＵの場合、ＡＥＳ暗号の処理速度が速くなります。<br>
+		（処理時間が、暗号化で従来の約16％、複合で従来の約12％になります。）<br>
+		（※Intel(R) Core(TM) i5-2520M CPU にて、100MByteのファイルでの計測結果）</td>
+	<td>2015年12月16日</td></tr>
 <tr><td>1.92</td>
-	<td>�}�j���A�����ACHM�i�R���p�C���ς�HTML�w���v�t�@�C���j�`���ɂ����B<br>
-		������AGUI�ł����ɂ������Ă̕z�΂�������Ȃ��B</td>
-	<td>2012�N 6�� 5��</td></tr>
+	<td>マニュアルを、CHM（コンパイル済みHTMLヘルプファイル）形式にした。<br>
+		いずれ、GUI版を作るにあたっての布石かもしれない。</td>
+	<td>2012年 6月 5日</td></tr>
 <tr><td>1.91</td>
 	<td><ul>
-		<li>�h�L�������g���኱�A�����������B</li>
-		<li>���@�[�W����1.00�ō쐬�����Í����t�@�C���i���F�p�X���[�h�j�𕜍��ł��Ȃ������o�O���C���B</li>
+		<li>ドキュメントを若干、書き直した。</li>
+		<li>ヴァージョン1.00で作成した暗号化ファイル（鍵：パスワード）を復号できなかったバグを修正。</li>
 		</ul></td>
-	<td>2012�N 2�� 4��</td></tr>
+	<td>2012年 2月 4日</td></tr>
 <tr><td>1.90</td>
 	<td>
 		<ul>
-		<li>�\�t�g�̖��̂��A"AES"����"CMS"�ɕύX�����B</li>
-		<li>�Í����b�Z�[�W�\���iCMS�j�̕������^�C�v�iEnveloped-Data Type�j�ɑΉ����܂����B<br>
-			�Ή����錮�Ǘ���@�́A�����o�i�p�X���[�h�j�̂ݑΉ����Ă��܂��B
+		<li>ソフトの名称を、"AES"から"CMS"に変更した。</li>
+		<li>暗号メッセージ構文（CMS）の封筒化タイプ（Enveloped-Data Type）に対応しました。<br>
+			対応する鍵管理手法は、鍵導出（パスワード）のみ対応しています。
 			<ul>
-				<li>�����o�֐��FPBKDF2<br>�@with HMAC-SHA-256�i�����́AHMAC-SHA-1, HMAC-SHA-224�ɂ��Ή����Ă��܂��j</li>
-				<li>�����b�v�@�FPWRI-KEK<br>�@with �R���e���c�̈Í��Ɠ����A���S���Y���i�����͈���Ă��Ă��\�ł��j</li>
+				<li>鍵導出関数：PBKDF2<br>　with HMAC-SHA-256（復号は、HMAC-SHA-1, HMAC-SHA-224にも対応しています）</li>
+				<li>鍵ラップ　：PWRI-KEK<br>　with コンテンツの暗号と同じアルゴリズム（復号は違っていても可能です）</li>
 			</ul>
-			�����̌��Ǘ���@�i���z��(RSA�Í���)�A������(Diffie-Hellman��)�A���X�j�ɂ͑Ή����Ă��܂���B�j</li>
-		<li>�f�t�H���g�ŁAEnveloped-Data Type����������悤�ɂ����B</li>
-		<li>DES�Í��A3-DES�Í��ɑΉ��i�Â��Í��ł��̂Ŏg�p�͂����߂��܂���j�B</li>
+			※他の鍵管理手法（鍵配送(RSA暗号等)、鍵合意(Diffie-Hellman等)、等々）には対応していません。）</li>
+		<li>デフォルトで、Enveloped-Data Typeを処理するようにした。</li>
+		<li>DES暗号、3-DES暗号に対応（古い暗号ですので使用はお勧めしません）。</li>
 		</ul></td>
-	<td>2012�N 2�� 4��</td></tr>
+	<td>2012年 2月 4日</td></tr>
 <tr><td>1.0</td>
-	<td>�q�e�b�ɂĊ�������Ă��镔���ɂ��ẮA�S�Ăq�e�b�̊����ɏ]���悤�A�Đ݌v�����B<br>
-		�Í����b�Z�[�W�́A�Í����b�Z�[�W�\���iCMS�j�̈Í����^�C�v�iEncrypted-Data Type�j�ɑΉ����܂����B<br>
-		�Í����t�@�C���́APKCS#8�̍\���ɏ]���Ă��܂��B<br>
-		 �� ���̂��߁A�ߋ����@�[�W�����Ƃ̌݊����͖����Ȃ�܂����B<br>
-		 �� �܂��A�����̃n�b�V���l��ۑ�����d�l�́A���̉����ɂ�薳���Ȃ�܂��B</td>
-	<td>2011�N 4��12��</td></tr>
-<tr><td>��</td>
-	<td>�e�Z�p�̒��쌠�����h�L�������g�ɒǉ��B�t���Y��Ă����B</td>
-	<td>2011�N 1��27��</td></tr>
-<tr><td>��</td>
-	<td>�Í��t�@�C�����ɁA���t�@�C����SHA-256�n�b�V�����Í������Ċi�[���A<br>
-		�������Ɍ��t�@�C���Ɠ����n�b�V���l�ł��邩�ƍ�����d�l�ɂ����B<br>
-		�i�Í����b�Z�[�W�\���iCMS�j�ł́A�W��������Ă��Ȃ����߁A���Ή��ł��B�j</td>
-	<td>2011�N 1��19��</td></tr>
-<tr><td>��</td>
-	<td>���ł̃Z�L�����e�B�΍�̂��߁A�ȉ��̎d�l�ύX�B
-		<ul><li>���������ɂ��āA�[������"Mersenne Twister"�ɂ���ē����l����A<br>
-			�X��"SHA-256"�ɂ��n�b�V���l������悤�ɂ����B<br>
-			�Í��������������̈Í����y�сA�����x�N�g��IV�́A���̒l���g�p���܂��B</li>
-			<li>�I�v�V�����ŁA�Í����ɕ�������w��ł���悤�ɂ����B</li>
-			<li>������SHA-256�n�b�V�����o�͂���悤�ɂ����B</li>
+	<td>ＲＦＣにて勧告されている部分については、全てＲＦＣの勧告に従うよう、再設計した。<br>
+		暗号メッセージは、暗号メッセージ構文（CMS）の暗号化タイプ（Encrypted-Data Type）に対応しました。<br>
+		暗号鍵ファイルは、PKCS#8の構文に従っています。<br>
+		 ※ このため、過去ヴァージョンとの互換性は無くなりました。<br>
+		 ※ また、平文のハッシュ値を保存する仕様は、この改訂により無くなります。</td>
+	<td>2011年 4月12日</td></tr>
+<tr><td>─</td>
+	<td>各技術の著作権情報をドキュメントに追加。付け忘れていた。</td>
+	<td>2011年 1月27日</td></tr>
+<tr><td>─</td>
+	<td>暗号ファイル内に、元ファイルのSHA-256ハッシュを暗号化して格納し、<br>
+		復号時に元ファイルと同じハッシュ値であるか照合する仕様にした。<br>
+		（暗号メッセージ構文（CMS）では、標準化されていないため、未対応です。）</td>
+	<td>2011年 1月19日</td></tr>
+<tr><td>─</td>
+	<td>初版のセキュリティ対策のため、以下の仕様変更。
+		<ul><li>乱数生成について、擬似乱数"Mersenne Twister"によって得た値から、<br>
+			更に"SHA-256"によりハッシュ値化するようにした。<br>
+			暗号鍵自動生成時の暗号鍵及び、初期ベクトルIVは、この値を使用します。</li>
+			<li>オプションで、暗号鍵に文字列を指定できるようにした。</li>
+			<li>平文のSHA-256ハッシュを出力するようにした。</li>
 		</ul></td>
-	<td>2011�N 1��17��</td></tr>
-<tr><td>��</td>
-	<td>���Łi�o�̓t�@�C���͓Ǝ��`���j<br>
-		AES�Í���SIMD(SSE2)���߂ɂ�鍂�����̌����Ƃ��č쐬�B<br>
-		�Í������������̈Í����y�я����x�N�g��IV�́A<br>
-		�[������"Mersenne Twister"�݂̂��g�p���邱�Ƃ��A<br>
-		�Í��̋��x�͎኱�ア�����z�肳���B</td>
-	<td>2011�N 1��13��</td></tr>
+	<td>2011年 1月17日</td></tr>
+<tr><td>─</td>
+	<td>初版（出力ファイルは独自形式）<br>
+		AES暗号のSIMD(SSE2)命令による高速化の研究として作成。<br>
+		暗号鍵自動生成の暗号鍵及び初期ベクトルIVは、<br>
+		擬似乱数"Mersenne Twister"のみを使用することより、<br>
+		暗号の強度は若干弱い事が想定される。</td>
+	<td>2011年 1月13日</td></tr>
 </table>
 </div>
 </div>
