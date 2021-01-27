@@ -7,7 +7,7 @@ class OPSW {
 public:
 //--------------
 //変数
-				int			fSIMD;			//SIMDあるか？
+				int			cpuinfo[4];		//cpuid eax=1の内容
 				int			iMode;			//暗号利用モード
 				int			iType;			//ファイルタイプ
 				int			iCount;			//繰り返し回数
@@ -26,4 +26,6 @@ public:
 		~OPSW();							//ファイルクローズ
 void	opError(const char *stErrMsg);		//オプションエラー
 void	print_help();						//ヘルプ
+bool	chkSSE2(){return((cpuinfo[3] & 0x04000000) != 0);};
+bool	chkAESNI(){return((cpuinfo[2] & 0x02000000) != 0);};
 };

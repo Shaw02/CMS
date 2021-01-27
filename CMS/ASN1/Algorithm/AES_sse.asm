@@ -988,9 +988,9 @@ AES_NI_KeyExpansion128_Sub	proc
 	pshufd		xmm2, xmm2, 11111111b	;3,3,3,3
 	pxor		xmm1, xmm3
 	pslldq		xmm3, 4
-	pxor		xmm1, xmm2
 	pxor		xmm1, xmm3
 	pslldq		xmm3, 4
+	pxor		xmm1, xmm2
 	pxor		xmm1, xmm3
 	movdqa		XMMWORD PTR [ecx], xmm1
 

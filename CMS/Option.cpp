@@ -33,18 +33,11 @@ OPSW::OPSW(int argc, _TCHAR* argv[]):
 
 	//----------------------------------------------------
 	//SIMD命令のチェック
-	fSIMD = ChkSIMD();
-	switch(fSIMD){
-		case(1):
-			cout << "Detect SSE2 instruction sets." << endl;
-			break;
-		case(2):
-			cout << "Detect AES-NI instruction sets." << endl;
-			break;
-		default:
-			cout << "SIMD instruction do not found." << endl;
-			exit(-1);
-			break;
+
+	__cpuid(cpuinfo, 1);
+	if(!chkSSE2()){
+		cerr << "SSE2 instruction do not found." << endl;
+		exit(-1);
 	}
 
 	//----------------------------------

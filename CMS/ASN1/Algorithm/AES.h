@@ -56,9 +56,11 @@ union _mm_i32
 										//For this standard, Nb = 4. (Also see Sec. 6.3.)
 #define		AES_Nbb			AES_Nb*4	//[Byte]
 #define		AES_BlockSize	AES_Nbb
+
 /****************************************************************/
 /*			プロトタイプ宣言									*/
 /****************************************************************/
+#ifdef	_M_IX86
 //アセンブリ言語で書かれた関数	"AES_sse.asm"
 extern "C"{
 	//--------------------------			
@@ -81,6 +83,7 @@ extern "C"{
 //				__m128i	__fastcall	AES_NI_InvCipher_CBC4(unsigned char cNr,unsigned int *ptrKs, __m128i* data, __m128i vector);
 
 }
+#endif
 
 /****************************************************************/
 /*			クラス定義											*/
@@ -98,7 +101,6 @@ public:
 											//For this standard, Nk = 4, 6, or 8. (Also see Sec. 6.3.)
 	unsigned	char	Nr;					//Number of rounds, which is a function of Nk and Nb (which is fixed).
 											//For this standard, Nr = 10, 12, or 14. (Also see Sec. 6.3.)
-	bool				aesni;
 
 //Function
 public:
@@ -129,8 +131,15 @@ protected:
 	__m128i	AddRoundKey(__m128i data, int i);					//5.1.4	AddRoundKey
 
 	void	KeyExpansion(unsigned char *key);					//5.2	Key Expansion
+	void	KeyExpansion_C(unsigned char *key);					//
+	void	KeyExpansion_AESNI(unsigned char *key);				//
+
 	__m128i	InvCipher(__m128i data);							//5.3	InvCipher
+#ifdef	_M_X64
+	__m128i	InvCipher_CBC8(__m128i* data, __m128i vector);		//5.3	InvCipher
+#else
 	__m128i	InvCipher_CBC4(__m128i* data, __m128i vector);		//5.3	InvCipher
+#endif
 	__m128i	InvShiftRows(__m128i data);							//5.3.1	InvShiftRows
 	__m128i	InvSubBytes(__m128i data);							//5.3.2	InvSubBytes
 	__m128i	InvMixColumns(__m128i data);						//5.3.3	InvMixColumns

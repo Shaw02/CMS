@@ -7,8 +7,8 @@
 /*			定数定義											*/
 /****************************************************************/
 //暗号処理用バッファ
-//#define	Encrypt_Buff	(2048/AES_BlockSize)		//128*16 = 2048
-#define	Encrypt_Buff		2048
+//#define	Encrypt_Buff	(65536/AES_BlockSize)		//4096*16 = 65536
+#define	Encrypt_Buff		65536
 
 /****************************************************************/
 /*			グローバス変数（クラス）							*/
@@ -77,56 +77,6 @@ extern "C"	void	dataPrint32(int n, void *Data)
 	}
 	cout	<<	dec	<<	endl;
 
-}
-//==============================================================
-//			get process
-//--------------------------------------------------------------
-//	●引数
-//			無し
-//	●返値
-//			__int64		プロセス時間
-//==============================================================
-__int64	ReadTSC()
-{
-	__asm{
-;		cpuid
-		rdtsc
-	}
-}
-//==============================================================
-//			SIMDに対応しているかチェック
-//--------------------------------------------------------------
-//	●引数
-//			無し
-//	●返値
-//			__int64		プロセス時間
-//==============================================================
-int	ChkSIMD(){
-	__asm{
-		push	ebx
-		push	ecx
-		push	edx
-
-		mov		eax, 1
-		cpuid
-		test	ecx, 002000000h
-		jnz		ChkSIMD_AESNI
-		test	edx, 004000000h		;//SSE2 check
-		jnz		ChkSIMD_SSE2
-		mov		eax, 0
-		jmp		ChkSIMD_END
-ChkSIMD_SSE2:
-		mov		eax, 1
-		jmp		ChkSIMD_END
-ChkSIMD_AESNI:
-		mov		eax, 2
-;		jmp		ChkSIMD_END
-ChkSIMD_END:
-
-		pop		edx
-		pop		ecx
-		pop		ebx
-	}
 }
 
 //==============================================================
@@ -310,7 +260,7 @@ void	decrypt()
 int __cdecl _tmain(int argc, _TCHAR* argv[])
 {
 
-	unsigned	__int64	cycles = ReadTSC();		//プログラム起動時のクロック数
+	unsigned	__int64	cycles = __rdtsc();		//プログラム起動時のクロック数
 
 #ifdef	_DEBUG
 
@@ -385,7 +335,7 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 #endif
 
 	cout	<<	"Success.\n"
-				"Process cycles = "	<<	ReadTSC() - cycles	<<	endl;
+				"Process cycles = "	<<	__rdtsc() - cycles	<<	endl;
 
 	return 0;
 }

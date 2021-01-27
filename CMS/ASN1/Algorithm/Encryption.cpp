@@ -38,11 +38,9 @@ Encryption::~Encryption(void)
 void	Encryption::encipher(void *data,unsigned int iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
 
-	while(n < iSize){
+	for(int n=0; n<iSize; n+=szBlock){
 		encrypt(&cData[n]);
-		n	+=	szBlock;
 	}
 }
 //==============================================================
@@ -102,11 +100,9 @@ int		Encryption::encipher_last(void *data,unsigned int iSize)
 void	Encryption::decipher(void *data,unsigned int iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
 
-	while(n < iSize){
+	for(int n=0; n<iSize; n+=szBlock){
 		decrypt(&cData[n]);
-		n	+=	szBlock;
 	}
 }
 //==============================================================

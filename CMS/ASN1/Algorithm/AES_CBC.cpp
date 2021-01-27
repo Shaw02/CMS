@@ -112,13 +112,11 @@ void	AES_CBC::encipher(void *data,unsigned int iSize)
 	__m128i				_vector		= vector;
 
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
 
-	while(n < iSize){
+	for(int n=0; n<iSize; n+=szBlock){
 		temp = Cipher(_mm_xor_si128(_mm_load_si128((__m128i*)&cData[n]), _vector));
 		_mm_store_si128((__m128i*)&cData[n], temp);
 		_vector = temp;
-		n	+=	szBlock;
 	}
 	vector = _vector;
 
@@ -193,10 +191,15 @@ void	AES_CBC::decipher(void *data,unsigned int iSize)
 	unsigned	char*	cData		= (unsigned	char*)data;
 	unsigned	int		n			= 0;
 
-	if((iSize >= szBlock * 4) && (aesni == true)){
+	if((iSize >= szBlock * 4) && cOpsw->chkAESNI()){
 		while(n < iSize){
-			vector = InvCipher_CBC4((__m128i*)&cData[n], vector);
-			n	+=	szBlock * 4;
+#ifdef	_M_X64
+			vector = InvCipher_CBC8((__m128i*)&cData[n], vector);
+			n	+=	szBlock * 8;
+#else
+			vector = InvCipher_CBC4((__m128i*) & cData[n], vector);
+			n += szBlock * 4;
+#endif
 		}
 	}
 
@@ -229,11 +232,17 @@ int		AES_CBC::decipher_last(void *data,unsigned int iSize)
 	unsigned	char	cntPadData;
 
 	//•œ†
-	if(aesni == true){
+	if(cOpsw->chkAESNI()){
 		while(iSize > szBlock * 4){
-			vector = InvCipher_CBC4((__m128i*)&cData[n], vector);
-			n		+= szBlock * 4;
-			iSize	-= szBlock * 4;
+#ifdef	_M_X64
+			vector = InvCipher_CBC8((__m128i*) & cData[n], vector);
+			n += szBlock * 8;
+			iSize -= szBlock * 8;
+#else
+			vector = InvCipher_CBC4((__m128i*) & cData[n], vector);
+			n += szBlock * 4;
+			iSize -= szBlock * 4;
+#endif
 		}
 	}
 

@@ -13,12 +13,6 @@ AES::AES(const char _strName[]):
 	Encryption(_strName)
 {
 	szBlock	= AES_BlockSize;
-
-	if(ChkSIMD()==2){
-		aesni = true;
-	} else {
-		aesni = false;
-	}
 }
 
 //==============================================================
@@ -129,68 +123,13 @@ __m128i	AES::mul(__m128i data, unsigned char n)
 void	AES::KeyExpansion(unsigned char *key)
 {
 
-	//The round constant word array.
-	static	const	unsigned	int	Rcon[10]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36};
-
-	unsigned	int	i;
-				int	iR;
-				int	iRm;
-				int	temp;
-
 //	Nk	= cNk;
 	Nr	= Nk + 6;
 
-	if(aesni == false){
-
-		//------------------
-		// í èÌ
-
-		i	= 0;
-		//çÇë¨ÉÅÉÇÉäÉRÉsÅ[
-		do{
-			_mm_storel_epi64((__m128i*)&w[i], _mm_loadl_epi64((__m128i*)&key[i*4]));
-			i++;
-			i++;
-		} while (i < Nk);
-
-		i		= Nk;
-		temp	= w[i-1];
-		do{
-			iR	= i/Nk;
-			iRm	= i%Nk;		//äÑÇËéZñΩóﬂÇÇQÇ¬ìfÇ≠ÇÃÇÕñ‹ëÃñ≥Ç¢ÅB
-
-			if(iRm==0){
-				temp = SubWord(RotWord(temp)) ^ Rcon[(iR)-1];
-			} else if((Nk > 6) && ( (i%Nk) == 4)){
-				temp = SubWord(temp);
-			}
-			temp	^= w[i-Nk];
-			w[i]	 = temp;
-
-			i++;
-
-		} while (i < (unsigned int)AES_Nb * (Nr+1));
-
+	if(!cOpsw->chkAESNI()){
+		KeyExpansion_C(key);
 	} else {
-
-		//------------------
-		// AES-NI
-
-		switch(Nk){
-			case(4):
-				AES_NI_KeyExpansion128(w,key);
-				break;
-			case(6):
-				AES_NI_KeyExpansion192(w,key);				
-				break;
-			case(8):
-				AES_NI_KeyExpansion256(w,key);				
-				break;
-			default:
-				cerr << "Error AES::KeyExpansion function on AES.cpp" << endl;
-				exit(-1);
-				break;
-		}
+		KeyExpansion_AESNI(key);
 	}
 
 #ifdef	_DEBUG
@@ -205,6 +144,71 @@ void	AES::KeyExpansion(unsigned char *key)
 #endif
 
 }
+
+//--------------------------------------------------------------
+//	í èÌ
+void	AES::KeyExpansion_C(unsigned char *key)
+{
+	//The round constant word array.
+	static	const	unsigned	int	Rcon[10]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36};
+
+	unsigned	int	i = 0;
+				int	iR;
+				int	iRm;
+				int	temp;
+
+	//çÇë¨ÉÅÉÇÉäÉRÉsÅ[
+	do{
+		_mm_storel_epi64((__m128i*)&w[i], _mm_loadl_epi64((__m128i*)&key[i*4]));
+		i++;
+		i++;
+	} while (i < Nk);
+
+	i		= Nk;
+	temp	= w[i-1];
+	do{
+		iR	= i/Nk;
+		iRm	= i%Nk;		//äÑÇËéZñΩóﬂÇÇQÇ¬ìfÇ≠ÇÃÇÕñ‹ëÃñ≥Ç¢ÅB
+
+		if(iRm==0){
+			temp = SubWord(RotWord(temp)) ^ Rcon[(iR)-1];
+		} else if((Nk > 6) && ( (i%Nk) == 4)){
+			temp = SubWord(temp);
+		}
+		temp	^= w[i-Nk];
+		w[i]	 = temp;
+
+		i++;
+
+	} while (i < (unsigned int)AES_Nb * (Nr+1));
+}
+
+//--------------------------------------------------------------
+//	AES-NI
+void	AES::KeyExpansion_AESNI(unsigned char *key)
+{
+#ifdef _M_IX86
+	//Å° To Do:	CÇ…à⁄êAÇ∑ÇÈ
+	switch(Nk){
+		case(4):
+			AES_NI_KeyExpansion128(w,key);
+			break;
+		case(6):
+			AES_NI_KeyExpansion192(w,key);				
+			break;
+		case(8):
+			AES_NI_KeyExpansion256(w,key);				
+			break;
+		default:
+			cerr << "Error AES::KeyExpansion function on AES.cpp" << endl;
+			exit(-1);
+			break;
+	}
+#else
+	KeyExpansion_C(key);
+#endif
+}
+
 //==============================================================
 //			fips-197	5.2		RotWord()
 //--------------------------------------------------------------
@@ -380,32 +384,31 @@ static	const	unsigned	char	InvSbox[256]={
 __m128i	AES::Cipher(__m128i data)
 {
 
-	if(aesni == false){
+#ifdef	_M_IX86
+	if(!cOpsw->chkAESNI()){
 		data = AES_SSE_Cipher(Nr,w,data);
 	} else {
 		data = AES_NI_Cipher(Nr,w,data);
 	}
 
-	return(data);
-
-/*
+#else
 	//ÅüRound [0]
-	int	i=0;
+	int	i = 0;
 
 	data = AddRoundKey(data, i);
 	i++;
 
 	//ÅüRound (1) Å` (Nr-1)
-	do{
-		data = AddRoundKey(MixColumns(ShiftRows((data))),i);
+	do {
+		data = AddRoundKey(MixColumns(ShiftRows((data))), i);
 		i++;
-	} while(i < Nr);
+	} while (i < Nr);
 
 	//ÅüRound (Nr)
-	data = AddRoundKey(ShiftRows(SubBytes(data)),i);
+	data = AddRoundKey(ShiftRows(SubBytes(data)), i);
+#endif
 
 	return(data);
-*/
 }
 //==============================================================
 //			fips-197	5.1.1		
@@ -533,31 +536,30 @@ __m128i	AES::AddRoundKey(__m128i data, int i)
 //==============================================================
 __m128i	AES::InvCipher(__m128i data)
 {
-	if(aesni == false){
+#ifdef	_M_IX86
+	if(!cOpsw->chkAESNI()){
 		data = AES_SSE_InvCipher(Nr,w,data);
 	} else {
 		data = AES_NI_InvCipher(Nr,w,data);
 	}
-
-	return(data);
-/*
+#else
 	//ÅüRound (Nr)
-	int	i=Nr;
+	int	i = Nr;
 
 	data = InvAddRoundKey(data, i);
 	i--;
 
 	//ÅüRound (Nr-1) Å` (1)
-	do{
-		data = InvMixColumns(InvAddRoundKey(InvShiftRows(InvSubBytes(data)),i));
+	do {
+		data = InvMixColumns(InvAddRoundKey(InvShiftRows(InvSubBytes(data)), i));
 		i--;
-	} while(i > 0);
+	} while (i > 0);
 
 	//ÅüRound (0)
 	data = InvAddRoundKey(InvShiftRows(InvSubBytes(data)), i);
+#endif
 
 	return(data);
-*/
 }
 
 //==============================================================
@@ -569,7 +571,11 @@ __m128i	AES::InvCipher(__m128i data)
 //	Åúï‘íl
 //			__m128i					next vector
 //==============================================================
+#ifdef	_M_X64
+__m128i	AES::InvCipher_CBC8(__m128i* data, __m128i vector)
+#else
 __m128i	AES::InvCipher_CBC4(__m128i* data, __m128i vector)
+#endif
 {
 
 	__m128i*	_w = (__m128i*)w;
@@ -577,23 +583,38 @@ __m128i	AES::InvCipher_CBC4(__m128i* data, __m128i vector)
 	//Load
 	//ÅüRound (Nr)
 	int		i		= Nr;
-	__m128i	_vector	= data[3];
-//	__m128i	tmp		= _mm_load_si128((__m128i*)(&w[i*4]));
+#ifdef	_M_X64
+	__m128i	_vector	= data[7];
+#else
+	__m128i	_vector = data[3];
+#endif
+
 	__m128i	tmp		= _w[i];
 	__m128i	xdata1	= _mm_xor_si128(data[0],tmp);
 	__m128i	xdata2	= _mm_xor_si128(data[1],tmp);
 	__m128i	xdata3	= _mm_xor_si128(data[2],tmp);
 	__m128i	xdata4	= _mm_xor_si128(data[3],tmp);
+#ifdef	_M_X64
+	__m128i	xdata5	= _mm_xor_si128(data[4],tmp);
+	__m128i	xdata6	= _mm_xor_si128(data[5],tmp);
+	__m128i	xdata7	= _mm_xor_si128(data[6],tmp);
+	__m128i	xdata8	= _mm_xor_si128(data[7],tmp);
+#endif
 	i--;
 
 	//ÅüRound (Nr-1) Å` (1)
 	do{
-//		tmp   = _mm_aesimc_si128(_mm_load_si128((__m128i*)&w[i*4]));
 		tmp   = _mm_aesimc_si128(_w[i]);
 		xdata1 = _mm_aesdec_si128(xdata1, tmp);
 		xdata2 = _mm_aesdec_si128(xdata2, tmp);
 		xdata3 = _mm_aesdec_si128(xdata3, tmp);
 		xdata4 = _mm_aesdec_si128(xdata4, tmp);
+#ifdef	_M_X64
+		xdata5 = _mm_aesdec_si128(xdata5, tmp);
+		xdata6 = _mm_aesdec_si128(xdata6, tmp);
+		xdata7 = _mm_aesdec_si128(xdata7, tmp);
+		xdata8 = _mm_aesdec_si128(xdata8, tmp);
+#endif
 		i--;
 
 	} while(i > 0);
@@ -602,6 +623,12 @@ __m128i	AES::InvCipher_CBC4(__m128i* data, __m128i vector)
 	// & CBC calc & Store
 //	tmp		= _mm_load_si128((__m128i*)&w[i*4]);
 	tmp   = _w[i];
+#ifdef	_M_X64
+	data[7]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata8, tmp), data[6]);
+	data[6]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata7, tmp), data[5]);
+	data[5]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata6, tmp), data[4]);
+	data[4]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata5, tmp), data[3]);
+#endif
 	data[3]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata4, tmp), data[2]);
 	data[2]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata3, tmp), data[1]);
 	data[1]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata2, tmp), data[0]);

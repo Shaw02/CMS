@@ -10,8 +10,9 @@
 //#include <stdio.h>
 #include <time.h>
 #include <tchar.h>
-#include <nmmintrin.h>
-#include <wmmintrin.h>
+#include <intrin.h>		//cpuid, rdtsc
+#include <emmintrin.h>	//SSE 4.2
+#include <wmmintrin.h>	//AES-Ni
 
 #include <iomanip>
 #include <string>
@@ -20,6 +21,8 @@
 #include <vector>
 #include <map>
 #include <set>
+
+#pragma intrinsic(__cpuid, __rdtsc)
 
 
 // TODO: プログラムに必要な追加ヘッダーをここで参照してください。
@@ -107,6 +110,7 @@ using namespace std;
 /*			外部宣言											*/
 /****************************************************************/
 
+extern	OPSW*	cOpsw;			//オプションスイッチ
 extern	MT_SHA*	cRandom;
 
 /****************************************************************/
@@ -115,5 +119,3 @@ extern	MT_SHA*	cRandom;
 extern "C"	void		dataPrint(int n, void *Data);
 extern "C"	void		dataPrint32(int n, void *Data);
 void		errPrint(const char *strFile, const char *strMSG);
-__int64		ReadTSC();
-int			ChkSIMD();
