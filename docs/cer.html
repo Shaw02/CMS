@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>Canonical Encoding Rules（CER）</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<div class="block">
+<h2><a name="CER">Canonical Encoding Rules（CER）</a></h2>
+<p>
+<a href="ber.html">BER（基本符号化規則）</a>を、更に厳密にしたもの。<br>
+CER, DER共通の符号化ルールは、「<a href="cerder.html">CER, DER共通の符号化ルール</a>」項を参照。<br>
+</p>
+
+<h3>Lengthフィールド</h3>
+<p>
+IdentifierのP/Cフィールドが0(Primitive)の場合においては、
+Lengthフィールドは、最小のバイト数になるように記述しなければならない。<br>
+</p>
+
+<h3>ビット列、バイト列、文字列について</h3>
+<p>
+Bit String, Octet String, 文字列データにおいて、<br>
+データ長が1000を超えない場合は、IdentifierのP/Cフィールドを0(Primitive)として符号化しなければならない。<br>
+データ長が1000を超える場合は、IdentifierのP/Cフィールドを1(Constructed)として符号化しなければならない。<br>
+その際、データの断片は、最後のデータを除き、Lengthは1000でなければならない。<br>
+</p>
+
+<h3>SETについて</h3>
+<p>
+要素はタグの正規化順（Universal, Application, Context-specific, Private の順、同じClassでは昇順）で符号化しなければならない。<br>
+その上、１つ以上の要素がTAG化されないChoiceTypeである時、
+要素がコード化される順番を決定する目的の為、
+ChoiceType若しくは、ネストされたTAG化されないChoiceType内で
+最も小さいTAGと等しいTAGを持っているように、各TAG化されないChoiceTypeは順序つけされる。<bt>
+</p>
+
+
+</div>	<!-- h2 の div -->
+</div>
+
+</BODY>
+</HTML>

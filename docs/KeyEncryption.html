@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>パスワードによる鍵管理手法</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<div class="block">
+<h2><a name="KeyDerivation">鍵導出による鍵管理</a></h2>
+
+<p>
+パスワードを鍵暗号化用の鍵に変換する為に使われます。<br>
+パスワードから導出された鍵暗号化用の鍵(KEK)は、コンテンツ暗号化用の鍵(CEK)を暗号化するために使われます。<br>
+鍵導出アルゴリズムでは、以下に示す２つのアルゴリズムが指定されます。<br>
+</p>
+
+
+<li><a href="KeyDerivation.html">Key Derivation Algorithm</a><br>
+	パスワードから鍵暗号化用の鍵(KEK)を導出するアルゴリズムです。
+</li>
+<li>Key Encryption Algorithms<br>
+	コンテンツ用の暗号鍵CEK（乱数から生成される）を暗号化する暗号アルゴリズムです。<br>
+	アルゴリズムについては、以下を参照。
+	鍵は、<a href="KeyDerivation.html">鍵導出関数</a>でパスワードから導出した鍵(KEK)を使用します。
+</li>
+
+<h3><a name="PWRI">id-alg-PWRI-KEK</a></h3>
+<dl>
+<dt>id-alg-PWRI-KEK</dt><dd>1.2.840.113549.1.9.16.3.9</dd>
+</dl>
+<p>
+鍵導出（パスワード）を用いて、コンテンツ暗号化鍵(CEK)を暗号化するアルゴリズムです。<br>
+鍵導出（パスワード）による鍵管理では、習慣的な手法として、このアルゴリズムが使用されます。<br>
+詳細は、"RFC.3211"を参照。
+</p>
+
+<pre class="code">
+parameters ::= <a href="AlgorithmIdentifier.html">AlgorithmIdentifier</a>
+</pre>
+
+<table summary="parametersについて">
+<caption>parametersについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容				</th></tr>
+<tr><td><a href="AlgorithmIdentifier.html">AlgorithmIdentifier</a></td>
+	<td>コンテンツ用鍵(CEK)を暗号化するためのアルゴリズム（Triple-DES CBC, AES-CBC等）。<br>
+		コンテンツの暗号化に用いたアルゴリズムと同一である必要は無いが、
+		その場合は同等以上のセキュリティとなるように注意する<br>
+		（例えば、RC2/40鍵でラッピングしたTriple-DES鍵は、暗号強度で厳密なインピーダンス不整合を導く。）<br>
+		ブロック暗号のOFBモード及びECBモードや、RC4等のいかなるKSG (keystream generator)暗号は使用すべきではない。<br>
+		</td></tr>
+</table>
+
+
+<h4><a name="KeyWrap">Key Wrap のプロセス</a></h4>
+
+<p>
+まず、コンテンツ暗号化鍵(CEK)を、以下の通り整形する。
+</p>
+<ol type="1">
+<li>コンテンツ暗号化鍵(CEK)のバイト数の、１バイトのカウント値。</li>
+<li>コンテンツ暗号化鍵(CEK)の最初の３バイトのビット単位の補数を含むチェック値。</li>
+<li>コンテンツ暗号化鍵(CEK)</li>
+<li>ランダムパディングで、整形したコンテンツ用暗号化鍵が鍵暗号化アルゴリズムのブロック長の倍数になるようにする。<br>
+	パディングデータは暗号論敵強度を持たないが、予測不可能性は助ける。<br>
+	常に知られたデータ長であるので、PKCS#5パディングは使わないように注意する。<br>
+	</li>
+</ol>
+<p>
+つまり、この並びの構造になる。<br>
+SS … コンテンツ暗号化鍵(CEK) バイトのカウント値<br>
+CC … チェック値<br>
+XX … コンテンツ暗号化鍵(CEK)<br>
+PP … パディング (要求された場合)<br>
+</p>
+<table>
+<tr><td>SS</td><td>CC</td><td>XX XX XX ... XX</td><td>PP PP ... PP</td></tr>
+</table>
+
+<p>
+次に、この整形したコンテンツ用暗号鍵(CEK)を、２回暗号化を実施する。<br>
+このとき、parametersで指定された暗号アルゴリズムを用い、
+２回目の暗号化においては初期化ベクタ(IV)はリセットせず、そのまま使う。<br>
+尚、設定する暗号鍵(KEK)は、<a href="KeyDerivation.html">鍵導出関数(KDF)</a>でパスワードから導き出した暗号鍵を用いる。<br>
+</p>
+
+<h4><a name="KeyUnwrap">Key Unwrap のプロセス</a></h4>
+
+<p>
+暗号化されたデータブロック数をnとする。<br>
+</p>
+<ol type="2">
+<li>先ず、暗号モジュールの初期化ベクタIVを、(n-1)番目のブロックの値に設定し、(n)番目(最終)のブロックを復号する。</li>
+<li>次に、復号した(n)番目(最終)のブロックを初期化ベクタ(IV)にし、1～(n-1)番目のブロックを復号する。</li>
+<li>暗号モジュールのパラメータどおりの初期化ベクタIVに設定しなおし、1～(n)番目までの全ブロックを復号する。</li>
+<li>1バイト目が鍵長。2～4バイト目がチェック地、5バイト目～がコンテンツ用暗号鍵CEKの平文となる。</li>
+</ol>
+
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>

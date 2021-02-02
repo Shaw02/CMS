@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>オプションスイッチ</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+<h2>オプションスイッチ</h2>
+
+<p>
+ＣＵＩ（コマンドライン・ユーザー・インターフェイス）アプリケーションです。<br>
+以下の通り、コマンドラインに打ち込んでください。<br>
+</p>
+
+<p>
+CMS <var>filename.ext</var> <var>/option</var>
+</p>
+
+<table class="noline">
+<tr><td><var>filename.ext</var> … </td>
+	<td>復号するファイル名(拡張子".p7"は省いてください)<br>
+		もしくは、暗号化したいファイル名を指定します。
+	</td></tr>
+</table>
+<br>
+
+<table class="noline">
+<caption>/option</caption>
+<tr><td width=64pt>/D		</td><td>復号処理をします。　(Default)</td></tr>
+<tr><td>/E		</td><td>	暗号処理をします。</td></tr>
+<tr><td>/T(n)	</td><td>出力のファイル形式を指定します。<br>
+						　3 : Enveloped-data Type　(Default)<br>
+						　　　　↑セキュリティ性確保の為、なるべくこちらをお使いください。<br>
+						　6 : Encrypted-data Type<br>
+						　　　　↑過去バージョン（AES Ver,1.00）の出力形式です。</td></tr>
+<tr><td>/M(n)	</td><td>使用する暗号アルゴリズムを指定します。<br>
+						　1 …　DES-CBC<br>
+						　2 …　DES-3EDE-CBC<br>
+						　3 …　AES-CBC 128bit<br>
+						　4 …　AES-CBC 192bit<br>
+						　5 …　AES-CBC 256bit　(Default)</td></tr>
+<tr><td>/W(s)	</td><td>パスワードを指定します。<br>
+						・Enveloped-data Typeを出力する（/T3を指定）時は、必ずパスワードを設定してください。<br>
+						・Encrypted-data Typeを出力する（/T6を指定）時に、
+						設定しなかった場合は暗号鍵は疑似乱数で作成し、
+						暗号鍵ファイル"filename.ext.key"に鍵を保存します。</td></tr>
+<tr><td>/Fk(s)	</td><td>暗号鍵ファイルを指定します。<br>
+						このオプションを使用時は、必ず、Encrypted-data Type（オプションで/T6）を指定してください。<br>
+						暗号／復号時に、指定されたファイルを暗号鍵にします。</td></tr>
+</table>
+
+
+</div>
+
+</BODY>
+</HTML>

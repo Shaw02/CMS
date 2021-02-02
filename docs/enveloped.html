@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>封筒化データ(Enveloped-data)タイプ</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2>封筒化データ(Enveloped-data)タイプ</h2>
+
+<div class='block'>
+<p>
+一般的に使われている暗号データの形式です。<br>
+このタイプでは、以下の情報を格納する事ができます。<br>
+</p>
+<ul>
+<li>発信者の情報　（コンテンツを暗号化した人の電子（公開鍵）証明書）<br>
+	※オプションであり、本ソフトで暗号化する際は、格納しません。</li>
+<li>受信者の情報　（鍵管理手法と、そのパラメータ）<br>
+	（コンテンツを受信する人の電子（公開鍵）証明書や、パスワードによる暗号のための情報）<br>
+	※受取人の数だけ格納されますが、本ソフトではパスワードによる暗号のみ対応しています。</li>
+<li>暗号化されたコンテンツ実体</li>
+</ul>
+<p>EnvelopedDataは以下のASN.1による記述で定義されます。<br></p>
+
+<pre class="code">
+<strong>[ASN.1] EnvelopedData (oid = 1.2.840.113549.1.7.3)</strong>
+EnvelopedData ::= SEQUENCE {
+  version CMSVersion,
+  originatorInfo [0] IMPLICIT OriginatorInfo OPTIONAL,
+  recipientInfos RecipientInfos,
+  encryptedContentInfo <a href="EncryptedContentInfo.html">EncryptedContentInfo</a>,
+  unprotectedAttrs [1] IMPLICIT UnprotectedAttributes OPTIONAL }
+</pre>
+
+<pre class="code">
+<a name="OriginatorInfo">OriginatorInfo</a> ::= SEQUENCE {
+  certs [0] IMPLICIT <!--a href="CertificateSet.html"-->CertificateSet<!--/a--> OPTIONAL,
+  crls [1] IMPLICIT <!--a href="RevocationInfoChoices.html"-->RevocationInfoChoices<!--/a--> OPTIONAL }
+</pre>
+
+<pre class="code">
+RecipientInfos ::= SET SIZE (1..MAX) OF <a href="RecipientInfo.html">RecipientInfo</a>
+</pre>
+
+<pre class="code">
+UnprotectedAttributes ::= SET SIZE (1..MAX) OF <!--a href="Attribute.html"-->Attribute<!--/a-->
+</pre>
+
+<table summary="EnvelopedDataについて">
+<caption>EnvelopedDataについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容			</th></tr>
+<tr><td>version</td>
+	<td>このEnvelopedDataデータのヴァージョンを示す。<br>
+		4 : originatorInfoフィールドの中のcertsかcrlsで、otherタイプが選択される場合。<br>
+		3 : originatorInfoフィールドのcertsに、v2attrCertタイプのデータがある場合。 or RecipientInfoにpwri構造体かori構造体がある場合。<br>
+		0 : originatorInfoフィールドとunprotectedAttrsフィールドが無く、且つ全てのRecipientInfoフィールドのヴァージョンが0の場合。<br>
+		2 : それ以外の場合</td></tr>
+<tr><td>originatorInfo</td>
+	<td>コンテンツ作成者の情報。<br>
+		鍵管理アルゴリズムが要求される場合このフィールドが存在し、電子証明書群と証明書失効リスト群が含まれる。<br>
+		<!--a href="CertificateSet.html"-->certs<!--/a-->
+		 … 電子証明書群（X.509 公開鍵証明書等）。<br>
+		<!--a href="RevocationInfoChoices.html"-->crls<!--/a-->
+		 … 証明書失効リスト群。</td></tr>
+<tr><td><a href="RecipientInfo.html">recipientInfos</a></td>
+	<td>コンテンツ受信者の情報群。少なくとも１個以上の受信者情報が無ければならない。</td></tr>
+<tr><td><a href="EncryptedContentInfo.html">encryptedContentInfo</a></td>
+	<td>暗号化されたコンテンツとその情報。</td></tr>
+<tr><td><!--a href="Attribute.html"-->unprotectedAttrs<!--/a--></td>
+	<td>暗号化されない属性の集まり。</td></tr>
+</table>
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>

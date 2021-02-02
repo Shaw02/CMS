@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>CER, DER共通の符号化ルール</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2><a name="CERDER">CER, DER共通の符号化ルール</a></h2>
+<div class="block">
+
+<h3>Boolen値</h3>
+<p>
+TRUEは、全てのビットを1にしなければならない。（つまり、0xFF）<br>
+</p>
+
+<h3>使用しないビットについて</h3>
+<p>
+0にしなければならない。<br>
+</p>
+
+<h3>浮動小数点値</h3>
+<p>
+別途、X.690の原文を参照。<br>
+</p>
+
+<h3>GeneralString値</h3>
+<p>
+別途、X.690の原文を参照。<br>
+</p>
+
+<h3>SET及びSQUENCEの初期値</h3>
+<p>
+何れの要素においても、値がDEFAULTと同値である場合は符号化しない。<br>
+</p>
+
+<h3>SET OF</h3>
+<p>
+SET OF内の要素の値は、OCTET（バイト）列として比較した際に、昇順となるようにする。<br>
+</p>
+
+<h3>Generalized Time</h3>
+<p>
+別途、X.690の原文を参照。<br>
+</p>
+
+<h3>UTCTime</h3>
+<p>
+別途、X.690の原文を参照。<br>
+</p>
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>

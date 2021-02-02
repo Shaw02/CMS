@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>
+<meta http-equiv='Content-Style-Type' content='text/css'>
+<link rel="stylesheet" type="text/css" href="help.css">
+<Title>受取人情報 （RecipientInfo）</Title>
+</HEAD>
+<BODY>
+
+<div id='contents'>
+<h1>CMS対応　暗号／復号ユーティリティ</h1>
+
+<h2>受取人情報 （RecipientInfo）</h2>
+
+<div class='block'>
+
+<p>
+鍵管理の手法によって、それぞれことなる構造のデータが格納されます。<br>
+本ソフトでは、鍵導出（パスワード）による暗号のみに対応しています。<br>
+</p>
+
+<pre class="code">
+RecipientInfo ::= CHOICE {
+  ktri KeyTransRecipientInfo,
+  kari [1] KeyAgreeRecipientInfo,
+  kekri [2] KEKRecipientInfo>,
+  pwri [3] <a href="PasswordRecipientinfo.html">PasswordRecipientinfo</a>,
+  ori [4] OtherRecipientInfo }
+</pre>
+
+<pre class="code">
+<a name="EncryptedKey">EncryptedKey</a> ::= OCTET STRING
+</pre>
+
+<table summary="PasswordRecipientinfoについて">
+<caption>PasswordRecipientinfoについて</caption>
+<tr><th>フィールド名		</th>
+	<th>内容				</th></tr>
+<tr><td>KeyTransRecipientInfo</td>
+	<td>鍵配送　（対称鍵暗号アルゴリズムを用いた鍵管理手法です。）</td></tr>
+<tr><td>KeyAgreeRecipientInfo</td>
+	<td>鍵合意　（鍵合意アルゴリズムを用いた鍵管理手法です。）</td></tr>
+<tr><td>KEKRecipientInfo</td>
+	<td>共通鍵暗号化鍵　（共通鍵暗号アルゴリズム（暗号鍵は事前に共有化）を用いる鍵管理手法です。）</td></tr>
+<tr><td><a href="PasswordRecipientinfo.html">PasswordRecipientinfo</a></td>
+	<td>鍵導出　（パスワード等を用いる鍵管理手法です。）</td></tr>
+<tr><td>OtherRecipientInfo</td>
+	<td>その他</td></tr>
+</table>
+
+
+</div>
+
+</div>
+
+</BODY>
+</HTML>
