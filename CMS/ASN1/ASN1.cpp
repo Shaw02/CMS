@@ -50,6 +50,11 @@ void	ASN1::Set_Construct(ASN1* asn1)
 //==============================================================
 void	ASN1::Clear_Construct()
 {
+
+	for(vector<ASN1*>::iterator	it=Constructed.begin(), e=Constructed.end(); it!=e; it++){
+		//■■■ To Do:	各クラスをポインタにする
+	}
+
 	Constructed.clear();
 }
 

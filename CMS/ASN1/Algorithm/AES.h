@@ -107,9 +107,9 @@ public:
 	AES(const char _strName[]="AES");							//
 	~AES(void);													//
 
-			void	Set_Key(void *key){KeyExpansion((unsigned char *)key);};		//à√çÜåÆ ê›íË
-			void	Clear_Key();										//åÆZeroâª
-//			void	init(){};											//èâä˙âª
+			void	Set_Key(void *key){KeyExpansion((unsigned char *)key);};	//à√çÜåÆ ê›íË
+			void	Clear_Key();												//åÆZeroâª
+//			void	init(){};													//èâä˙âª
 			void	encrypt_ecb(void *data);
 			void	decrypt_ecb(void *data);
 
@@ -122,7 +122,8 @@ protected:
 
 	__m128i	mul(__m128i data, unsigned char n);					//4,2	Multiplication
 
-	__m128i	Cipher(__m128i data);								//5.1	Cipher
+	__m128i	Cipher_SSE2(__m128i data);							//5.1	Cipher (for SSE2)
+	__m128i	Cipher_AESNI(__m128i data);							//5.1	Cipher (for AES-Ni)
 	__m128i	SubBytes(__m128i data);								//5.1.1	SubBytes
 	__m128i	SubBytes2(__m128i data);							//5.1.1	SubBytes(x02)
 	__m128i	SubBytes3(__m128i data);							//5.1.1	SubBytes(x03)
@@ -134,12 +135,8 @@ protected:
 	void	KeyExpansion_C(unsigned char *key);					//
 	void	KeyExpansion_AESNI(unsigned char *key);				//
 
-	__m128i	InvCipher(__m128i data);							//5.3	InvCipher
-#ifdef	_M_X64
-	__m128i	InvCipher_CBC8(__m128i* data, __m128i vector);		//5.3	InvCipher
-#else
-	__m128i	InvCipher_CBC4(__m128i* data, __m128i vector);		//5.3	InvCipher
-#endif
+	__m128i	InvCipher_SSE2(__m128i data);						//5.3	InvCipher
+	__m128i	InvCipher_AESNI(__m128i data);						//5.3	InvCipher
 	__m128i	InvShiftRows(__m128i data);							//5.3.1	InvShiftRows
 	__m128i	InvSubBytes(__m128i data);							//5.3.2	InvSubBytes
 	__m128i	InvMixColumns(__m128i data);						//5.3.3	InvMixColumns

@@ -56,7 +56,11 @@ void	AES::Clear_Key()
 //==============================================================
 void	AES::encrypt_ecb(void *data)
 {
-	_mm_store_si128((__m128i*)data, Cipher(_mm_load_si128((__m128i*)data)));
+	if(cOpsw->chkAESNI()){
+		_mm_store_si128((__m128i*)data, Cipher_AESNI(_mm_load_si128((__m128i*)data)));
+	} else {
+		_mm_store_si128((__m128i*)data, Cipher_SSE2(_mm_load_si128((__m128i*)data)));
+	}
 }
 //==============================================================
 //			fips-197	
@@ -68,7 +72,11 @@ void	AES::encrypt_ecb(void *data)
 //==============================================================
 void	AES::decrypt_ecb(void *data)
 {
-	_mm_store_si128((__m128i*)data, InvCipher(_mm_load_si128((__m128i*)data)));
+	if(cOpsw->chkAESNI()){
+		_mm_store_si128((__m128i*)data, InvCipher_AESNI(_mm_load_si128((__m128i*)data)));
+	} else {
+		_mm_store_si128((__m128i*)data, InvCipher_SSE2(_mm_load_si128((__m128i*)data)));
+	}
 }
 //==============================================================
 //			fips-197	4.2		Multiplication
@@ -133,7 +141,7 @@ void	AES::KeyExpansion(unsigned char *key)
 	}
 
 #ifdef	_DEBUG
-	i = 0;
+	int i = 0;
 	printf("AES::KeyExpansion:\n");
 	do{
 		printf("w[%d]=",i);
@@ -381,17 +389,15 @@ static	const	unsigned	char	InvSbox[256]={
 //	●返値
 //			__m128i				Cipher-text
 //==============================================================
-__m128i	AES::Cipher(__m128i data)
+__m128i	AES::Cipher_SSE2(__m128i data)
 {
 
 #ifdef	_M_IX86
-	if(!cOpsw->chkAESNI()){
-		data = AES_SSE_Cipher(Nr,w,data);
-	} else {
-		data = AES_NI_Cipher(Nr,w,data);
-	}
+	//x86(32bit)であれば、アセンブリ言語で最適化したルーチンを使う。
+	data = AES_SSE_Cipher(Nr,w,data);
 
 #else
+	//x86-64は、コンパイラに任す。
 	//◆Round [0]
 	int	i = 0;
 
@@ -410,6 +416,42 @@ __m128i	AES::Cipher(__m128i data)
 
 	return(data);
 }
+//--------------------------------------------------------------
+__m128i	AES::Cipher_AESNI(__m128i data)
+{
+
+//#ifdef	_M_IX86
+//	data = AES_NI_Cipher(Nr,w,data);
+//
+//#else
+
+	const	__m128i*	_w = (__m128i*)w;
+
+	//◆Round [0] ~ [9]
+	data = _mm_xor_si128(data, _w[0]);
+	data = _mm_aesenc_si128(data, _w[1]);
+	data = _mm_aesenc_si128(data, _w[2]);
+	data = _mm_aesenc_si128(data, _w[3]);
+	data = _mm_aesenc_si128(data, _w[4]);
+	data = _mm_aesenc_si128(data, _w[5]);
+	data = _mm_aesenc_si128(data, _w[6]);
+	data = _mm_aesenc_si128(data, _w[7]);
+	data = _mm_aesenc_si128(data, _w[8]);
+	data = _mm_aesenc_si128(data, _w[9]);
+
+	//◆Round (10) ～ (Nr-1)
+	for(int i=10; i<Nr; i++){
+		data = _mm_aesenc_si128(data, _w[i]);
+	}
+
+	//◆Round (Nr)
+	data = _mm_aesenclast_si128(data, _w[Nr]);
+
+//#endif
+
+	return(data);
+}
+
 //==============================================================
 //			fips-197	5.1.1		
 //--------------------------------------------------------------
@@ -479,7 +521,7 @@ __m128i	AES::ShiftRows(__m128i data)
 	static	const	_mm_i32	_mask2 = {0x00FF0000,0x00FF0000,0x00FF0000,0x00FF0000};
 	static	const	_mm_i32	_mask3 = {0xFF000000,0xFF000000,0xFF000000,0xFF000000};
 
-	__m128i	a0	=	_mm_and_si128(_mask0.m128i, data);								//縦方向の回転
+	__m128i	a0	=	_mm_and_si128(_mask0.m128i, data);							//縦方向の回転
 	__m128i	a1	=	_mm_and_si128(_mask1.m128i, _mm_shuffle_epi32(data, 0x39));	//0011 1001 b
 	__m128i	a2	=	_mm_and_si128(_mask2.m128i, _mm_shuffle_epi32(data, 0x4E));	//0100 1110 b
 	__m128i	a3	=	_mm_and_si128(_mask3.m128i, _mm_shuffle_epi32(data, 0x93));	//1001 0011 b
@@ -534,15 +576,14 @@ __m128i	AES::AddRoundKey(__m128i data, int i)
 //	●返値
 //			__m128i				Cipher-text
 //==============================================================
-__m128i	AES::InvCipher(__m128i data)
+__m128i	AES::InvCipher_SSE2(__m128i data)
 {
 #ifdef	_M_IX86
-	if(!cOpsw->chkAESNI()){
-		data = AES_SSE_InvCipher(Nr,w,data);
-	} else {
-		data = AES_NI_InvCipher(Nr,w,data);
-	}
+	//x86(32bit)であれば、アセンブリ言語で最適化したルーチンを使う。
+	data = AES_SSE_InvCipher(Nr,w,data);
+
 #else
+	//x86-64は、コンパイラに任す。
 	//◆Round (Nr)
 	int	i = Nr;
 
@@ -561,81 +602,44 @@ __m128i	AES::InvCipher(__m128i data)
 
 	return(data);
 }
-
-//==============================================================
-//			fips-197	5.3		InvCipher CBC4
 //--------------------------------------------------------------
-//	●引数
-//			__m128i*	data		Plain-text 
-//			__m128i		vector		now vector
-//	●返値
-//			__m128i					next vector
-//==============================================================
-#ifdef	_M_X64
-__m128i	AES::InvCipher_CBC8(__m128i* data, __m128i vector)
-#else
-__m128i	AES::InvCipher_CBC4(__m128i* data, __m128i vector)
-#endif
+__m128i	AES::InvCipher_AESNI(__m128i data)
 {
 
-	__m128i*	_w = (__m128i*)w;
+//#ifdef	_M_IX86
+//	data = AES_NI_InvCipher(Nr,w,data);
+//
+//#else
+	const	__m128i*	_w = (__m128i*)w;
+	int	i = Nr;
 
-	//Load
 	//◆Round (Nr)
-	int		i		= Nr;
-#ifdef	_M_X64
-	__m128i	_vector	= data[7];
-#else
-	__m128i	_vector = data[3];
-#endif
-
-	__m128i	tmp		= _w[i];
-	__m128i	xdata1	= _mm_xor_si128(data[0],tmp);
-	__m128i	xdata2	= _mm_xor_si128(data[1],tmp);
-	__m128i	xdata3	= _mm_xor_si128(data[2],tmp);
-	__m128i	xdata4	= _mm_xor_si128(data[3],tmp);
-#ifdef	_M_X64
-	__m128i	xdata5	= _mm_xor_si128(data[4],tmp);
-	__m128i	xdata6	= _mm_xor_si128(data[5],tmp);
-	__m128i	xdata7	= _mm_xor_si128(data[6],tmp);
-	__m128i	xdata8	= _mm_xor_si128(data[7],tmp);
-#endif
+	data = _mm_xor_si128(data, _w[i]);
 	i--;
 
-	//◆Round (Nr-1) ～ (1)
-	do{
-		tmp   = _mm_aesimc_si128(_w[i]);
-		xdata1 = _mm_aesdec_si128(xdata1, tmp);
-		xdata2 = _mm_aesdec_si128(xdata2, tmp);
-		xdata3 = _mm_aesdec_si128(xdata3, tmp);
-		xdata4 = _mm_aesdec_si128(xdata4, tmp);
-#ifdef	_M_X64
-		xdata5 = _mm_aesdec_si128(xdata5, tmp);
-		xdata6 = _mm_aesdec_si128(xdata6, tmp);
-		xdata7 = _mm_aesdec_si128(xdata7, tmp);
-		xdata8 = _mm_aesdec_si128(xdata8, tmp);
-#endif
+	//◆Round (Nr-1) ～ (10)
+	while(i>9){
+		data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[i]));
 		i--;
+	}
 
-	} while(i > 0);
+	//◆Round [9] ~ [0]
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[9]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[8]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[7]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[6]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[5]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[4]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[3]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[2]));
+	data = _mm_aesdec_si128(data, _mm_aesimc_si128(_w[1]));
+	data = _mm_aesdeclast_si128(data, _w[0]);
 
-	//◆Round (0)
-	// & CBC calc & Store
-//	tmp		= _mm_load_si128((__m128i*)&w[i*4]);
-	tmp   = _w[i];
-#ifdef	_M_X64
-	data[7]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata8, tmp), data[6]);
-	data[6]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata7, tmp), data[5]);
-	data[5]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata6, tmp), data[4]);
-	data[4]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata5, tmp), data[3]);
-#endif
-	data[3]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata4, tmp), data[2]);
-	data[2]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata3, tmp), data[1]);
-	data[1]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata2, tmp), data[0]);
-	data[0]	= _mm_xor_si128(_mm_aesdeclast_si128(xdata1, tmp), vector);
+//#endif
 
-	return(_vector);
+	return(data);
 }
+
 //==============================================================
 //			fips-197	5.3.1	InvShiftRows
 //--------------------------------------------------------------

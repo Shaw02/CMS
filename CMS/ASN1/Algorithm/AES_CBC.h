@@ -53,4 +53,10 @@ public:
 			void	decipher(void *data,unsigned int iSize);
 			int		encipher_last(void *data,unsigned int iSize);
 			int		decipher_last(void *data,unsigned int iSize);
+
+#ifdef	_M_X64
+	__m128i	InvCipher_CBC8(__m128i* data, __m128i vector);		//5.3	InvCipher
+#else
+	__m128i	InvCipher_CBC4(__m128i* data, __m128i vector);		//5.3	InvCipher
+#endif
 };
