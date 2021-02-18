@@ -262,9 +262,25 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 
 	unsigned	__int64	cycles = __rdtsc();		//プログラム起動時のクロック数
 
+	//乱数の種用
+	union {
+		unsigned	int		i[4];
+		unsigned	__int64	i64[2];
+	} __declspec(align(16)) randSeed;
+
+	//------------------
+	//乱数作成
+	time((time_t*)&randSeed.i64[0]);	//1970年からの、経過秒数
+	randSeed.i64[1] = cycles;			//電源onからの、クロック数
+	cRandom	= new MT_SHA((unsigned long *)randSeed.i, sizeof(randSeed)/sizeof(int));		//MT乱数処理
+
+	//------------------
+	//オプション処理
+	cOpsw	= new OPSW(argc, argv);
+
 #ifdef	_DEBUG
 
-	static	const	char	iKey128[]={	0x2b, 0x7e, 0x15, 0x16, 
+	static	const	char	iKey128[]={	0x2b, 0x7e, 0x15, 0x16,
 										0x28, 0xae, 0xd2, 0xa6, 
 										0xab, 0xf7, 0x15, 0x88, 
 										0x09, 0xcf, 0x4f, 0x3c};
@@ -303,23 +319,6 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 
 #else
 	
-	//乱数の種用
-	union {
-		unsigned	int		i[4];
-		unsigned	__int64	i64[2];
-	} __declspec(align(16)) randSeed;
-
-	//------------------
-	//乱数作成
-	time((time_t*)&randSeed.i64[0]);	//1970年からの、経過秒数
-	randSeed.i64[1] = cycles;			//電源onからの、クロック数
-	cRandom	= new MT_SHA((unsigned long *)randSeed.i, sizeof(randSeed)/sizeof(int));		//MT乱数処理
-
-	//------------------
-	//オプション処理
-	cOpsw	= new OPSW(argc, argv);
-
-
 	//------------------
 	//処理開始
 	if(cOpsw->cDecipher == 0){
@@ -328,11 +327,10 @@ int __cdecl _tmain(int argc, _TCHAR* argv[])
 		decrypt();		//復号	
 	}
 
+#endif
+
 	delete	cOpsw;
 	delete	cRandom;
-
-
-#endif
 
 	cout	<<	"Success.\n"
 				"Process cycles = "	<<	__rdtsc() - cycles	<<	endl;
