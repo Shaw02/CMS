@@ -30,5 +30,5 @@ PrivateKeyInfo ::= SEQUENCE {
 
 				void	Set(AlgorithmIdentifier*	_algorithm,
 										char		c[],
-							unsigned	int			iSize);
+										size_t		iSize);
 };

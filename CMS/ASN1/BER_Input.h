@@ -17,19 +17,17 @@ public:
 					~BER_Input(void);
 
 			void	DecodeError(unsigned int iEer);
-			int		read_int(int iSize);
-unsigned	int		read_uint(int iSize);
+			int		read_int(size_t iSize);
+unsigned	int		read_uint(size_t iSize);
 unsigned	int		read_variable(void);
-unsigned	int		read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* iTag);
-unsigned	int		read_TAG_with_Check(unsigned char cClass, bool fStruct, unsigned int iTag);
+			size_t	read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* iTag);
+			size_t	read_TAG_with_Check(unsigned char cClass, bool fStruct, unsigned int iTag);
 
-unsigned	int		read_Integer(Integer* i);
-unsigned	int		read_Object_Identifier(ObjectIdentifier* oid);
-unsigned	int		read_Object_Identifier_with_Check(
+			size_t	read_Integer(Integer* i);
+			size_t	read_Object_Identifier(ObjectIdentifier* oid);
+			size_t	read_Object_Identifier_with_Check(
 						ObjectIdentifier*	oid,
 						unsigned	int		iData[],
-						unsigned	int		szData
-				);
-
-unsigned	int		read_Octet_Strings(OctetString* _str);
+									size_t	szData);
+			size_t	read_Octet_Strings(OctetString* _str);
 };

@@ -57,7 +57,7 @@ public:
 	enum				useMode{_EXPLICIT, _IMPLICIT}	mode;
 
 	vector<ASN1*>		Constructed;	//構造化する場合
-	unsigned	int		szAddValue;
+			size_t		szAddValue;
 
 //--------------
 //関数
@@ -68,8 +68,8 @@ public:
 
 						void	Set_Construct(ASN1* asn1);
 						void	Clear_Construct();
-						void	Set_ExternalDataSize(unsigned int iSize);
-						int		Get_ExternalDataSize(void){return(szAddValue);}	//
+						void	Set_ExternalDataSize(size_t iSize);
+						size_t	Get_ExternalDataSize(void){return(szAddValue);}	//
 
 						//BER Encode用
 						void	error(unsigned int iEer);
@@ -77,16 +77,16 @@ public:
 						void	encodeBER_TAG(	unsigned	char	cClass,
 															bool	fStruct,
 												unsigned	int		iTag,
-												unsigned	int		iSize);
-						void	encodeBER_size(unsigned int iSize);
+															size_t	iSize);
+						void	encodeBER_size(size_t iSize);
 						void	encodeBER_int(int _i);
 						void	encodeBER_variable(unsigned int _i);
 						void	encodeBER_Constructed(unsigned char cClass, unsigned int iTag);
 	virtual				void	encodeBER();					//BERコード生成
 
 	virtual	const		char*	Get_BERcode(void);				//BERコード取得
-	virtual	unsigned	int		Get_BERsize(void);				//BERサイズ取得
-			unsigned	int		Get_szInt_for_BER(int _i);	
-			unsigned	int		Get_szSize_for_BER(unsigned int iSize);
+	virtual				size_t	Get_BERsize(void);				//BERサイズ取得
+						size_t	Get_szInt_for_BER(int _i);
+						size_t	Get_szSize_for_BER(size_t	iSize);
 
 };

@@ -31,9 +31,9 @@ PKCS7_Input::~PKCS7_Input(void)
 //	●引数
 //			unsigned	char	cType	コンテンツタイプ
 //	●返値
-//			unsigned	int				コンテンツのサイズ
+//						size_t			コンテンツのサイズ
 //==============================================================
-unsigned int	PKCS7_Input::read_ContentInfo(unsigned int type)
+size_t	PKCS7_Input::read_ContentInfo(unsigned int type)
 {
 	static	unsigned	int		oid_pkcs7[]	=	{1,2,840,113549,1,7,type};
 
@@ -54,11 +54,11 @@ unsigned int	PKCS7_Input::read_ContentInfo(unsigned int type)
 //	●引数
 //			EnvelopedData*	_envelopedData		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
-//			unsigned		int					暗号文のポインタ
+//							size_t				暗号文のポインタ
 //==============================================================
-unsigned	int	PKCS7_Input::read_EnvelopedData(EnvelopedData* _envelopedData)
+size_t	PKCS7_Input::read_EnvelopedData(EnvelopedData* _envelopedData)
 {
-	unsigned	int	ptEncryptedContent;
+	size_t	ptEncryptedContent;
 
 	//EnvelopedData
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
@@ -93,11 +93,11 @@ unsigned	int	PKCS7_Input::read_EnvelopedData(EnvelopedData* _envelopedData)
 //	●引数
 //			EncryptedData*	_encryptedData		読み込み内容を格納するオブジェクトのポインタ
 //	●返値
-//			unsigned		int					暗号文のポインタ
+//							size_t				暗号文のポインタ
 //==============================================================
-unsigned	int	PKCS7_Input::read_EncryptedData(EncryptedData* _encryptedData)
+size_t	PKCS7_Input::read_EncryptedData(EncryptedData* _encryptedData)
 {
-	unsigned	int	ptEncryptedContent;
+	size_t	ptEncryptedContent;
 
 	//EncryptedData
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
@@ -126,14 +126,14 @@ unsigned	int	PKCS7_Input::read_EncryptedData(EncryptedData* _encryptedData)
 //	●引数
 //			EncryptedContentInfo*	ECinfo	読み込み内容を格納するオブジェクトのポインタ
 //	●返値
-//			unsigned	int					暗号文のポインタ
+//						size_t				暗号文のポインタ
 //==============================================================
-unsigned	int		PKCS7_Input::read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo)
+size_t	PKCS7_Input::read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo)
 {
 	//contentType ContentType,
 	ObjectIdentifier		contentType;					//暗号文のType
 	Encryption*				cCE;
-	unsigned	int			szEncryptedContent;
+	size_t					szEncryptedContent;
 
 	//encryptedContentInfo
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
@@ -161,12 +161,12 @@ unsigned	int		PKCS7_Input::read_EncryptedContentInfo(EncryptedContentInfo*	ECinf
 //==============================================================
 void	PKCS7_Input::read_RecipientInfos(RecipientInfos* _recipientInfos)
 {
-	unsigned	int		ptTemp;				//ファイルポインタ一次保存用
+		std::streamoff	ptTemp;				//ファイルポインタ一次保存用
 
 	unsigned	int		read_tag;			//ASN.1 タグ
 	unsigned	char	read_class;			//ASN.1 クラス
 				bool	read_fStruct;		//ASN.1 構造化
-	unsigned	int		iSize;				//ASN.1 サイズ
+				size_t	iSize;				//ASN.1 サイズ
 
 	//----------
 	//"SET RecipientInfo"でなくなるまで繰り返す。
@@ -446,16 +446,16 @@ Encryption*	PKCS7_Input::read_keyEncryptionAlgorithm()
 //==============================================================
 KeyDerivation*		PKCS7_Input::read_KeyDerivationAlgorithm()
 {
-	unsigned	int		ptTemp;				//ファイルポインタ一次保存用
+	std::streamoff		ptTemp;				//ファイルポインタ一次保存用
 
 	unsigned	int		read_tag;			//ASN.1 タグ
 	unsigned	char	read_class;			//ASN.1 クラス
 				bool	read_fStruct;		//ASN.1 構造化
-	unsigned	int		iSize;				//ASN.1 サイズ
+				size_t	iSize;				//ASN.1 サイズ
 
 	static	PBKDF2	_pbkdf2	=	PBKDF2(&cHMAC_SHA256);
-	PBKDF2*					_pbkdf;
-	HMAC*					cHMAC;
+			PBKDF2*	_pbkdf;
+			HMAC*	cHMAC;
 
 	//contentType ContentType,
 	ObjectIdentifier		_oid;

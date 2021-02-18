@@ -43,13 +43,13 @@ PBKDF2::~PBKDF2(void)
 //--------------------------------------------------------------
 //	●引数
 //		void*				_S		ソルト
-//		unsigned	int		_szS	ソルトのサイズ
+//					size_t	_szS	ソルトのサイズ
 //		unsigned	int		_c		繰り返し回数
-//		unsigned	int		_dkLen	導出する鍵のサイズ
+//					size_t	_dkLen	導出する鍵のサイズ
 //	●返値
 //			無し
 //==============================================================
-void	PBKDF2::Set_PBKDF2(void* _S, unsigned int _szS, unsigned int _c, unsigned int _dkLen)
+void	PBKDF2::Set_PBKDF2(void* _S, size_t _szS, unsigned int _c, size_t _dkLen)
 {
 	static	const	unsigned	int		HMAC_SHA1_oid[]		= {1,2,840,113549,2,7};	//RFC 2898 PKCS#5 ver 2.0 
 	static	const	unsigned	int		HMAC_SHA1_oid2[]	= {1,3,6,1,5,5,8,1,2};	//RFC 3370 CMS Algorithm
@@ -91,27 +91,27 @@ void	PBKDF2::Set_PBKDF2(void* _S, unsigned int _szS, unsigned int _c, unsigned i
 //--------------------------------------------------------------
 //	●引数
 //		void*				T	計算結果を格納するポインタ
-//		unsigned	int		szT	格納サイズ
+//					size_t	szT	格納サイズ
 //		unsigned	int		n	
 //	●返値
 //			無し
 //==============================================================
-void	PBKDF2::F(void* T, unsigned int szT, unsigned int n)
+void	PBKDF2::F(void* T, size_t szT, unsigned int n)
 {
 	unsigned	int		cnt			= c;				//繰り返し回数
-	unsigned	int		_m128_hLen	= __m128_hLen;		//__m128iでのハッシュ値長
+				size_t	_m128_hLen	= __m128_hLen;		//__m128iでのハッシュ値長
 			__m128i*	_m128_U		= __m128_U;			//排他的論理和計算用
 	unsigned	char*	_U_			= U_;				//中間バッファ
 
 	//------
 	//1 times
 	{
-		unsigned	int		sLen		= S.size();
+					size_t	sLen		= S.size();
 		unsigned	int*	USi			= (unsigned int *)&US[sLen];	//
 
 		USi[0] = ((n>>24) & 0xFF) | ((n>>8) & 0xFF00) | ((n & 0xFF00)<<8) | ((n & 0xFF)<<24);
 		cHMAC->calc(_U_, US, sLen+4);
-		for(unsigned int i = 0; i < _m128_hLen; i++){
+		for(size_t i = 0; i < _m128_hLen; i++){
 			_m128_U[i] = _mm_load_si128((__m128i*)&_U_[i * sizeof(__m128i)]);
 		}
 		cnt--;
@@ -120,11 +120,11 @@ void	PBKDF2::F(void* T, unsigned int szT, unsigned int n)
 	//------
 	//2 times -
 	{
-		unsigned	int		_hLen		= hLen;
+		size_t	_hLen		= hLen;
 
 		while(cnt--){
 			cHMAC->calc(_U_, _U_, _hLen);
-			for(unsigned int i = 0; i < _m128_hLen; i++){
+			for(size_t i = 0; i < _m128_hLen; i++){
 				_m128_U[i] = _mm_xor_si128(_m128_U[i] ,_mm_load_si128((__m128i*)&_U_[i * sizeof(__m128i)]));
 			}
 		}
@@ -134,7 +134,7 @@ void	PBKDF2::F(void* T, unsigned int szT, unsigned int n)
 	//計算結果格納
 	{
 		unsigned	char*	U	=	(unsigned	char*)T;			//戻り値を格納するポインタ
-		unsigned	int		i	=	0;
+					size_t	i	=	0;
 
 		while((i + sizeof(__m128i)) <= szT){
 			_mm_storeu_si128((__m128i*)&U[i], _m128_U[i / sizeof(__m128i)]);
@@ -153,7 +153,7 @@ void	PBKDF2::F(void* T, unsigned int szT, unsigned int n)
 //	●返値
 //			無し
 //==============================================================
-void	PBKDF2::calc(void* DK, void* P, unsigned int szP)
+void	PBKDF2::calc(void* DK, void* P, size_t szP)
 {
 	//先に、HMAC関数の鍵を設定する。
 	cHMAC->SetKey(P, szP);
@@ -161,9 +161,9 @@ void	PBKDF2::calc(void* DK, void* P, unsigned int szP)
 	//計算
 	{
 		unsigned	int		i		= 0;
-		unsigned	int		_hLen	= hLen;				//ハッシュ値の長さ
-		unsigned	int		l		= dkLen / _hLen;	//DKのブロック長(少数切捨て)
-		unsigned	int		r		= dkLen % _hLen;	//DKのブロック長　端数
+					size_t	_hLen	= hLen;				//ハッシュ値の長さ
+					size_t	l		= dkLen / _hLen;	//DKのブロック長(少数切捨て)
+					size_t	r		= dkLen % _hLen;	//DKのブロック長　端数
 		unsigned	char*	T		= (unsigned	char*)DK;
 
 		while(l--){

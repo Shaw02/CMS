@@ -24,9 +24,9 @@ class Digest :
 	public AlgorithmIdentifier
 {
 public:
-	unsigned	int		iCountBlock;		//Block数のカウント
-	unsigned	int		szBlock;
-	unsigned	int		szHash;
+				size_t	iCountBlock;		//Block数のカウント
+				size_t	szBlock;
+				size_t	szHash;
 
 	unsigned	char*	M;					//Padding用
 
@@ -34,11 +34,11 @@ public:
 	Digest(const char _strName[]="Digest");
 	~Digest(void);
 
-			void	CalcHash(void *result, void *data, unsigned int iSize);
+			void	CalcHash(void *result, void *data, size_t iSize);
 
 	virtual	void	init(void){};
 			void	add(void *data);
-	virtual	void	final(void *data,unsigned int iSize);	//関数によりPaddingが異なるかもしれない。
+	virtual	void	final(void *data, size_t iSize);	//関数によりPaddingが異なるかもしれない。
 	virtual	void	getHash(void *result){};
 
 	virtual	void	calc(void *data){};

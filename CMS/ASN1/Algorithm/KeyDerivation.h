@@ -25,7 +25,7 @@ class KeyDerivation :
 //--------------
 //ïœêî
 public:
-			unsigned	int		dkLen;		//
+			size_t	dkLen;		//
 
 //--------------
 //ä÷êî
@@ -33,5 +33,5 @@ public:
 	KeyDerivation(const char _strName[]="Key Derivation");
 	~KeyDerivation(void);
 
-	virtual	void	calc(void* DK, void* P, unsigned int szP){};
+	virtual	void	calc(void* DK, void* P, size_t szP){};
 };

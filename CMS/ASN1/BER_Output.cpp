@@ -35,7 +35,7 @@ BER_Output::~BER_Output(void)
 //	●注意
 //			外部データの後ろにもBERエンコードされたデータがあるとダメ。
 //==============================================================
-void	BER_Output::write_BERcode(const	char* strCode, unsigned int szCode)
+void	BER_Output::write_BERcode(const	char* strCode, size_t szCode)
 {
 	write(strCode, szCode);
 }

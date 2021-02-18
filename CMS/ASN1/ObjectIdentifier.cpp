@@ -68,13 +68,13 @@ void	ObjectIdentifier::encodeBER()
 //--------------------------------------------------------------
 //	●引数
 //			unsigned int i[]	OID
-//			unsigned int n		OIDのサイズ(整数が何個あるか？)
+//			size_t		 n		OIDのサイズ(整数が何個あるか？)
 //	●返値
 //			無し
 //==============================================================
-void	ObjectIdentifier::Set(unsigned int i[],unsigned int n)
+void	ObjectIdentifier::Set(unsigned int i[], size_t n)
 {
-	unsigned	int	count = 0;
+	size_t	count = 0;
 
 	while(count < n){
 		iValue.push_back(i[count]);

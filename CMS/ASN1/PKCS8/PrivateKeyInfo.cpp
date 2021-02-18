@@ -30,14 +30,14 @@ PrivateKeyInfo::~PrivateKeyInfo(void)
 //	●引数
 //		AlgorithmIdentifier*	_algorithm		暗号鍵のアルゴリズム
 //					char		c[]				暗号鍵のポインタ
-//		unsigned	int			iSize			暗号鍵のサイズ
+//					size_t		iSize			暗号鍵のサイズ
 //	●返値
 //			無し
 //==============================================================
 void	PrivateKeyInfo::Set(
 			AlgorithmIdentifier*	_algorithm,
 						char		c[],
-			unsigned	int			iSize)
+						size_t		iSize)
 {
 	//version                   Version,
 	version.Set(0);

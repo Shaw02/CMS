@@ -52,13 +52,13 @@ PBKDF2-params ::= SEQUENCE {
 			unsigned	int		c;			//繰り返し回数
 
 			//繰り返し計算用バッファ
-			unsigned	int		hLen;
+						size_t	hLen;
 			unsigned	char*	U_;
 
 			unsigned	char*	US;
 
 			//排他的論理和を格納するバッファ
-			unsigned	int		__m128_hLen;
+						size_t	__m128_hLen;
 					__m128i*	__m128_U;
 
 			//ASN.1用
@@ -70,8 +70,8 @@ public:
 	PBKDF2(HMAC* _cHash, const char _strName[]="PBKDF2");
 	~PBKDF2(void);
 
-	void	Set_PBKDF2(void* _S, unsigned int _szS, unsigned int _c, unsigned int _dkLen);
+	void	Set_PBKDF2(void* _S, size_t _szS, unsigned int _c, size_t _dkLen);
 
-	void	F(void* T, unsigned int szT, unsigned int n);
-	void	calc(void* DK, void* P, unsigned int szP);
+	void	F(void* T, size_t szT, unsigned int n);
+	void	calc(void* DK, void* P, size_t szP);
 };

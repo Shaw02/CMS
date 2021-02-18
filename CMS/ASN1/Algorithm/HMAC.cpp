@@ -36,26 +36,26 @@ HMAC::~HMAC(void)
 //--------------------------------------------------------------
 //	●引数
 //		void*				Key		鍵
-//		unsigned	int		szKey	鍵のサイズ
+//		size_t				szKey	鍵のサイズ
 //	●返値
 //			無し
 //	●備考
 //			PBKDF2等で、何回も同じ処理をするのは無駄の為
 //==============================================================
-void	HMAC::SetKey(void* Key, unsigned int szKey)
+void	HMAC::SetKey(void* Key, size_t szKey)
 {
 	//頻度にアクセスするので、レジスタに入れる。
-			Digest*			_cHash	=	cHash;				//ハッシュ関数のポインタ
-	const	unsigned	int	szBlock =	_cHash->szBlock;	//ハッシュ関数の入力ブロック長
-	const	unsigned	int	szHash	=	_cHash->szHash;		//ハッシュ関数の出力長
-			char*			_Kipad	=	Kipad;				//最適化でレジスタに入れて貰う。
-			char*			_Kopad	=	Kopad;				//
+			Digest*	_cHash	=	cHash;				//ハッシュ関数のポインタ
+	const	size_t	szBlock =	_cHash->szBlock;	//ハッシュ関数の入力ブロック長
+	const	size_t	szHash	=	_cHash->szHash;		//ハッシュ関数の出力長
+			char*	_Kipad	=	Kipad;				//最適化でレジスタに入れて貰う。
+			char*	_Kopad	=	Kopad;				//
 
 	//------------
 	//鍵の0x00Padding
 	{
 		//変数定義
-		const	char*	cKey			= (char *)Key;
+		const	char*	cKey	= (char *)Key;
 
 		//Padding実施
 		if(szKey > szBlock){
@@ -74,7 +74,7 @@ void	HMAC::SetKey(void* Key, unsigned int szKey)
 	//ipad ＆ opad で排他的論理和した鍵を作成
 	{
 		//変数定義
-				unsigned	int		i	=	0;
+						size_t	i		=	0;
 		static	const	_mm_i32	_mm_36	= {0x36363636,0x36363636,0x36363636,0x36363636};
 		static	const	_mm_i32	_mm_5C	= {0x5C5C5C5C,0x5C5C5C5C,0x5C5C5C5C,0x5C5C5C5C};
 						__m128i _mm_temp;	
@@ -100,18 +100,18 @@ void	HMAC::SetKey(void* Key, unsigned int szKey)
 //	●引数
 //		void*				result	
 //		void*				data	メッセージ
-//		unsigned	int		szData	メッセージのサイズ
+//		size_t				szData	メッセージのサイズ
 //	●返値
 //			無し
 //==============================================================
-void	HMAC::calc(void* result, void* data, unsigned int szData)
+void	HMAC::calc(void* result, void* data, size_t szData)
 {
-			unsigned	int		i	=	szData;
+			size_t	i		=	szData;
 
 	//頻度にアクセスするので、レジスタに入れる。
-			Digest*			_cHash	=	cHash;				//ハッシュ関数のポインタ
-	const	unsigned	int	szBlock =	_cHash->szBlock;	//ハッシュ関数の入力ブロック長
-	const	unsigned	int	szHash	=	_cHash->szHash;		//ハッシュ関数の出力長
+			Digest*	_cHash	=	cHash;				//ハッシュ関数のポインタ
+	const	size_t	szBlock =	_cHash->szBlock;	//ハッシュ関数の入力ブロック長
+	const	size_t	szHash	=	_cHash->szHash;		//ハッシュ関数の出力長
 
 	//------------
 	//計算

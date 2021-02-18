@@ -28,12 +28,12 @@ AlgorithmIdentifier::~AlgorithmIdentifier(void)
 //		’l‚ðÝ’è
 //--------------------------------------------------------------
 //	œˆø”
-//			unsigned int i[]	oid
-//			unsigned int n		oid‚Ì”
+//			unsigned	int		i[]		oid
+//						size_t	n		oid‚Ì”
 //	œ•Ô’l
 //			–³‚µ
 //==============================================================
-void	AlgorithmIdentifier::Set_oid(unsigned int i[],unsigned int n)
+void	AlgorithmIdentifier::Set_oid(unsigned int i[], size_t n)
 {
 	algorithm.Set(i,n);
 }
@@ -67,7 +67,7 @@ void	AlgorithmIdentifier::Set()
 //==============================================================
 int	AlgorithmIdentifier::Check_OID(ObjectIdentifier* ptOID)
 {
-	int	i = algorithm.iValue.size();
+	size_t	i = algorithm.iValue.size();
 
 	if(i != ptOID->iValue.size()){
 		return(-1);

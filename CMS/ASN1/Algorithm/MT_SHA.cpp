@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "MT_SHA.h"
+#include <wmmintrin.h>
 
 //==============================================================
 //			コンストラクタ

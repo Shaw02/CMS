@@ -16,5 +16,5 @@ public:
 								BER_Output(const char*	strFileName);
 								~BER_Output(void);
 
-						void	write_BERcode(const	char* strCode, unsigned int szCode);
+						void	write_BERcode(const	char* strCode, size_t szCode);
 };

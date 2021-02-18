@@ -21,9 +21,9 @@ public:
 	void	Get_PrivateKeyInfo(void);
 	void	Get_PrivateKey(
 				unsigned	char*		_key,
-				unsigned	int			_szKey);
+							size_t		_szKey);
 	void	Get_PrivateKey_with_check(
 				AlgorithmIdentifier*	_algorithm,
 				unsigned	char*		_key,
-				unsigned	int			_szKey);
+							size_t		_szKey);
 };

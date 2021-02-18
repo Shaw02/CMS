@@ -35,8 +35,8 @@ PKCS8_Input::~PKCS8_Input(void)
 //==============================================================
 void	PKCS8_Input::Get_PrivateKeyInfo()
 {
-	unsigned	int		szAlgorithm;
-	unsigned	int		ptAlgorithm;
+	size_t	szAlgorithm;
+	size_t	ptAlgorithm;
 
 	//SEQUENCE
 	read_TAG_with_Check(BER_Class_General, true, BER_TAG_SEQUENCE);
@@ -63,13 +63,13 @@ void	PKCS8_Input::Get_PrivateKeyInfo()
 //--------------------------------------------------------------
 //	●引数
 //			unsigned	char*		_key		暗号鍵を格納するポインタ
-//			unsigned	int			_szKey		暗号鍵のサイズ（チェック用）
+//						size_t		_szKey		暗号鍵のサイズ（チェック用）
 //	●返値
 //			無し
 //==============================================================
 void	PKCS8_Input::Get_PrivateKey(
 			unsigned	char*		_key,
-			unsigned	int			_szKey)
+						size_t		_szKey)
 {
 	if(privateKey.strValue.size() != _szKey){
 		errPrint("Key",": unmatch key size.");
@@ -82,14 +82,14 @@ void	PKCS8_Input::Get_PrivateKey(
 //	●引数
 //			algorithmIdentifier*	_algorithm	暗号アルゴリズム
 //			unsigned	char*		_key		暗号鍵を格納するポインタ
-//			unsigned	int			_szKey		暗号鍵のサイズ（チェック用）
+//						size_t		_szKey		暗号鍵のサイズ（チェック用）
 //	●返値
 //			無し
 //==============================================================
 void	PKCS8_Input::Get_PrivateKey_with_check(
 			AlgorithmIdentifier*	_algorithm,
 			unsigned	char*		_key,
-			unsigned	int			_szKey)
+						size_t		_szKey)
 {
 	unsigned	int		i = 0;
 

@@ -18,5 +18,5 @@ public:
 						~OctetString(void);
 
 				void	encodeBER();
-				void	Set(char i[],unsigned int iSise);
+				void	Set(char i[], size_t iSize);
 };

@@ -15,6 +15,6 @@ public:
 		FileOutput(const char*	strFileName);
 		~FileOutput(void);
 void	fileopen(const char*	strFileName);
-void	StreamPointerAdd(__int32 iSize);
-void	StreamPointerMove(__int32 iSize);
+void	StreamPointerAdd(std::streamoff iSize);
+void	StreamPointerMove(std::streamoff iSize);
 };

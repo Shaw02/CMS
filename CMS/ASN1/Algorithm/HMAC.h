@@ -39,8 +39,8 @@ union _mm_i32
 //--------------
 //変数
 public:
-	Digest*			cHash;		//ハッシュ関数
-	ASN1	null;				//Param
+	Digest*	cHash;		//ハッシュ関数
+	ASN1	null;		//Param
 
 	char*	Kipad;
 	char*	Kopad;
@@ -51,6 +51,6 @@ public:
 	HMAC(Digest* _cHash, const char _strName[]="HMAC");
 	~HMAC(void);
 
-	void	SetKey(void* Key, unsigned int szKey);
-	void	calc(void* result, void* data, unsigned int szData);
+	void	SetKey(void* Key, size_t szKey);
+	void	calc(void* result, void* data, size_t szData);
 };

@@ -62,11 +62,11 @@ void	ASN1::Clear_Construct()
 //		外部データサイズの設定
 //--------------------------------------------------------------
 //	●引数
-//			unsigned int	iSize	外部データのサイズ
+//			size_t	iSize	外部データのサイズ
 //	●返値
 //			無し
 //==============================================================
-void	ASN1::Set_ExternalDataSize(unsigned int iSize)
+void	ASN1::Set_ExternalDataSize(size_t iSize)
 {
 	szAddValue = iSize;
 }
@@ -94,11 +94,11 @@ void	ASN1::error(unsigned int iEer)
 //		unsigned	char	cClass	クラス
 //					bool	fStruct	構造化フラグ
 //		unsigned	int		iTag	タグNo.
-//		unsigned	int		iSize	データサイズ
+//					size_t	iSize	データサイズ
 //	●返値
 //			無し
 //==============================================================
-void	ASN1::encodeBER_TAG(unsigned char cClass, bool fStruct,unsigned int iTag, unsigned int iSize)
+void	ASN1::encodeBER_TAG(unsigned char cClass, bool fStruct,unsigned int iTag, size_t iSize)
 {
 	const	unsigned	char	cTag = ((fStruct&0x01)<<5) | (cClass<<6);
 
@@ -116,11 +116,11 @@ void	ASN1::encodeBER_TAG(unsigned char cClass, bool fStruct,unsigned int iTag, u
 //			【ＢＥＲエンコード】サイズ
 //--------------------------------------------------------------
 //	●引数
-//		unsigned int iSize		値	（※32bit値までのみ対応）
+//		size_t	iSize		値	（※32bit値までのみ対応）
 //	●返値
 //			無し
 //==============================================================
-void	ASN1::encodeBER_size(unsigned int iSize)
+void	ASN1::encodeBER_size(size_t iSize)
 {
 	if(iSize < (1<<7)){			//0～127
 		strBER.append(1,iSize & 0x7F);
@@ -245,11 +245,11 @@ void	ASN1::encodeBER()
 //	●引数
 //						int	_i		整数値
 //	●返値
-//			unsigned	int			BER符号化された整数値のサイズ
+//						size_t		BER符号化された整数値のサイズ
 //==============================================================
-unsigned int ASN1::Get_szInt_for_BER(int _i){
+size_t ASN1::Get_szInt_for_BER(int _i){
 
-	unsigned int	iResult;
+	size_t	iResult;
 
 	if((_i < 128) && (_i >= -128)) {	//-128～127
 		iResult = 1;
@@ -269,11 +269,11 @@ unsigned int ASN1::Get_szInt_for_BER(int _i){
 //	●引数
 //			unsigned	int	iSize	サイズ値
 //	●返値
-//			unsigned	int			BER符号化されたサイズ値のサイズ
+//						size_t		BER符号化されたサイズ値のサイズ
 //==============================================================
-unsigned int ASN1::Get_szSize_for_BER(unsigned int iSize){
+size_t ASN1::Get_szSize_for_BER(size_t iSize){
 
-	unsigned int	szSize;
+	size_t	szSize;
 
 	if(iSize < (1<<7)){			//～127
 		szSize = 1;
@@ -306,8 +306,8 @@ const	char*	ASN1::Get_BERcode(void){
 //	●引数
 //							無し
 //	●返値
-//		unsigned	int		BERコードのサイズ
+//				size_t		BERコードのサイズ
 //==============================================================
-unsigned	int	ASN1::Get_BERsize(void){
+size_t	ASN1::Get_BERsize(void){
 	return(strBER.size());
 };

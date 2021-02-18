@@ -33,7 +33,7 @@ AlgorithmIdentifier ::= SEQUENCE  {
 						AlgorithmIdentifier(const char _strName[]="AlgorithmIdentifier");
 						~AlgorithmIdentifier(void);
 
-				void	Set_oid(unsigned int i[],unsigned int n);
+				void	Set_oid(unsigned int i[], size_t n);
 				void	Set();
 				int		Check_OID(ObjectIdentifier* ptOID);
 };

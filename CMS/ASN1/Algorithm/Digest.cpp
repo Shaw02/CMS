@@ -28,17 +28,17 @@ Digest::~Digest(void)
 //			ハッシュ値計算
 //--------------------------------------------------------------
 //	●引数
-//			void *result	ハッシュ値を格納するアドレス
-//			void *data		入力データのポインタ（64Byte）
-//			unsigned int n	入力データのサイズ[Byte]
+//			void	*result		ハッシュ値を格納するアドレス
+//			void	*data		入力データのポインタ（64Byte）
+//			size_t	n			入力データのサイズ[Byte]
 //	●返値
 //			無し
 //==============================================================
-void	Digest::CalcHash(void *result, void *data, unsigned int iSize)
+void	Digest::CalcHash(void *result, void *data, size_t iSize)
 {
-	unsigned	int		i			= iSize;
+				size_t	i			= iSize;
+				size_t	_szBlock	= szBlock;	//頻度に使うのでレジスタに入って貰う。
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		_szBlock	=	szBlock;	//頻度に使うのでレジスタに入って貰う。
 
 	init();
 
@@ -72,23 +72,23 @@ void	Digest::add(void *data)
 //			最終ブロック（64Byte未満）の入力
 //--------------------------------------------------------------
 //	●引数
-//			void *data		計算する１ブロックのポインタ（64Byte未満）
-//			unsigned int n	ブロックのサイズ[Byte]
+//			void	*data		計算する１ブロックのポインタ（64Byte未満）
+//			size_t	n			ブロックのサイズ[Byte]
 //	●返値
 //			無し
 //	●返値
 //			デフォルトは、MD5, SHA-1, SHA-2用　共用
 //==============================================================
-void	Digest::final(void *data,unsigned int iSize)
+void	Digest::final(void *data, size_t iSize)
 {
-	unsigned	int			i = 0;
+				size_t	i = 0;
 
 	unsigned	__int64		iTotalSize	= ((iCountBlock*64)+iSize)*8;
 	unsigned	char*		cData		= (unsigned char*)data;
 
 	//頻度に使うのでレジスタに入って貰う。
 	unsigned	char*		_M			= M;
-	unsigned	int			_szBlock	= szBlock;
+				size_t		_szBlock	= szBlock;
 
 	//--------------------
 	//BlockSizeぴったりだった。

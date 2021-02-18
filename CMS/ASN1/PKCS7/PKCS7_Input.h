@@ -13,10 +13,10 @@ public:
 		PKCS7_Input(const char*	strFileName,const char _strName[]="PKCS#7");
 		~PKCS7_Input(void);
 
-unsigned	int			read_ContentInfo(unsigned int type);
-unsigned	int			read_EnvelopedData(EnvelopedData* _envelopedData);
-unsigned	int			read_EncryptedData(EncryptedData* _encryptedData);
-unsigned	int			read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo);
+			size_t		read_ContentInfo(unsigned int type);
+			size_t		read_EnvelopedData(EnvelopedData* _envelopedData);
+			size_t		read_EncryptedData(EncryptedData* _encryptedData);
+			size_t		read_EncryptedContentInfo(EncryptedContentInfo*	ECinfo);
 
 			void		read_RecipientInfos(RecipientInfos* _recipientInfos);
 			void		read_PasswordRecipientInfo(PasswordRecipientInfo* _passwordRecipientInfo);

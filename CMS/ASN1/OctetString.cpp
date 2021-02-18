@@ -42,11 +42,11 @@ void	OctetString::encodeBER()
 //--------------------------------------------------------------
 //	●引数
 //					char	c[]		データのポインタ
-//		unsigned	int		iSize	データサイズ
+//					size_t	iSize	データサイズ
 //	●返値
 //			無し
 //==============================================================
-void	OctetString::Set(char c[],unsigned int iSize)
+void	OctetString::Set(char c[],size_t iSize)
 {
 	strValue.assign(c, iSize);
 }

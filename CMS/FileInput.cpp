@@ -42,15 +42,15 @@ void	FileInput::fileopen(const char*	strFileName){
 //--------------------------------
 //	相対シーク
 //--------------------------------
-void	FileInput::StreamPointerAdd(__int32 iSize){
-	seekg((long)iSize,ios::cur);
+void	FileInput::StreamPointerAdd(std::streamoff iSize){
+	seekg(iSize,ios::cur);
 };
 
 //--------------------------------
 //	絶対シーク
 //--------------------------------
-void	FileInput::StreamPointerMove(__int32 iSize){
-	seekg((long)iSize,ios::beg);
+void	FileInput::StreamPointerMove(std::streamoff iSize){
+	seekg(iSize,ios::beg);
 };
 
 //--------------------------------
@@ -77,10 +77,10 @@ unsigned	__int16	FileInput::i16Read(){
 //--------------------------------
 //サイズ
 //--------------------------------
-unsigned	int	FileInput::GetSize(){
+std::streamoff	FileInput::GetSize(){
 
-	unsigned	int	iData;
-	unsigned	int	iDataT = tellg();
+	std::streamoff	iData;
+	std::streamoff	iDataT = tellg();
 
 	seekg(0		,ios::end);
 	iData = tellg();

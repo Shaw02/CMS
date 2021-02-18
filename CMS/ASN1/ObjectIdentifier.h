@@ -19,6 +19,6 @@ public:
 						~ObjectIdentifier(void);
 
 				void	encodeBER();
-				void	Set(unsigned int i[],unsigned int n);
+				void	Set(unsigned int i[],size_t n);
 				void	SetVector(vector<unsigned int> i);
 };
