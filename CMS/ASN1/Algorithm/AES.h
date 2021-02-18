@@ -132,8 +132,13 @@ protected:
 	__m128i	AddRoundKey(__m128i data, int i);					//5.1.4	AddRoundKey
 
 	void	KeyExpansion(unsigned char *key);					//5.2	Key Expansion
-	void	KeyExpansion_C(unsigned char *key);					//
-	void	KeyExpansion_AESNI(unsigned char *key);				//
+	void	KeyExpansion_SSE2(unsigned char *key);				//
+	void	KeyExpansion_128_AESNI(unsigned char *key);			//
+	void	KeyExpansion_192_AESNI(unsigned char *key);			//
+	void	KeyExpansion_256_AESNI(unsigned char *key);			//
+	__m128i	KeyExpansion_AESNI_Add(__m128i _Data, __m128i _Data2);
+	__m128i	KeyExpansion_AESNI_S(__m128i _Data, __m128i _SData);
+	__m128i	KeyExpansion_AESNI_W(__m128i _Data, __m128i _WData);
 
 	__m128i	InvCipher_SSE2(__m128i data);						//5.3	InvCipher
 	__m128i	InvCipher_AESNI(__m128i data);						//5.3	InvCipher

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AES.h"
+#include <wmmintrin.h>
 
 //==============================================================
 //			コンストラクタ
@@ -121,28 +122,41 @@ __m128i	AES::mul(__m128i data, unsigned char n)
 //			fips-197	5.2		Key Expansion
 //--------------------------------------------------------------
 //	●引数
-//			char				cNK		= 4(0100)	: 128bit AES
-//										= 6(0110)	: 192bit AES
-//										= 8(1000)	: 256bit AES
-//			const unsigned char	Key[]				: Cipher Key
+//			unsigned char	Key[]				: Cipher Key
 //	●返値
 //			無し
 //==============================================================
 void	AES::KeyExpansion(unsigned char *key)
 {
 
-//	Nk	= cNk;
+#ifdef	_DEBUG
+	printf("AES::KeyExpansion (Nk=%d):\n", Nk);
+#endif
+
 	Nr	= Nk + 6;
 
 	if(!cOpsw->chkAESNI()){
-		KeyExpansion_C(key);
+		KeyExpansion_SSE2(key);
 	} else {
-		KeyExpansion_AESNI(key);
+		switch(Nk){
+			case(4):
+				KeyExpansion_128_AESNI(key);
+				break;
+			case(6):
+				KeyExpansion_192_AESNI(key);
+				break;
+			case(8):
+				KeyExpansion_256_AESNI(key);
+				break;
+			default:
+				cerr << "Error AES::KeyExpansion function on AES.cpp" << endl;
+				exit(-1);
+				break;
+		}
 	}
 
 #ifdef	_DEBUG
 	int i = 0;
-	printf("AES::KeyExpansion:\n");
 	do{
 		printf("w[%d]=",i);
 		dataPrint(4, &w[i]);
@@ -155,8 +169,12 @@ void	AES::KeyExpansion(unsigned char *key)
 
 //--------------------------------------------------------------
 //	通常
-void	AES::KeyExpansion_C(unsigned char *key)
+void	AES::KeyExpansion_SSE2(unsigned char *key)
 {
+#ifdef	_DEBUG
+	printf("AES::KeyExpansion_SSE2:\n");
+#endif
+
 	//The round constant word array.
 	static	const	unsigned	int	Rcon[10]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36};
 
@@ -167,7 +185,8 @@ void	AES::KeyExpansion_C(unsigned char *key)
 
 	//高速メモリコピー
 	do{
-		_mm_storel_epi64((__m128i*)&w[i], _mm_loadl_epi64((__m128i*)&key[i*4]));
+		memcpy(&w[i], &key[i*4], 8);
+	//	_mm_storel_epi64((__m128i*)&w[i], _mm_loadl_epi64((__m128i*)&key[i*4]));
 		i++;
 		i++;
 	} while (i < Nk);
@@ -192,29 +211,196 @@ void	AES::KeyExpansion_C(unsigned char *key)
 }
 
 //--------------------------------------------------------------
-//	AES-NI
-void	AES::KeyExpansion_AESNI(unsigned char *key)
+void	AES::KeyExpansion_128_AESNI(unsigned char *key)
 {
-#ifdef _M_IX86
-	//■ To Do:	Cに移植する
-	switch(Nk){
-		case(4):
-			AES_NI_KeyExpansion128(w,key);
-			break;
-		case(6):
-			AES_NI_KeyExpansion192(w,key);				
-			break;
-		case(8):
-			AES_NI_KeyExpansion256(w,key);				
-			break;
-		default:
-			cerr << "Error AES::KeyExpansion function on AES.cpp" << endl;
-			exit(-1);
-			break;
-	}
-#else
-	KeyExpansion_C(key);
+
+#ifdef	_DEBUG
+	printf("AES::KeyExpansion_128_AESNI:\n");
 #endif
+
+//#ifdef _M_IX86
+//	AES_NI_KeyExpansion128(w,key);
+//#else
+	const	__m128i*	_k = (__m128i*)key;
+			__m128i*	_w = (__m128i*)w;
+			__m128i	temp1 = _k[0];
+
+	_w[0] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x01));
+	_w[1] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x02));
+	_w[2] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x04));
+	_w[3] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x08));
+	_w[4] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x10));
+	_w[5] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x20));
+	_w[6] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x40));
+	_w[7] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x80));
+	_w[8] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x1B));
+	_w[9] = temp1;
+	temp1 = KeyExpansion_AESNI_S(temp1, _mm_aeskeygenassist_si128(temp1, 0x36));
+	_w[10] = temp1;
+//#endif
+
+}
+
+//--------------------------------------------------------------
+void	AES::KeyExpansion_192_AESNI(unsigned char *key)
+{
+//#ifdef _M_IX86
+//	AES_NI_KeyExpansion192(w,key);
+//#else
+	static	const	_mm_i32	_mask0 = {0xFFFFFFFF,0xFFFFFFFF,0x00000000,0x00000000};
+	static	const	_mm_i32	_mask1 = {0x00000000,0xFFFFFFFF,0x00000000,0xFFFFFFFF};
+			const	__m128i*	_k = (__m128i*)key;
+					__m128i*	_w = (__m128i*)w;
+					__m128i temp0 = _k[0];								//[0][1][2][3]
+					__m128i	temp1 = _mm_and_si128(_k[1], _mask0.m128i);	//[4][5][-][-]
+					__m128i	temp2;
+					__m128i	temp3;
+
+	_w[0] = temp0;
+
+	temp1 = _mm_xor_si128(temp1, _mm_slli_si128(_mm_shuffle_epi32(_mm_aeskeygenassist_si128(temp1, 0x01), 0x55), 8));	//[4][5][s][s]
+	temp2 = _mm_slli_si128(temp0, 8);	//[-][-][0][1]
+	temp1 = _mm_xor_si128(temp1, temp2);
+	temp2 = _mm_slli_si128(temp2, 4);	//[-][-][-][0]
+	temp1 = _mm_xor_si128(temp1, temp2);
+	_w[1] = temp1;						//[4][5][6][7]
+
+	//------
+	temp0 = KeyExpansion_AESNI_S(_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8)), temp1);
+	_w[2] = temp0;						//[8][9][10][11]
+
+	temp1 = KeyExpansion_AESNI_S(
+				_mm_xor_si128(_mm_slli_si128(temp0, 8), _mm_srli_si128(temp1, 8)),
+				_mm_aeskeygenassist_si128(temp0, 0x02));
+	_w[3] = temp1;						//[12][13][14][15]
+
+	temp2 =	_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8));	//[10][11][12][13]
+	temp3 = _mm_and_si128(_mm_slli_si128(temp2, 4), _mask1.m128i);				//[-] [10][- ][12]
+	temp0 = _mm_xor_si128(
+				_mm_xor_si128(temp2, temp3),
+				_mm_and_si128(_mm_shuffle_epi32(temp1, 0xFF), _mask0.m128i));
+	temp0 = _mm_xor_si128(temp0, _mm_slli_si128(_mm_shuffle_epi32(_mm_aeskeygenassist_si128(temp0, 0x04), 0x55), 8));
+	_w[4] = temp0;
+
+	//------
+	temp1 = KeyExpansion_AESNI_S(_mm_xor_si128(_mm_slli_si128(temp0, 8), _mm_srli_si128(temp1, 8)), temp0);
+	_w[5] = temp1;
+
+	temp0 = KeyExpansion_AESNI_S(
+				_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8)),
+				_mm_aeskeygenassist_si128(temp1, 0x08));
+	_w[6] = temp0;
+
+	temp2 =	_mm_xor_si128(_mm_slli_si128(temp0, 8), _mm_srli_si128(temp1, 8));
+	temp3 = _mm_and_si128(_mm_slli_si128(temp2, 4), _mask1.m128i);
+	temp1 = _mm_xor_si128(
+				_mm_xor_si128(temp2, temp3),
+				_mm_and_si128(_mm_shuffle_epi32(temp0, 0xFF), _mask0.m128i));
+	temp1 = _mm_xor_si128(temp1, _mm_slli_si128(_mm_shuffle_epi32(_mm_aeskeygenassist_si128(temp1, 0x10), 0x55), 8));
+	_w[7] = temp1;
+
+	//------
+	temp0 = KeyExpansion_AESNI_S(_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8)), temp1);
+	_w[8] = temp0;
+
+	temp1 = KeyExpansion_AESNI_S(
+				_mm_xor_si128(_mm_slli_si128(temp0, 8), _mm_srli_si128(temp1, 8)),
+				_mm_aeskeygenassist_si128(temp0, 0x20));
+	_w[9] = temp1;
+
+	temp2 =	_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8));
+	temp3 = _mm_and_si128(_mm_slli_si128(temp2, 4), _mask1.m128i);
+	temp0 = _mm_xor_si128(
+				_mm_xor_si128(temp2, temp3),
+				_mm_and_si128(_mm_shuffle_epi32(temp1, 0xFF), _mask0.m128i));
+	temp0 = _mm_xor_si128(temp0, _mm_slli_si128(_mm_shuffle_epi32(_mm_aeskeygenassist_si128(temp0, 0x40), 0x55), 8));
+	_w[10] = temp0;
+
+	//------
+	temp1 = KeyExpansion_AESNI_S(_mm_xor_si128(_mm_slli_si128(temp0, 8), _mm_srli_si128(temp1, 8)), temp0);
+	_w[11] = temp1;
+
+	temp0 = KeyExpansion_AESNI_S(
+				_mm_xor_si128(_mm_slli_si128(temp1, 8), _mm_srli_si128(temp0, 8)),
+				_mm_aeskeygenassist_si128(temp1, 0x80));
+	_w[12] = temp0;
+//#endif
+}
+
+//--------------------------------------------------------------
+void	AES::KeyExpansion_256_AESNI(unsigned char *key)
+{
+//#ifdef _M_IX86
+//	AES_NI_KeyExpansion256(w,key);
+//#else
+			const	__m128i*	_k = (__m128i*)key;
+					__m128i*	_w = (__m128i*)w;
+					__m128i temp0 = _k[0];		//[0][1][2][3]
+					__m128i	temp1 = _k[1];		//[4][5][6][7]
+
+	_w[0] = temp0;
+	_w[1] = temp1;
+
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x01));
+	_w[2] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[3] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x02));
+	_w[4] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[5] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x04));
+	_w[6] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[7] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x08));
+	_w[8] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[9] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x10));
+	_w[10] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[11] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x20));
+	_w[12] = temp0;
+	temp1 = KeyExpansion_AESNI_W(temp1, temp0);
+	_w[13] = temp1;
+	temp0 = KeyExpansion_AESNI_S(temp0, _mm_aeskeygenassist_si128(temp1, 0x40));
+	_w[14] = temp0;
+//#endif
+}
+
+__m128i	AES::KeyExpansion_AESNI_Add(__m128i _Data, __m128i _Data2)
+{
+	__m128i	temp = _mm_xor_si128(_Data, _Data2);
+
+	_Data = _mm_slli_si128(_Data, 4);
+	temp = _mm_xor_si128(temp, _Data);
+	_Data = _mm_slli_si128(_Data, 4);
+	temp = _mm_xor_si128(temp, _Data);
+	_Data = _mm_slli_si128(_Data, 4);
+	temp = _mm_xor_si128(temp, _Data);
+
+	return(temp);
+}
+
+__m128i	AES::KeyExpansion_AESNI_S(__m128i _Data, __m128i _SData)
+{
+	return(KeyExpansion_AESNI_Add(_Data, _mm_shuffle_epi32(_SData, 0xFF)));
+}
+
+__m128i	AES::KeyExpansion_AESNI_W(__m128i _Data, __m128i _WData)
+{
+	return(KeyExpansion_AESNI_Add(_Data, _mm_shuffle_epi32(_mm_aeskeygenassist_si128(_WData, 0), 0xAA)));
 }
 
 //==============================================================
