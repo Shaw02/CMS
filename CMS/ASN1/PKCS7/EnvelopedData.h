@@ -38,5 +38,5 @@ EnvelopedData ::= SEQUENCE {
 				void	Set(
 							ObjectIdentifier*		_type,
 							Encryption*				_algorithm,
-							unsigned	int			_szContent);
+							size_t					_szContent);
 };

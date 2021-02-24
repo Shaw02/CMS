@@ -79,14 +79,14 @@ public:
 												unsigned	int		iTag,
 															size_t	iSize);
 						void	encodeBER_size(size_t iSize);
-						void	encodeBER_int(int _i);
+						void	encodeBER_int(__int64 _i);
 						void	encodeBER_variable(unsigned int _i);
 						void	encodeBER_Constructed(unsigned char cClass, unsigned int iTag);
 	virtual				void	encodeBER();					//BERコード生成
 
 	virtual	const		char*	Get_BERcode(void);				//BERコード取得
 	virtual				size_t	Get_BERsize(void);				//BERサイズ取得
-						size_t	Get_szInt_for_BER(int _i);
+						size_t	Get_szInt_for_BER(__int64 _i);
 						size_t	Get_szSize_for_BER(size_t	iSize);
 
 };

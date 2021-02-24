@@ -116,32 +116,27 @@ void	ASN1::encodeBER_TAG(unsigned char cClass, bool fStruct,unsigned int iTag, s
 //			【ＢＥＲエンコード】サイズ
 //--------------------------------------------------------------
 //	●引数
-//		size_t	iSize		値	（※32bit値までのみ対応）
+//		size_t	iSize		値	（※64bit値までのみ対応）
 //	●返値
 //			無し
 //==============================================================
 void	ASN1::encodeBER_size(size_t iSize)
 {
-	if(iSize < (1<<7)){			//0～127
+	if(iSize < 128){			//0～127
 		strBER.append(1,iSize & 0x7F);
-	} else if(iSize < (1<<8)) {	//128～256
-		strBER.append(1,0x81);
-		strBER.append(1,iSize & 0xFF);
-	} else if(iSize < (1<<16)) {	//256～65535,	
-		strBER.append(1,0x82);
-		strBER.append(1,((iSize>>8) & 0xFF));
-		strBER.append(1,(iSize & 0xFF));
-	} else if(iSize < (1<<24)) {	//
-		strBER.append(1,0x83);
-		strBER.append(1,((iSize>>16) & 0xFF));
-		strBER.append(1,((iSize>>8) & 0xFF));
-		strBER.append(1,(iSize & 0xFF));
 	} else {
-		strBER.append(1,0x84);
-		strBER.append(1,((iSize>>24) & 0xFF));
-		strBER.append(1,((iSize>>16) & 0xFF));
-		strBER.append(1,((iSize>>8) & 0xFF));
-		strBER.append(1,(iSize & 0xFF));
+		string	_code;
+		size_t	i = 0;
+		while(iSize > 0){
+			_code.append(1, (char)(iSize & 0xFF));
+			iSize >>= 8;
+			i++;
+		}
+		strBER.append(1, (char)(0x80 + i));
+		while(i > 0){
+			i--;
+			strBER.append(1,_code[i]);
+		}
 	}
 }
 //==============================================================
@@ -152,24 +147,22 @@ void	ASN1::encodeBER_size(size_t iSize)
 //	●返値
 //			無し
 //==============================================================
-void	ASN1::encodeBER_int(int _i)
+void	ASN1::encodeBER_int(__int64 _i)
 {
-	if((_i < 64) && (_i >= -64)){		//-64～63
-		strBER.append(1,_i & 0x7F);
-	} else if((_i < 128) && (_i >= -128)) {	//-128～127
-		strBER.append(1,_i & 0xFF);
-	} else if((_i < 32768) && (_i >= -32768)) {	//128～32767,	
-		strBER.append(1,(_i>> 8) & 0xFF);
-		strBER.append(1,_i & 0xFF);
-	} else if((_i < 8388608) && (_i >= -8388608)) {
-		strBER.append(1,(_i>>16) & 0xFF);
-		strBER.append(1,(_i>> 8) & 0xFF);
-		strBER.append(1,_i & 0xFF);
+	if(_i == 0){
+		strBER.append(1,0);
 	} else {
-		strBER.append(1,(_i>>24) & 0xFF);
-		strBER.append(1,(_i>>16) & 0xFF);
-		strBER.append(1,(_i>> 8) & 0xFF);
-		strBER.append(1,_i & 0xFF);
+		string	_code;
+		size_t	i = 0;
+		while((_i != 0) && (_i != -1)){
+			_code.append(1, (char)(_i & 0xFF));
+			_i >>= 8;
+			i++;
+		}
+		while(i > 0){
+			i--;
+			strBER.append(1,_code[i]);
+		}
 	}
 }
 //==============================================================
@@ -182,7 +175,7 @@ void	ASN1::encodeBER_int(int _i)
 //==============================================================
 void	ASN1::encodeBER_variable(unsigned int _i)
 {
-	unsigned	int		count=0;		//読み込み回数カウント用
+				size_t	count=0;		//読み込み回数カウント用
 				char	cData[9];
 
 	//----------------------------------
@@ -243,25 +236,28 @@ void	ASN1::encodeBER()
 //			《ＢＥＲエンコード》符号化後の整数値のサイズを取得
 //--------------------------------------------------------------
 //	●引数
-//						int	_i		整数値
+//						__int64	_i		整数値
 //	●返値
-//						size_t		BER符号化された整数値のサイズ
+//						size_t			BER符号化された整数値のサイズ
 //==============================================================
-size_t ASN1::Get_szInt_for_BER(int _i){
+size_t ASN1::Get_szInt_for_BER(__int64 _i){
 
-	size_t	iResult;
+	size_t	iResult = 7;
 
-	if((_i < 128) && (_i >= -128)) {	//-128～127
-		iResult = 1;
-	} else if((_i < 32768) && (_i >= -32768)) {	//128～32767,	
-		iResult = 2;
-	} else if((_i < 8388608) && (_i >= -8388608)) {
-		iResult = 3;
-	} else {
-		iResult = 4;
+	union{
+		__int64	i64;
+		char	c[8];
+	} _num;
+
+	_num.i64 = _i;
+
+	while(iResult>0){
+		if(_num.c[iResult] != 0){
+			break;
+		}
+		iResult--;
 	}
-
-	return(iResult);
+	return(iResult+1);
 }
 //==============================================================
 //			《ＢＥＲエンコード》符号化後のサイズ値のサイズを取得

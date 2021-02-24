@@ -49,10 +49,10 @@ public:
 
 			//ブロック暗号用
 			//高速化の為、専用のを作る。
-			void	encipher(void *data,unsigned int iSize);
-			void	decipher(void *data,unsigned int iSize);
-			int		encipher_last(void *data,unsigned int iSize);
-			int		decipher_last(void *data,unsigned int iSize);
+			void	encipher(void *data,size_t iSize);
+			void	decipher(void *data,size_t iSize);
+			int		encipher_last(void *data,size_t iSize);
+			int		decipher_last(void *data,size_t iSize);
 
 #ifdef	_M_X64
 	__m128i	InvCipher_CBC8(__m128i* data, __m128i vector);		//5.3	InvCipher

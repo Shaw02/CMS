@@ -17,8 +17,9 @@ public:
 					~BER_Input(void);
 
 			void	DecodeError(unsigned int iEer);
-			int		read_int(size_t iSize);
-unsigned	int		read_uint(size_t iSize);
+			__int64	read_int(size_t iSize);
+unsigned	__int64	read_uint(size_t iSize);
+			size_t	read_size_t(size_t iSize);
 unsigned	int		read_variable(void);
 			size_t	read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* iTag);
 			size_t	read_TAG_with_Check(unsigned char cClass, bool fStruct, unsigned int iTag);

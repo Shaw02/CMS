@@ -32,7 +32,7 @@ EnvelopedData::~EnvelopedData(void)
 //	●引数
 //			ObjectIdentifier*		_type			暗号文のタイプ
 //			Encryption*				_algorithm		暗号アルゴリズム
-//			unsigned	int			_szContent		暗号文のサイズ（実体はとりあえず外部に）
+//			size_t					_szContent		暗号文のサイズ（実体はとりあえず外部に）
 //	●返値
 //			無し
 //	●注意
@@ -41,7 +41,7 @@ EnvelopedData::~EnvelopedData(void)
 void	EnvelopedData::Set(
 			ObjectIdentifier*		_type,
 			Encryption*				_algorithm, 
-			unsigned	int			_szContent)
+			size_t					_szContent)
 {
 	unsigned	int	iVersion;
 

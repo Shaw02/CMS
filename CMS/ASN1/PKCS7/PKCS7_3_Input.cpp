@@ -50,7 +50,7 @@ void	PKCS7_3_Input::Get_EnvelopedData()
 //==============================================================
 void	PKCS7_3_Input::Receipt(string*	strPassword)
 {
-	int	szCEK;
+	size_t	szCEK;
 	PasswordRecipientInfo*	_password	= &enveloped_data.recipientInfos.cPassword;
 
 	//"PasswordRecipientInfo"があるかチェック

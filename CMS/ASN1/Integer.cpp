@@ -45,7 +45,7 @@ void	Integer::encodeBER()
 //	œ•Ô’l
 //			–³‚µ
 //==============================================================
-void	Integer::Set(int i)
+void	Integer::Set(__int64 i)
 {
 	iValue = i;
 }

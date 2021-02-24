@@ -36,6 +36,6 @@ PasswordRecipientInfo ::= SEQUENCE {
 
 				void	SetInfo(KeyDerivation* _keyDerivation, Encryption* keyEncryption);
 
-				void	SetKey(void* ptPassword, unsigned int szPassword, void* Key, unsigned int szKey);
-				int		GetKey(void* ptPassword, unsigned int szPassword, void* Key, unsigned int szKey);
+				void	SetKey(void* ptPassword, size_t szPassword, void* Key, size_t szKey);
+				size_t	GetKey(void* ptPassword, size_t szPassword, void* Key, size_t szKey);
 };

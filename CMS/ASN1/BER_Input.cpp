@@ -49,12 +49,12 @@ void	BER_Input::DecodeError(unsigned int iEer)
 //	●返値
 //			unsigned int			数値
 //==============================================================
-int	BER_Input::read_int(size_t iSize)
+__int64	BER_Input::read_int(size_t iSize)
 {
-	int		iResult	= cRead();
+	__int64		iResult	= cRead();
 
 	if(iResult & 0x80){			//負？
-		iResult |= 0xFFFFFF00;
+		iResult |= 0xFFFFFFFFFFFFFF00;
 	}
 
 	iSize--;
@@ -74,9 +74,29 @@ int	BER_Input::read_int(size_t iSize)
 //	●返値
 //			unsigned int			数値
 //==============================================================
-unsigned int	BER_Input::read_uint(size_t iSize)
+unsigned __int64	BER_Input::read_uint(size_t iSize)
 {
-	unsigned int	iResult = 0;
+	unsigned __int64	iResult = 0;
+
+	do{
+		iResult <<= 8;
+		iResult |= cRead();
+		iSize--;
+	} while (iSize>0);
+
+	return(iResult);
+}
+//==============================================================
+//		【ＢＥＲデコード】符号無し整数値
+//--------------------------------------------------------------
+//	●引数
+//					size_t	iSize	整数値のサイズ[Byte]
+//	●返値
+//					size_t			数値
+//==============================================================
+size_t	BER_Input::read_size_t(size_t iSize)
+{
+	size_t	iResult = 0;
 
 	do{
 		iResult <<= 8;
@@ -138,7 +158,7 @@ size_t	BER_Input::read_TAG(unsigned char* cClass, bool* fStruct, unsigned int* i
 
 	iSize = cRead();
 	if(iSize >= 0x81){
-		iSize = read_uint(iSize & 0x7F);
+		iSize = read_size_t(iSize & 0x7F);
 	}
 
 	return(iSize);

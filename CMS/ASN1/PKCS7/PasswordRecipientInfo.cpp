@@ -65,17 +65,17 @@ void	PasswordRecipientInfo::SetInfo(
 //--------------------------------------------------------------
 //	●引数
 //			void*			ptPassword		パスフレーズ
-//			unsigned	int	szPassword		パスフレーズのサイズ
+//			size_t			szPassword		パスフレーズのサイズ
 //			void*			Key				CEK
-//			unsigned	int	szKey			CEKのサイズ
+//			size_t			szKey			CEKのサイズ
 //	●返値
 //			void					
 //==============================================================
-void	PasswordRecipientInfo::SetKey(void* ptPassword, unsigned int szPassword, void* CEK, unsigned int szCEK)
+void	PasswordRecipientInfo::SetKey(void* ptPassword, size_t szPassword, void* CEK, size_t szCEK)
 {
 	//暗号鍵 for 鍵
 	unsigned	char*	KEK	= new unsigned char [keyEncryptionAlgorithm->szKey];
-	unsigned	int		szECEK;
+				size_t	szECEK;
 
 	//鍵暗号化鍵の導出
 	keyDerivation->calc(KEK, ptPassword, szPassword);
@@ -97,18 +97,18 @@ void	PasswordRecipientInfo::SetKey(void* ptPassword, unsigned int szPassword, vo
 //--------------------------------------------------------------
 //	●引数
 //			void*			ptPassword		パスフレーズ
-//			unsigned	int	szPassword		パスフレーズのサイズ
+//			size_t			szPassword		パスフレーズのサイズ
 //			void*			Key				CEK
-//			unsigned	int	szKey			CEKのサイズ
+//			size_t			szKey			CEKのサイズ
 //	●返値
 //			void					
 //==============================================================
-int	PasswordRecipientInfo::GetKey(void* ptPassword, unsigned int szPassword, void* EK, unsigned int szEK)
+size_t	PasswordRecipientInfo::GetKey(void* ptPassword, size_t szPassword, void* EK, size_t szEK)
 {
 	//暗号鍵 for 鍵
-	unsigned	int		szKEK;
+				size_t	szKEK;
 	unsigned	char*	KEK;
-	unsigned	int		szCEK;
+				size_t	szCEK;
 
 	//鍵暗号化鍵の導出
 	szKEK = keyEncryptionAlgorithm->szKey;

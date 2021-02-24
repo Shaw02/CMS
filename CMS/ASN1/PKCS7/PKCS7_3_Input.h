@@ -17,8 +17,8 @@ public:
 			OctetString				CEK;				//暗号鍵（セッション鍵）
 
 			//encryptedContent [0] IMPLICIT EncryptedContent OPTIONAL
-			unsigned	int			ptEncryptedContent;
-		//	unsigned	int			szEncryptedContent;
+						size_t		ptEncryptedContent;
+		//	unsigned	size_t		szEncryptedContent;
 
 //--------------
 //関数

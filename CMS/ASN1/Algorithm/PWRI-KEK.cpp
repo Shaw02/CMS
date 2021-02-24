@@ -43,7 +43,7 @@ PWRI_KEK::~PWRI_KEK(void)
 //==============================================================
 void	PWRI_KEK::Clear_Key()
 {
-	unsigned	i;
+	size_t	i;
 
 	keyWrapAlgorithm->Clear_Key();
 
@@ -77,19 +77,19 @@ void	PWRI_KEK::Set_Key(void *key)
 //--------------------------------------------------------------
 //	●引数
 //			void*			data	CEKのポインタ
-//			unsigned int	iSize	CEKのサイズ
+//			size_t			iSize	CEKのサイズ
 //			void*			random	乱数値のポインタ
 //	●返値
-//			int						ラップされたCEKのサイズ
+//			size_t					ラップされたCEKのサイズ
 //==============================================================
-int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
+size_t	PWRI_KEK::KeyWrap(void *CEK,size_t szCEK)
 {
 	unsigned	char*	cCEK	= (unsigned char*)CEK;
 
-	unsigned	int		szECEK	= szCEK + 4;
-	unsigned	int		szKEB	= keyWrapAlgorithm->szBlock;
+				size_t	szECEK	= szCEK + 4;
+				size_t	szKEB	= keyWrapAlgorithm->szBlock;
 
-	unsigned	int	i,j;
+				size_t	i,j;
 
 	unsigned	char*	cBuff0;		//暗号化用のバッファ
 	unsigned	char*	cBuff;		//暗号化用のバッファ（アライメント）
@@ -99,7 +99,7 @@ int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
 
 	//暗号用のバッファを確保。アライメントも考慮する。
 	cBuff0	= new unsigned char [szECEK + szKEB];
-	cBuff	= cBuff0 + szKEB - ((int)cBuff0 % szKEB) - (((int)cBuff0 % szKEB)?0:szKEB);
+	cBuff	= cBuff0 + szKEB - ((size_t)cBuff0 % szKEB) - (((size_t)cBuff0 % szKEB)?0:szKEB);
 
 	//コンテンツ用暗号鍵"CEK"のSize
 	cBuff[0] = szCEK & 0xFF;
@@ -142,26 +142,26 @@ int	PWRI_KEK::KeyWrap(void *CEK,unsigned int szCEK)
 //--------------------------------------------------------------
 //	●引数
 //			void*			data	ラップされたCEKのポインタ
-//			unsigned int	iSize	ラップされたCEKのサイズ
+//			size_t			iSize	ラップされたCEKのサイズ
 //	●返値
-//			int						CEKのサイズ
+//			size_t					CEKのサイズ
 //==============================================================
-int	PWRI_KEK::KeyUnWrap(void *data,unsigned int szData)
+size_t	PWRI_KEK::KeyUnWrap(void *data,size_t szData)
 {
 //	unsigned	char*	cData	= (unsigned char*)data;
 
-	unsigned	int		szKEK;
-	unsigned	int		szKEB	= keyWrapAlgorithm->szBlock;
+				size_t	szKEK;
+				size_t	szKEB	= keyWrapAlgorithm->szBlock;
 
-	unsigned	int		i;
-	unsigned	int		n		= szData / szKEB;		//ブロック数
-	unsigned	int		ptData	= szData - (szKEB*2);
+				size_t	i;
+				size_t	n		= szData / szKEB;		//ブロック数
+				size_t	ptData	= szData - (szKEB*2);
 
 	unsigned	char*	cBuff0;		//暗号化用のバッファ
 	unsigned	char*	cBuff;		//暗号化用のバッファ（アライメント）
 
 	cBuff0	= new unsigned char [szData + szKEB];
-	cBuff	= cBuff0 + szKEB - ((int)cBuff0 % szKEB) - (((int)cBuff0 % szKEB)?0:szKEB);
+	cBuff	= cBuff0 + szKEB - ((size_t)cBuff0 % szKEB) - (((size_t)cBuff0 % szKEB)?0:szKEB);
 
 	memcpy(cBuff, data, szData);
 

@@ -36,7 +36,7 @@ DES::~DES(void)
 //==============================================================
 void	DES::Clear_Key()
 {
-	int	i=0;
+	size_t	i=0;
 
 	while (i < DES_Round){
 		k[i] = 0;
@@ -81,7 +81,7 @@ void	DES::KeyExpansion(void *key, unsigned __int64 ptKS[DES_Round])
 	unsigned	__int64		CD;
 	unsigned	int			C = 0;
 	unsigned	int			D = 0;
-				int			i,j;
+				size_t		i,j;
 	unsigned	char		r;
 
 	//--------------
@@ -317,8 +317,8 @@ unsigned	int		DES::P(unsigned	int	iData)
 		13,19, 2,26,
 		10,21,28, 7};
 
-	unsigned	int	result = 0;
-	unsigned	int	i = 0;
+	unsigned	int		result	= 0;
+				size_t	i		= 0;
 
 	while(i < 32){	//56
 		result <<= 1;
@@ -373,8 +373,8 @@ unsigned	int		DES::f(unsigned	int	iData, unsigned __int64 iKey)
 		 7, 2,11, 1, 4,14, 1, 7, 9, 4,12,10,14, 8, 2,13,
 		 0,15, 6,12,10, 9,13, 0,15, 3, 3, 5, 5, 6, 8,11};
 
-	unsigned	int			temp = 0;
-	unsigned	int			i = 0;
+	unsigned	int			temp	= 0;
+				size_t		i		= 0;
 	union{
 		unsigned	char	c[8];
 		unsigned	__int64	l;
@@ -416,7 +416,7 @@ unsigned __int64	DES::Cipher(unsigned __int64 iData)
 		unsigned	__int64	l;
 	}	Data;
 
-	unsigned	int	i = 0;
+	size_t	i = 0;
 
 	//--------------
 	//IP
@@ -455,7 +455,7 @@ unsigned __int64	DES::InvCipher(unsigned __int64 iData)
 		unsigned	__int64	l;
 	}	Data;
 
-	unsigned	int	i = DES_Round;
+	size_t	i = DES_Round;
 
 	//--------------
 	//IP

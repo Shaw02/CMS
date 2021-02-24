@@ -10,7 +10,7 @@ class Integer :
 public:
 //--------------
 //•Ï”
-				int		iValue;
+				__int64	iValue;
 
 //--------------
 //ŠÖ”
@@ -18,5 +18,5 @@ public:
 						~Integer(void);
 
 				void	encodeBER();
-				void	Set(int i);
+				void	Set(__int64 i);
 };

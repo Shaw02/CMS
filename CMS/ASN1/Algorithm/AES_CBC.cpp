@@ -113,11 +113,11 @@ void	AES_CBC::Set_AES(__m128i _xmm_IV)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	平文
-//			unsigned int	iSize	平文のサイズ
+//			size_t			iSize	平文のサイズ
 //	●返値
 //			無し
 //==============================================================
-void	AES_CBC::encipher(void *data,unsigned int iSize)
+void	AES_CBC::encipher(void *data,size_t iSize)
 {
 	__m128i				temp;
 	__m128i				_vector		= vector;
@@ -125,13 +125,13 @@ void	AES_CBC::encipher(void *data,unsigned int iSize)
 	unsigned	char*	cData		= (unsigned	char*)data;
 
 	if(cOpsw->chkAESNI()){
-		for(int n=0; n<iSize; n+=szBlock){
+		for(size_t n=0; n<iSize; n+=szBlock){
 			temp = _mm_xor_si128(_mm_load_si128((__m128i*)&cData[n]), _vector);
 			_vector = Cipher_AESNI(temp);
 			_mm_store_si128((__m128i*)&cData[n], _vector);
 		}
 	} else {
-		for(int n=0; n<iSize; n+=szBlock){
+		for(size_t n=0; n<iSize; n+=szBlock){
 			temp = _mm_xor_si128(_mm_load_si128((__m128i*)&cData[n]), _vector);
 			_vector = Cipher_SSE2(temp);
 			_mm_store_si128((__m128i*)&cData[n], _vector);
@@ -144,19 +144,19 @@ void	AES_CBC::encipher(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	平文
-//			unsigned	int	iSize	平文のサイズ
+//			size_t			iSize	平文のサイズ
 //	●返値
-//						int			Paddingとして追加したサイズ
+//			int						Paddingとして追加したサイズ
 //==============================================================
-int		AES_CBC::encipher_last(void *data,unsigned int iSize)
+int	AES_CBC::encipher_last(void *data,size_t iSize)
 {
 	__m128i				temp;
 	__m128i				_vector		= vector;
 
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
+				size_t	n			= 0;
 
-	unsigned	int		ptPadding;
+				size_t	ptPadding;
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;
 
@@ -182,7 +182,7 @@ int		AES_CBC::encipher_last(void *data,unsigned int iSize)
 
 	//Padding処理(PKCS#7)を実施
 	ptPadding	= n + ((n%szBlock)?-1:szBlock-1);
-	cPadData	= szBlock - iSize;
+	cPadData	= (unsigned char)(szBlock - iSize);
 	cntPadData	= cPadData;
 	do{
 		cData[ptPadding] = cPadData;
@@ -220,19 +220,19 @@ int		AES_CBC::encipher_last(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	暗号文
-//			unsigned int	iSize	暗号文のサイズ
+//			size_t			iSize	暗号文のサイズ
 //	●返値
 //			無し
 //==============================================================
-void	AES_CBC::decipher(void *data,unsigned int iSize)
+void	AES_CBC::decipher(void *data,size_t iSize)
 {
 	__m128i				temp;
 	__m128i				_vector = vector;
 	__m128i				__vector;
 
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
-	unsigned	int	szBlock_for_SIMD;
+				size_t	n			= 0;
+				size_t	szBlock_for_SIMD;
 
 	if(cOpsw->chkAESNI()){
 
@@ -278,20 +278,20 @@ void	AES_CBC::decipher(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	暗号文
-//			unsigned	int	iSize	暗号文のサイズ
+//			size_t			iSize	暗号文のサイズ
 //	●返値
-//						int	1～szBlock	Paddingデータ
-//							-1			Paddingが異常
+//			int			1～szBlock	Paddingデータ
+//						-1			Paddingが異常
 //==============================================================
-int		AES_CBC::decipher_last(void *data,unsigned int iSize)
+int		AES_CBC::decipher_last(void *data,size_t iSize)
 {
 	__m128i				temp;
 	__m128i				_vector = vector;
 	__m128i				__vector;
 
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
-	unsigned	int		szBlock_for_SIMD;
+				size_t	n			= 0;
+				size_t	szBlock_for_SIMD;
 
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;
@@ -372,7 +372,7 @@ __m128i	AES_CBC::InvCipher_CBC4(__m128i* data, __m128i vector)
 
 	//Load
 	//◆Round (Nr)
-	int		i		= Nr;
+	size_t	i		= Nr;
 #ifdef	_M_X64
 	__m128i	_vector	= data[7];
 #else

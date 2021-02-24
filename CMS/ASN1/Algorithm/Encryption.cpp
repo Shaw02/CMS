@@ -31,15 +31,15 @@ Encryption::~Encryption(void)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	平文
-//			unsigned int	iSize	平文のサイズ
+//			size_t			iSize	平文のサイズ
 //	●返値
 //			無し
 //==============================================================
-void	Encryption::encipher(void *data,unsigned int iSize)
+void	Encryption::encipher(void *data,size_t iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
 
-	for(int n=0; n<iSize; n+=szBlock){
+	for(size_t n=0; n<iSize; n+=szBlock){
 		encrypt(&cData[n]);
 	}
 }
@@ -48,16 +48,16 @@ void	Encryption::encipher(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	平文
-//			unsigned	int	iSize	平文のサイズ
+//			size_t			iSize	平文のサイズ
 //	●返値
-//						int			Paddingとして追加したサイズ
+//			int						Paddingとして追加したサイズ
 //==============================================================
-int		Encryption::encipher_last(void *data,unsigned int iSize)
+int	Encryption::encipher_last(void *data,size_t iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
+				size_t	n			= 0;
 
-	unsigned	int		ptPadding;
+				size_t	ptPadding;
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;
 
@@ -70,7 +70,7 @@ int		Encryption::encipher_last(void *data,unsigned int iSize)
 
 	//Padding処理(PKCS#7)を実施
 	ptPadding	= n + ((n%szBlock)?-1:szBlock-1);
-	cPadData	= szBlock - iSize;
+	cPadData	= (unsigned char)(szBlock - iSize);
 	cntPadData	= cPadData;
 	do{
 		cData[ptPadding] = cPadData;
@@ -93,15 +93,15 @@ int		Encryption::encipher_last(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	暗号文
-//			unsigned int	iSize	暗号文のサイズ
+//			size_t 			iSize	暗号文のサイズ
 //	●返値
 //			無し
 //==============================================================
-void	Encryption::decipher(void *data,unsigned int iSize)
+void	Encryption::decipher(void *data,size_t iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
 
-	for(int n=0; n<iSize; n+=szBlock){
+	for(size_t n=0; n<iSize; n+=szBlock){
 		decrypt(&cData[n]);
 	}
 }
@@ -110,15 +110,15 @@ void	Encryption::decipher(void *data,unsigned int iSize)
 //--------------------------------------------------------------
 //	●引数
 //			void			*data	暗号文
-//			unsigned	int	iSize	暗号文のサイズ
+//			size_t 			iSize	暗号文のサイズ
 //	●返値
-//						int	1～szBlock	Paddingデータ
+//			int				1～szBlock	Paddingデータ
 //							-1			Paddingが異常
 //==============================================================
-int		Encryption::decipher_last(void *data,unsigned int iSize)
+int		Encryption::decipher_last(void *data,size_t iSize)
 {
 	unsigned	char*	cData		= (unsigned	char*)data;
-	unsigned	int		n			= 0;
+				size_t	n			= 0;
 
 	unsigned	char	cPadData;
 	unsigned	char	cntPadData;

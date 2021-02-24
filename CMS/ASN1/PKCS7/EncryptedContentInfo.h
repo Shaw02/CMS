@@ -27,7 +27,7 @@ EncryptedContentInfo ::= SEQUENCE {
 	Encryption*				contentEncryptionAlgorithm;		//ˆÃ†ƒAƒ‹ƒSƒŠƒYƒ€
 	Context					encryptedContent;				//ˆÃ†•¶‚ÌÀ‘Ì
 
-	unsigned	int		szContent;
+	size_t					szContent;
 
 //--------------
 //ŠÖ”
@@ -36,7 +36,7 @@ EncryptedContentInfo ::= SEQUENCE {
 
 				void	Set(ObjectIdentifier*		_type,
 							Encryption*				_algorithm,
-							unsigned	int			_szContent);
+							size_t					_szContent);
 				int		encrypt(unsigned char* CEK, FileInput* f_Plain, FileOutput* f_Cipher);
 				int		decrypt(unsigned char* CEK, FileInput* f_Cipher, FileOutput* f_Plain);
 };

@@ -30,8 +30,8 @@ class Encryption :
 	public AlgorithmIdentifier
 {
 public:
-	unsigned	int		szBlock;
-	unsigned	int		szKey;
+	size_t	szBlock;
+	size_t	szKey;
 
 //--------------
 //ä÷êî
@@ -48,14 +48,14 @@ public:
 	virtual	void	SetIV(void *data){};		//IVê›íË	
 
 	//For Content Encryption
-	virtual	void	encipher(void *data,unsigned int iSize);
-	virtual	void	decipher(void *data,unsigned int iSize);
-	virtual	int		encipher_last(void *data,unsigned int iSize);
-	virtual	int		decipher_last(void *data,unsigned int iSize);
+	virtual	void	encipher(void *data,size_t iSize);
+	virtual	void	decipher(void *data,size_t iSize);
+	virtual	int		encipher_last(void *data,size_t iSize);
+	virtual	int		decipher_last(void *data,size_t iSize);
 
 	//For Key Encryption (Key Wrap)
-	virtual	int		KeyWrap(void *CEK,unsigned int szCEK){return(0);};	//
-	virtual	int		KeyUnWrap(void *data,unsigned int szData){return(0);};	//
+	virtual	size_t	KeyWrap(void *CEK,size_t szCEK){return(0);};	//
+	virtual	size_t	KeyUnWrap(void *data,size_t szData){return(0);};	//
 	virtual	void*	GetKey(){return(0);};
 	virtual	void*	GetEncrptedKey(){return(0);};
 };

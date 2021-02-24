@@ -64,8 +64,8 @@ PWRI_KEK-params ::= SEQUENCE {
 //			void	init(){};									//‰Šú‰»
 
 			//Key Wrap—p
-			int		KeyWrap(void *KEK,unsigned int szKEK);	//
-			int		KeyUnWrap(void *data,unsigned int szData);	//
+			size_t	KeyWrap(void *KEK,size_t szKEK);	//
+			size_t	KeyUnWrap(void *data,size_t szData);	//
 			void*	GetKey(){return((void *)strKey.c_str());};
 			void*	GetEncrptedKey(){return((void *)strEncrptedKey.c_str());};
 };
